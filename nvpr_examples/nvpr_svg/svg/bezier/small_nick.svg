@@ -1,0 +1,10 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" 
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="300px" height="400px" viewBox="195 -5 310 410"
+     xmlns="http://www.w3.org/2000/svg" version="1.1">
+  <title>A path from gs_bezier</title>
+  <desc>A path from gs_bezier</desc>
+  <rect x="200" y="0" width="300" height="400"
+        fill="none" stroke="orange" />
+<path stroke-width="118.000000" fill="lightgoldenrodyellow" stroke="olivedrab" d="M 369.0625 160.41666666666666 C 369.0625 158.75 434.0625 117.08333333333331 414.0625 137.08333333333331"/></svg>

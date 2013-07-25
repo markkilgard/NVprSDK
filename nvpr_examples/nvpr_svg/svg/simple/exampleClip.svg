@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" width="400" height="150" viewBox="0 0 400 150">
+	
+	<!-- Matthew Bystedt http://pike.port5.com 2004 -->
+
+    <script type="text/ecmascript"> <![CDATA[
+        var lsx = 100;
+        var lsy = 75;
+
+        var rsx = 310;
+        var rsy = 75;
+        
+    function mouseMove (evt) {
+        var document = evt.target.ownerDocument;
+		var rootElem = document.rootElement;
+		
+        var trans = rootElem.currentTranslate;
+        var scale = rootElem.currentScale;
+        var p = rootElem.createSVGPoint();
+        // Remove the current pan and zoom from the mouse coordinate
+        p.x = ( evt.clientX - trans.x ) / scale;
+        p.y = ( evt.clientY - trans.y ) / scale;
+                
+        var newY = (p.y - lsy) / 4 + lsy;
+        var newX = (p.x - lsx) / 3 + lsx;
+        if (newX > 170) {
+            newX = 170;
+        }
+        document.getElementById("leftEye").setAttributeNS(null, "cx",  newX);
+        document.getElementById("leftEye").setAttributeNS(null, "cy",  newY);
+
+        newY = (p.y - rsy) / 4 + rsy;
+        newX = (p.x - rsx) / 3 + rsx;
+        if (newX < 230) {
+            newX = 230;
+        }
+        document.getElementById("rightEye").setAttributeNS(null, "cx",  newX);
+        document.getElementById("rightEye").setAttributeNS(null, "cy",  newY);
+
+        window.status = p.x + " - " + p.y;
+    }
+    
+    ]]></script>	
+	
+	<!-- Pattern Definition -->
+	<defs>
+        <clipPath id="eyeLeftPath">
+            <ellipse cx="130" cy="75" rx="90" ry="40" transform="skewX(-20)"/>
+        </clipPath>
+        <clipPath id="eyeRightPath">
+            <ellipse cx="280" cy="75" rx="90" ry="40" transform="skewX(20)"/>
+        </clipPath>
+
+        <radialGradient id="eyeGradient">
+            <stop offset="0%" stop-color="black"/>
+            <stop offset="30%" stop-color="black"/>
+            <stop offset="33%" stop-color="aqua"/>
+            <stop offset="40%" stop-color="blue"/>
+            <stop offset="80%" stop-color="mediumblue"/>
+            <stop offset="95%" stop-color="midnightblue"/>
+        </radialGradient>
+	</defs>
+    
+    <rect width="100%" height="100%" fill="lavender" onmousemove="mouseMove(evt);"/>
+    
+    <g clip-path="url(#eyeLeftPath)" onmousemove="mouseMove(evt);">
+        <rect x="0" y="0" width="100%" height="100%" fill="midnightblue"/>
+        <circle id="leftEye" cx="76.33333333333333" cy="65.75" r="100" fill="url(#eyeGradient)"/>
+    </g>
+    <g clip-path="url(#eyeRightPath)" onmousemove="mouseMove(evt);">
+        <rect x="0" y="0" width="100%" height="100%" fill="midnightblue"/>
+        <circle id="rightEye" cx="230" cy="65.75" r="100" fill="url(#eyeGradient)"/>
+    </g>
+
+    <text x="50%" y="95%" stroke="gray" fill="gray" font-size="15" text-anchor="middle">The eye is upon us!</text>
+
+
+</svg>

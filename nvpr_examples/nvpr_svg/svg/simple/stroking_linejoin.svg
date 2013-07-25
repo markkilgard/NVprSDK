@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- author: georg held, revised by A. Neumann -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="350" height="100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+	<title>stroke-linejoin</title>
+	<g fill="none" stroke="black" stroke-width="15">
+		<path stroke-linejoin="miter" d="M25,90 l50,-50 l50,50"/>
+		<path stroke-linejoin="round" d="M125,90 l50,-50 l50,50"/>
+		<path stroke-linejoin="bevel" d="M225,90 l50,-50 l50,50"/>
+	</g>	
+</svg>

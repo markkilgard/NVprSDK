@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve"
+         width="500" height="500"
+         viewBox="0 0 500 500" > 
+	
+	
+	<defs> 
+		<clipPath id="intersection2"> 
+            <ellipse cx="300" cy="120" rx="90" ry="90" /> 
+        </clipPath> 
+        <clipPath id="intersection" clip-path="url(#intersection2)"> 
+            <ellipse cx="200" cy="120" rx="90" ry="90" /> 
+        </clipPath> 
+        <clipPath id="union" transform="translate(0 230)"> 
+			<g>
+				<use xlink:href="#intersectingCircles" />
+			</g>
+        </clipPath> 
+	</defs> 
+	
+	<rect width="100%" height="100%" fill="blanchedalmond" /> 
+    
+    <g clip-path="url(#intersection)"> 
+        <rect x="0" y="0" width="100%" height="100%" fill="mistyrose"  /> 
+    </g> 
+	<text x="50%" y="238" stroke="gray" fill="gray" font-size="15" text-anchor="middle">Clipped clip path</text> 
+	
+    <g clip-path="url(#union)"> 
+        <rect x="0" y="0" width="100%" height="100%" fill="lavender"  /> 
+    </g> 
+    <text x="50%" y="468" stroke="gray" fill="gray" font-size="15" text-anchor="middle">Two clip paths</text> 
+	
+	<g transform="translate(0 230)" fill="none" stroke="midnightblue" stroke-width="4">
+		<use xlink:href="#intersectingCircles" />
+	</g>
+	
+	<g fill="none" stroke="midnightblue" stroke-width="4">
+		<g id="intersectingCircles">
+			<ellipse cx="200" cy="120" rx="90" ry="90" /> 
+			<ellipse cx="300" cy="120" rx="90" ry="90" /> 
+		</g>
+	</g>
+ 
+</svg>

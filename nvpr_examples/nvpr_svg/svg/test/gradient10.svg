@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100%" height="100%">
+
+<linearGradient id="r" fy=".55" gradientTransform="rotate(90, 0.5, 0.5)">
+	<stop offset="0" stop-color="red"/>
+	<stop offset=".3" stop-color="black"/>
+	<stop offset=".5" stop-color="white"/>
+	<stop offset=".6" stop-color="black"/>
+	<stop offset=".7" stop-color="white"/>
+	<stop offset="1" stop-color="brown"/>
+</linearGradient>
+<linearGradient id="q">
+	<stop offset="0" stop-color="red" stop-opacity=".4"/>
+	<stop offset=".3" stop-color="black" stop-opacity="0"/>
+	<stop offset=".5" stop-color="white" stop-opacity=".3"/>
+	<stop offset=".7" stop-color="black" stop-opacity=".5"/>
+	<stop offset=".8" stop-color="white" stop-opacity=".5"/>
+	<stop offset="1" stop-color="brown"/>
+</linearGradient>
+<linearGradient id="s" gradientTransform="rotate(135, 0.5, 0.5)">
+	<stop offset="0" stop-color="red" stop-opacity=".4"/>
+	<stop offset=".3" stop-color="black" stop-opacity="0"/>
+	<stop offset=".5" stop-color="white" stop-opacity=".3"/>
+	<stop offset=".7" stop-color="black" stop-opacity=".5"/>
+	<stop offset=".8" stop-color="white" stop-opacity=".5"/>
+	<stop offset="1" stop-color="brown"/>
+</linearGradient>
+<rect x="30%" y="15%" height="70%" width="40%" fill="url(#r)"/>
+<rect x="30%" y="15%" height="70%" width="40%" fill="url(#q)"/>
+</svg>

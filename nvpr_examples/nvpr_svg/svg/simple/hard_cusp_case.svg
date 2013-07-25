@@ -1,0 +1,11 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" 
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="500px" height="500px" viewBox="0 0 502 502"
+     xmlns="http://www.w3.org/2000/svg" version="1.1">
+  <title>A path from gs_bezier</title>
+  <desc>A path from gs_bezier</desc>
+  <rect x="1" y="1" width="501" height="501"
+        fill="none" stroke="blue" />
+  <path style="fill-rule:evenodd" fill="purple" stroke="#FF0000" stroke-linecap="round" stroke-linejoin="miter" stroke-dashoffset="0" stroke-width="60" stroke-dasharray="none" d="M 406.579193,365.175018C 212.1875,19.583334 471.5625,368.75 222.8125,379.583344" transform="matrix(1.165048,0.000000,0.000000,0.940755,-164.684448,61.459854)" />
+</svg>

@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink">
+
+
+<defs>
+  <linearGradient id="myLinearGradient1" x1="0%" y1="0%" x2="100%" y2="0%" spreadMethod="pad">
+    <stop offset="10%" stop-color="#00cc00" stop-opacity="1"/>
+    <stop offset="30%" stop-color="#006600" stop-opacity="1" />
+
+    <stop offset="70%" stop-color="#cc0000" stop-opacity="1" />
+    <stop offset="90%" stop-color="#000099" stop-opacity="1" />
+
+  </linearGradient>
+</defs>
+
+<style>
+  <![CDATA[
+      text {
+        Font-Family: Ariel; Sans Serif;
+        Font-Size: 8;
+      }
+   ]]>
+</style>
+
+
+
+<rect x="10" y="10" width="500" height="50" rx="10" ry="10"
+   style="fill:url(#myLinearGradient1); stroke: #005000; stroke-width: 3;" />
+
+<line x1="60"  y1="0" x2="60"  y2="75" style="stroke: #000000; stroke-width: 3;"/>
+<line x1="160" y1="0" x2="160" y2="75" style="stroke: #000000; stroke-width: 3;"/>
+<line x1="360" y1="0" x2="360" y2="75" style="stroke: #000000; stroke-width: 3;"/>
+<line x1="460" y1="0" x2="460" y2="75" style="stroke: #000000; stroke-width: 3;"/>
+
+<text x="30"  y="95" style="stroke: #000000">offset 10%</text>
+<text x="130" y="95" style="stroke: #000000">offset 30%</text>
+<text x="330" y="95" style="stroke: #000000">offset 70%</text>
+<text x="424" y="95" style="stroke: #000000">offset 90%</text>
+
+<line x1="25" y1="40" x2="25" y2="130" style="stroke: #000000; stroke-width: 2;"/>
+<text x="20"  y="150" style="stroke: #000000">Padded with first color</text>
+
+<line x1="495" y1="40" x2="495" y2="130" style="stroke: #000000; stroke-width: 2;"/>
+<text x="360"  y="150" style="stroke: #000000">Padded with last color</text>
+
+
+</svg>
+    
+

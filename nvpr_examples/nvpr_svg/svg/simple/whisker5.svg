@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" 
+         "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     height="800">
+ <g transform="translate(200,200)" style="fill-opacity:1; fill:none;">
+ <g style="fill: #ff0000; stroke:#00ff00; stroke-width:1.0">
+  <path d="M 1 1 L 4 4 z"/>
+ </g>
+</g>
+</svg>
+

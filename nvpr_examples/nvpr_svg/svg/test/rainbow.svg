@@ -1,0 +1,206 @@
+<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" onload="startup()" onmouseup="manage(evt)">
+<script>
+<![CDATA[
+Messages={
+A:"A static linear gradient with seven stops. How might we make one which is CIEXYZ-balanced?",
+B:"A linear gradient that uses the same stops as A above. How might we reuse (without script) that code",
+C:"The animation consists of <animate>s on each stop-color in the gradient. How might we improve that?",
+D:"This just drags a rectangle painted by a doubled range of stops through a clipPath",
+E:"How to make a color wheel: that is a circular rainbow? First we try two C-shapes",
+F:"Any way to improve the drawing of this path? Are clipPaths required?",
+G:"These are six 60 degree turns, rotated and grouped.",
+H:"Linear gradients???",
+Q:"Are there better ways of embedding questions in a page? Maybe an option to see source of associated clips?",
+": several questions about doughnuts and rainbows":"Are there better ways of embedding questions in a page? Maybe a way to see source of clips and filters?"
+}
+function startup(){
+	var T=document.getElementsByTagName("text")
+	MSGS=[]
+	for (i=0;i<T.length;i++){
+		T.item(i).setAttribute("onmouseover","manage(evt)")
+		T.item(i).setAttribute("onmouseout","manage(evt)")
+		T.item(i).setAttribute("onmousedown","manage(evt)")
+		document.documentElement.setAttribute("onmouseup","manage(evt)")
+		var text=T.item(i)
+		var label=text.firstChild.nodeValue
+		var Msg=text.cloneNode(true)
+		Msg.firstChild.nodeValue=Messages[label]
+		Msg.setAttribute("font-size", 16)
+		Msg.setAttribute("fill", "black")
+		Msg.setAttribute("visibility", "hidden")
+		MSGS[i]={node:Msg,group:text.parentNode}
+	}
+	for (i=0;i<MSGS.length;i++){
+		MSGS[i].group.appendChild(MSGS[i].node)
+	}
+}
+var remember
+function manage(evt){
+	if (evt.type=="mouseover") evt.target.setAttribute("fill", "#fd0")
+	else if (evt.type=="mouseout") evt.target.setAttribute("fill", 'white')
+	else if (evt.type=="mousedown") {
+		remember=evt.target
+		evt.target.setAttribute("visibility", "hidden")
+		evt.target.nextSibling.nextSibling.setAttribute("visibility", "visible")
+	}
+	else {
+		remember.setAttribute("visibility", "visible")
+		remember.nextSibling.nextSibling.setAttribute("visibility", "hidden")
+	}
+}
+//]]>
+</script>
+<defs>
+<linearGradient id="Rainbow1">
+	<stop offset="0" stop-color="#d0d"/>
+	<stop offset=".167" stop-color="#00f"/>
+	<stop offset=".333" stop-color="#0dd"/>
+	<stop offset=".50" stop-color="#0f0"/>
+	<stop offset=".667" stop-color="#ff0"/>
+	<stop offset=".833" stop-color="#f00"/>
+	<stop offset="1" stop-color="#d0d"/>
+</linearGradient>
+
+<linearGradient id="Rainbow2">
+	<stop offset="0" stop-color="#d0d">
+	<animate attributeName="stop-color" dur="3s" values="#d0d; #00f; #0dd; #0f0; #dd0; #f00" repeatCount="indefinite"/>
+	</stop>
+	<stop offset=".167" stop-color="#00f">
+	<animate attributeName="stop-color" dur="3s" values="#00f; #0dd; #0f0; #ff0; #f00; #d0d" repeatCount="indefinite"/>
+	</stop>
+	<stop offset=".333" stop-color="#0dd">
+	<animate attributeName="stop-color" dur="3s" values="#0dd; #0f0; #ff0; #f00; #d0d; #00f" repeatCount="indefinite"/>
+	</stop>
+	<stop offset=".50" stop-color="#0f0">
+	<animate attributeName="stop-color" dur="3s" values="#0f0; #ff0; #f00; #d0d; #00f; #0dd" repeatCount="indefinite"/>
+	</stop>
+	<stop offset=".667" stop-color="#ff0">
+	<animate attributeName="stop-color" dur="3s" values="#ff0; #f00; #d0d; #00f; #0dd; #0f0" repeatCount="indefinite"/>
+	</stop>
+	<stop offset=".833" stop-color="#f00">
+	<animate attributeName="stop-color" dur="3s" values="#f00; #d0d; #00f; #0dd; #0f0; #ff0" repeatCount="indefinite"/>
+	</stop>
+	<stop offset="1" stop-color="#d0d">
+	<animate attributeName="stop-color" dur="3s" values="#d0d; #00f; #0dd; #0f0; #dd0; #f00" repeatCount="indefinite"/>
+	</stop>
+</linearGradient>
+<radialGradient id="RRainbow" spreadMethod="reflect">
+	<stop offset="0" stop-color="#d0d">
+	<animate attributeName="stop-color" dur="3s" values="#d0d; #00f; #0dd; #0f0; #dd0; #f00" repeatCount="indefinite"/>
+	</stop>
+	<stop offset=".167" stop-color="#00f">
+	<animate attributeName="stop-color" dur="3s" values="#00f; #0dd; #0f0; #ff0; #f00; #d0d" repeatCount="indefinite"/>
+	</stop>
+	<stop offset=".333" stop-color="#0dd">
+	<animate attributeName="stop-color" dur="3s" values="#0dd; #0f0; #ff0; #f00; #d0d; #00f" repeatCount="indefinite"/>
+	</stop>
+	<stop offset=".50" stop-color="#0f0">
+	<animate attributeName="stop-color" dur="3s" values="#0f0; #ff0; #f00; #d0d; #00f; #0dd" repeatCount="indefinite"/>
+	</stop>
+	<stop offset=".667" stop-color="#ff0">
+	<animate attributeName="stop-color" dur="3s" values="#ff0; #f00; #d0d; #00f; #0dd; #0f0" repeatCount="indefinite"/>
+	</stop>
+	<stop offset=".833" stop-color="#f00">
+	<animate attributeName="stop-color" dur="3s" values="#f00; #d0d; #00f; #0dd; #0f0; #ff0" repeatCount="indefinite"/>
+	</stop>
+	<stop offset="1" stop-color="#d0d">
+	<animate attributeName="stop-color" dur="3s" values="#d0d; #00f; #0dd; #0f0; #dd0; #f00" repeatCount="indefinite"/>
+	</stop>
+</radialGradient>
+<linearGradient id="Rainbow3">
+	<stop offset="0" stop-color="#d0d"/>
+	<stop offset=".083" stop-color="#00f"/>
+	<stop offset=".167" stop-color="#0dd"/>
+	<stop offset=".25" stop-color="#0f0"/>
+	<stop offset=".333" stop-color="#ff0"/>
+	<stop offset=".417" stop-color="#f00"/>
+	<stop offset=".50" stop-color="#d0d"/>
+	<stop offset=".583" stop-color="#00f"/>
+	<stop offset=".667" stop-color="#0dd"/>
+	<stop offset=".75" stop-color="#0f0"/>
+	<stop offset=".833" stop-color="#ff0"/>
+	<stop offset=".917" stop-color="#f00"/>
+	<stop offset="1" stop-color="#d0d"/>
+</linearGradient>
+
+<linearGradient id="R1" gradientTransform="rotate(30, 0.5, 0.5)">
+	<stop offset="0" stop-color="#d0d"/>
+	<stop offset="1" stop-color="#00f"/>
+</linearGradient><linearGradient id="R2" gradientTransform="rotate(30, 0.5, 0.5)">
+	<stop offset="0" stop-color="#00f"/>
+	<stop offset="1" stop-color="#0dd"/>
+</linearGradient><linearGradient id="R3" gradientTransform="rotate(30, 0.5, 0.5)">
+	<stop offset="0" stop-color="#0dd"/>
+	<stop offset="1" stop-color="#0f0"/>
+</linearGradient><linearGradient id="R4" gradientTransform="rotate(30, 0.5, 0.5)">
+	<stop offset="0" stop-color="#0f0"/>
+	<stop offset="1" stop-color="#ff0"/>
+</linearGradient><linearGradient id="R5" gradientTransform="rotate(30, 0.5, 0.5)">
+	<stop offset="0" stop-color="#ff0"/>
+	<stop offset="1" stop-color="#f00"/>
+</linearGradient><linearGradient id="R6" gradientTransform="rotate(30, 0.5, 0.5)">
+	<stop offset="0" stop-color="#f00"/>
+	<stop offset="1" stop-color="#d0d"/>
+</linearGradient>
+
+<clipPath id="CP">
+<path d="M 180 300 A 120 40 0 1 1 180 301 M 258 294 A 45 15 0 1 1 258 295" clip-rule="evenodd"/>
+</clipPath>
+<clipPath id="window">
+<rect width="80%" height="8%" x="10%" y="26%">
+</rect>
+</clipPath>
+</defs>
+<rect width="100%" height="100%" x="0%" y="0%" fill="#888"/>
+<g>
+<rect width="80%" height="8%" x="10%" y="4%" fill="url(#Rainbow1)"/>
+<text x="4%" y="10%" fill="white" font-size="32pt" font-family="times" onmouseover="manage(evt)" onmouseout="manage(evt)" onmousedown="manage(evt)">A</text>
+<text x="4%" y="10%" fill="black" font-size="16" font-family="times" onmouseover="manage(evt)" onmouseout="manage(evt)" onmousedown="manage(evt)" visibility="hidden">A static linear gradient with seven stops. How might we make one which is CIEXYZ-balanced?</text></g><rect width="80%" height="8%" x="10%" y="15%" fill="url(#Rainbow2)"/><g>
+<text x="5%" y="21%" fill="white" font-size="32pt" font-family="times" onmouseover="manage(evt)" onmouseout="manage(evt)" onmousedown="manage(evt)">C</text>
+<text x="5%" y="21%" fill="black" font-size="16" font-family="times" onmouseover="manage(evt)" onmouseout="manage(evt)" onmousedown="manage(evt)" visibility="hidden">The animation consists of &lt;animate&gt;s on each stop-color in the gradient. How might we improve that?</text></g><g>
+
+<text x="1%" y="21%" fill="white" font-size="32pt" font-family="times" onmouseover="manage(evt)" onmouseout="manage(evt)" onmousedown="manage(evt)">B</text>
+<text x="1%" y="21%" fill="black" font-size="16" font-family="times" onmouseover="manage(evt)" onmouseout="manage(evt)" onmousedown="manage(evt)" visibility="hidden">A linear gradient that uses the same stops as A above. How might we reuse (without script) that code</text></g><g>
+
+<rect width="160%" height="8%" x="10%" y="26%" fill="url(#Rainbow3)" clip-path="url(#window)">
+<animate attributeName="x" dur="3s" values="10%; -70%" repeatCount="indefinite"/>
+</rect>
+<text x="4%" y="32%" fill="white" font-size="32pt" font-family="times" onmouseover="manage(evt)" onmouseout="manage(evt)" onmousedown="manage(evt)">D</text>
+<text x="4%" y="32%" fill="black" font-size="16" font-family="times" onmouseover="manage(evt)" onmouseout="manage(evt)" onmousedown="manage(evt)" visibility="hidden">This just drags a rectangle painted by a doubled range of stops through a clipPath</text></g><g transform="translate(110) scale(0.9)">
+<path id="P" d="M600 200 A 100 100 0 0 1 686.6 250 L 643.3 275 A 50 50 0 0 0 600 250"/>
+<use xlink:href="#P" fill="url(#R1)"/>
+<use xlink:href="#P" transform="translate(86.6, 50) rotate(60, 600, 200)" fill="url(#R2)"/>
+<use xlink:href="#P" transform="translate(86.6, 150) rotate(120, 600, 200)" fill="url(#R3)"/>
+<use xlink:href="#P" transform="translate(0, 200) rotate(180, 600, 200)" fill="url(#R4)"/>
+<use xlink:href="#P" transform="translate(-86.6, 150) rotate(240, 600, 200)" fill="url(#R5)"/>
+<use xlink:href="#P" transform="translate(-86.6, 50) rotate(300, 600, 200)" fill="url(#R6)"/>
+<text x="65%" y="45%" fill="white" font-size="32pt" font-family="times" onmouseover="manage(evt)" onmouseout="manage(evt)" onmousedown="manage(evt)">H</text>
+<text x="65%" y="45%" fill="black" font-size="16" font-family="times" onmouseover="manage(evt)" onmouseout="manage(evt)" onmousedown="manage(evt)" visibility="hidden">Linear gradients???</text></g>
+<g fill="url(#RRainbow)" transform="translate(-80) scale(0.9)">
+<path id="Q" d="M600 200 A 100 100 0 0 1 686.6 250 L 643.3 275 A 50 50 0 0 0 600 250"/>
+<use xlink:href="#Q" transform="translate(86.6, 50) rotate(60, 600, 200)"/>
+<use xlink:href="#Q" transform="translate(86.6, 150) rotate(120, 600, 200)"/>
+<use xlink:href="#Q" transform="translate(0, 200) rotate(180, 600, 200)"/>
+<use xlink:href="#Q" transform="translate(-86.6, 150) rotate(240, 600, 200)"/>
+<use xlink:href="#Q" transform="translate(-86.6, 50) rotate(300, 600, 200)"/>
+<text x="65%" y="45%" fill="white" font-size="32pt" font-family="times" onmouseover="manage(evt)" onmouseout="manage(evt)" onmousedown="manage(evt)">G</text>
+<text x="65%" y="45%" fill="black" font-size="16" font-family="times" onmouseover="manage(evt)" onmouseout="manage(evt)" onmousedown="manage(evt)" visibility="hidden">These are six 60 degree turns, rotated and grouped.</text></g>
+<g transform="scale(0.9)">
+<g transform="translate(-100)">
+<rect width="35%" height="60%" x="22%" y="20%" fill="url(#RRainbow)" clip-path="url(#CP)"/>
+<path d="M300 200 A 100 50 0 0 1 300 400 L 300 350 A 150 50 0 0 0 300 250" fill="url(#RRainbow)" transform="translate(600) scale(-1, 1)"/>
+<path d="M300 200 A 100 50 0 0 1 300 400 L 300 350 A 150 50 0 0 0 300 250" fill="url(#RRainbow)"/>
+<text x="18%" y="45%" fill="white" font-size="32pt" font-family="times" onmouseover="manage(evt)" onmouseout="manage(evt)" onmousedown="manage(evt)">E</text>
+<text x="18%" y="45%" fill="black" font-size="16" font-family="times" onmouseover="manage(evt)" onmouseout="manage(evt)" onmousedown="manage(evt)" visibility="hidden">How to make a color wheel: that is a circular rainbow? First we try two C-shapes</text></g>
+<g>
+<text x="25%" y="64%" fill="white" font-size="32pt" font-family="times" onmouseover="manage(evt)" onmouseout="manage(evt)" onmousedown="manage(evt)">F</text>
+<text x="25%" y="64%" fill="black" font-size="16" font-family="times" onmouseover="manage(evt)" onmouseout="manage(evt)" onmousedown="manage(evt)" visibility="hidden">Any way to improve the drawing of this path? Are clipPaths required?</text></g>
+</g>
+<g>
+<text x="8%" y="87%" fill="white" font-size="24pt" font-family="times" onmouseover="manage(evt)" onmouseout="manage(evt)" onmousedown="manage(evt)">: several questions about doughnuts and rainbows</text>
+<text x="8%" y="87%" fill="black" font-size="16" font-family="times" onmouseover="manage(evt)" onmouseout="manage(evt)" onmousedown="manage(evt)" visibility="hidden">Are there better ways of embedding questions in a page? Maybe a way to see source of clips and filters?</text></g>
+<g>
+<text x="4%" y="87%" fill="white" font-size="24pt" font-family="times" onmouseover="manage(evt)" onmouseout="manage(evt)" onmousedown="manage(evt)">Q</text>
+<text x="4%" y="87%" fill="black" font-size="16" font-family="times" onmouseover="manage(evt)" onmouseout="manage(evt)" onmousedown="manage(evt)" visibility="hidden">Are there better ways of embedding questions in a page? Maybe an option to see source of associated clips?</text></g>
+
+</svg>

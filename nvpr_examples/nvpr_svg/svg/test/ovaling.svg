@@ -1,0 +1,38 @@
+<svg width="100%" height="100%"
+	xmlns="http://www.w3.org/2000/svg"
+	xmlns:xlink="http://www.w3.org/1999/xlink">
+<script><![CDATA[SVGDoc=document;//]]></script>
+<defs id="DEF">
+<linearGradient id="rhue" x1="0" x2="100" y1="100" y2="0" gradientUnits="userSpaceOnUse">
+	<stop offset="0" id="ro0" style="stop-color: red"/>
+	<stop offset=".25" id="ro1" style="stop-color: blue"/>
+	<stop offset=".75" id="ro2" style="stop-color: yellow"/>
+	<stop offset="1" id="ro3" style="stop-color: green"/>
+</linearGradient></defs>
+<g transform="translate(0 50)">
+	<ellipse cx="290" cy="200" rx="80" ry="80">
+	<animateColor attributeName="fill" dur="5s" values="#ff8; #f88; #f8f; #88f; #8ff; #8f8" 
+	keyTimes="0; .2; .4; .6; .8; 1"  repeatCount="indefinite"/>
+	</ellipse>
+	<g id="triad">
+		<g id="R1" transform="translate(200 200)"> 
+		<ellipse id="EL" cx="0" cy="0" rx="100" ry="30" opacity=".4" fill="url(#rhue)">
+			<animateTransform attributeName="transform" type="rotate" 
+			dur="7s" from="0" to="360" repeatCount="indefinite"/>
+			<animate attributeName="cx" dur="8s" values="-20; 120; -20" 
+			keyTimes="0; .5; 1" repeatCount="indefinite"/>
+			<animate attributeName="ry" dur="3s" values="10; 60; 10" 
+			keyTimes="0; .5; 1" repeatCount="indefinite"/>
+		</ellipse>
+		</g>
+		<use xlink:href="#R1" transform="rotate(30 300 200)"/>
+		<use xlink:href="#R1" transform="rotate(60 300 200)"/>
+		<use xlink:href="#R1" transform="rotate(90 300 200)"/>
+		<use xlink:href="#R1" transform="rotate(120 300 200)"/>
+	</g>
+	<use xlink:href="#triad" transform="rotate(72 290 200)"/>
+	<use xlink:href="#triad" transform="rotate(144 290 200)"/>
+	<use xlink:href="#triad" transform="rotate(216 290 200)"/>
+	<use xlink:href="#triad" transform="rotate(288 290 200)"/>
+</g>
+</svg>

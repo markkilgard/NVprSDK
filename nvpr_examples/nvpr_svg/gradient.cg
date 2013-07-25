@@ -1,0 +1,40 @@
+
+void radial_focal_gradient(float3 str : TEXCOORD0.CENTROID,
+                     float4 c : COLOR.CENTROID,
+
+                 out float4 color : COLOR,
+
+             uniform sampler1D ramp : TEXUNIT0)
+{
+  color = c*tex1D(ramp, length(str.xy) + str.z);
+}
+
+arbfp1 fp30 fp40 glslf void radial_focal_gradient(float3 str : TEXCOORD0,
+                                                  float4 c : COLOR,
+
+                                              out float4 color : COLOR,
+
+                                          uniform sampler1D ramp : TEXUNIT0)
+{
+  color = c*tex1D(ramp, length(str.xy) + str.z);
+}
+
+void radial_center_gradient(float2 st : TEXCOORD0.CENTROID,
+                            float4 c : COLOR.CENTROID,
+
+                        out float4 color : COLOR,
+
+                    uniform sampler1D ramp : TEXUNIT0)
+{
+  color = c*tex1D(ramp, length(st));
+}
+
+arbfp1 fp30 fp40 glslf void radial_center_gradient(float2 st : TEXCOORD0,
+                                                   float4 c : COLOR,
+
+                                               out float4 color : COLOR,
+
+                                           uniform sampler1D ramp : TEXUNIT0)
+{
+  color = c*tex1D(ramp, length(st));
+}

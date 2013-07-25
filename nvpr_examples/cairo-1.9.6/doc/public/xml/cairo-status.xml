@@ -1,0 +1,128 @@
+<?xml version='1.0' encoding='UTF-8'?> 
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+                "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
+<!ENTITY version SYSTEM "version.xml">
+]>
+<refentry id="cairo-error-status">
+<refmeta>
+<refentrytitle role="top_of_page" id="cairo-error-status.top_of_page">Error handling</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo>CAIRO Library</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Error handling</refname>
+<refpurpose>Decoding cairo's status</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv id="cairo-error-status.synopsis" role="synopsis">
+<title role="synopsis.title">Synopsis</title>
+
+<synopsis>
+<link linkend="typedef">typedef</link>             <link linkend="cairo-status-t">cairo_status_t</link>                      ();
+const <link linkend="char">char</link> *        <link linkend="cairo-status-to-string">cairo_status_to_string</link>              (<link linkend="cairo-status-t">cairo_status_t</link> status);
+<link linkend="void">void</link>                <link linkend="cairo-debug-reset-static-data">cairo_debug_reset_static_data</link>       (void);
+</synopsis>
+</refsynopsisdiv>
+
+
+
+
+
+
+
+
+
+<refsect1 id="cairo-error-status.description" role="desc">
+<title role="desc.title">Description</title>
+<para>
+Cairo uses a single status type to represent all kinds of errors.  A status
+value of <link linkend="CAIRO-STATUS-SUCCESS--CAPS"><literal>CAIRO_STATUS_SUCCESS</literal></link> represents no error and has an integer value
+of zero.  All other status values represent an error.
+</para>
+<para>
+Cairo's error handling is designed to be easy to use and safe.  All major
+cairo objects <firstterm>retain</firstterm> an error status internally which
+can be queried anytime by the users using cairo*<link linkend="status"><function>_status()</function></link> calls.  In
+the mean time, it is safe to call all cairo functions normally even if the
+underlying object is in an error status.  This means that no error handling
+code is required before or after each individual cairo function call.
+</para>
+</refsect1>
+
+<refsect1 id="cairo-error-status.details" role="details">
+<title role="details.title">Details</title>
+<refsect2 id="cairo-status-t" role="function">
+<title>cairo_status_t ()</title>
+<indexterm zone="cairo-status-t"><primary sortas="cairo_status_t">cairo_status_t</primary></indexterm><programlisting><link linkend="typedef">typedef</link>             cairo_status_t                      ();</programlisting>
+<para>
+<link linkend="cairo-status-t"><type>cairo_status_t</type></link> is used to indicate errors that can occur when
+using Cairo. In some cases it is returned directly by functions.
+but when using <link linkend="cairo-t"><type>cairo_t</type></link>, the last error, if any, is stored in
+the context and can be retrieved with <link linkend="cairo-status"><function>cairo_status()</function></link>.
+</para>
+<para>
+New entries may be added in future versions.  Use <link linkend="cairo-status-to-string"><function>cairo_status_to_string()</function></link>
+to get a human-readable representation of an error message.</para>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="cairo-status-to-string" role="function">
+<title>cairo_status_to_string ()</title>
+<indexterm zone="cairo-status-to-string"><primary sortas="cairo_status_to_string">cairo_status_to_string</primary></indexterm><programlisting>const <link linkend="char">char</link> *        cairo_status_to_string              (<link linkend="cairo-status-t">cairo_status_t</link> status);</programlisting>
+<para>
+Provides a human-readable description of a <link linkend="cairo-status-t"><type>cairo_status_t</type></link>.</para>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>status</parameter>&#160;:</term>
+<listitem><simpara> a cairo status
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara> a string representation of the status
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="cairo-debug-reset-static-data" role="function">
+<title>cairo_debug_reset_static_data ()</title>
+<indexterm zone="cairo-debug-reset-static-data"><primary sortas="cairo_debug_reset_static_data">cairo_debug_reset_static_data</primary></indexterm><programlisting><link linkend="void">void</link>                cairo_debug_reset_static_data       (void);</programlisting>
+<para>
+Resets all static data within cairo to its original state,
+(ie. identical to the state at the time of program invocation). For
+example, all caches within cairo will be flushed empty.
+</para>
+<para>
+This function is intended to be useful when using memory-checking
+tools such as valgrind. When valgrind's memcheck analyzes a
+cairo-using program without a call to <link linkend="cairo-debug-reset-static-data"><function>cairo_debug_reset_static_data()</function></link>,
+it will report all data reachable via cairo's static objects as
+"still reachable". Calling <link linkend="cairo-debug-reset-static-data"><function>cairo_debug_reset_static_data()</function></link> just prior
+to program termination will make it easier to get squeaky clean
+reports from valgrind.
+</para>
+<para>
+WARNING: It is only safe to call this function when there are no
+active cairo objects remaining, (ie. the appropriate destroy
+functions have been called as necessary). If there are active cairo
+objects, this call is likely to cause a crash, (eg. an assertion
+failure due to a hash table being destroyed when non-empty).</para>
+<para>
+</para></refsect2>
+
+</refsect1>
+
+
+
+<refsect1 id="cairo-error-status.see-also">
+<title>See Also</title>
+<para>
+<itemizedlist>
+<listitem><link linkend="cairo-status"><function>cairo_status()</function></link></listitem>
+<listitem><link linkend="cairo-surface-status"><function>cairo_surface_status()</function></link></listitem>
+<listitem><link linkend="cairo-pattern-status"><function>cairo_pattern_status()</function></link></listitem>
+<listitem><link linkend="cairo-font-face-status"><function>cairo_font_face_status()</function></link></listitem>
+<listitem><link linkend="cairo-scaled-font-status"><function>cairo_scaled_font_status()</function></link></listitem>
+</itemizedlist>
+</para>
+</refsect1>
+
+</refentry>

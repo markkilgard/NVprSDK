@@ -1,0 +1,30 @@
+
+float3 expand(float3 v)
+{
+  return (v-0.5)*2;  // Expand a range-compressed vector
+}
+
+void bumpmap(float2 normalMapTexCoord : TEXCOORD0,
+             float3 lightDir          : TEXCOORD1,
+
+             out float4 color : COLOR,
+
+            uniform float3 lightPos,
+            uniform sampler2D   normalMap)
+{
+  // Normalizes light vector with normalization cube map
+  float3 light = normalize(lightPos - float3(normalMapTexCoord,0));
+  // Sample and expand the normal map texture	
+  float3 normalTex = tex2D(normalMap, normalMapTexCoord).xyz;
+  float3 normal = expand(normalTex);
+  // Diffuse lighting
+  float diffuse = dot(normal,light);
+  
+  // Decide the brick color based on how flat (red) or angled (red) the surface is.
+  float3 red = float3(1,0,0);
+  float3 white = float3(1,1,1);
+  float3 brick = normal.z > 0.9 ? red : white;
+  
+  color = float4(brick*diffuse,1);
+}
+

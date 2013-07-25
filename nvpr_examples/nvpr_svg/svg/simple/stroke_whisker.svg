@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" 
+         "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     height="800">
+ <g transform="translate(200,200)" style="fill-opacity:1; fill:none; fill-rule:nonzero;">
+ <g style="fill: #ffff00; stroke:#ff0000; stroke-width:2.1">
+  <path d="M17.4 132.801C17.4 132.801 17.2 131.001 19 131.801C20.8 132.601 157.401 131.601 181.001 164.001C181.001 164.001 159.001 138.801 17.4 132.801z"/>
+ </g>
+</g>
+</svg>
+

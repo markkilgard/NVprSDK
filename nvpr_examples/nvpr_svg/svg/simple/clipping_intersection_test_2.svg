@@ -1,0 +1,189 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve"
+         width="500" height="500"
+         viewBox="0 0 500 500" > 
+	
+	<defs> 
+    
+    <clipPath id="cr3"> 
+      <use xlink:href="#r3" />
+    </clipPath>
+    <clipPath id="cr2"> 
+      <use xlink:href="#r2" />
+    </clipPath>
+    <clipPath id="cr1"> 
+      <use xlink:href="#r1" />
+    </clipPath>
+    <clipPath id="cr0"> 
+      <use xlink:href="#r0" />
+    </clipPath>
+    
+		<clipPath id="c-r3"> 
+      <use xlink:href="#-r3" />
+    </clipPath>
+    <clipPath id="c-r2"> 
+      <use xlink:href="#-r2" />
+    </clipPath>
+    <clipPath id="c-r1"> 
+      <use xlink:href="#-r1" />
+    </clipPath>
+    <clipPath id="c-r0"> 
+      <use xlink:href="#-r0" />
+    </clipPath>
+    
+    <clipPath id="c-r3I-r2" clip-path="url(#c-r2)"> 
+      <use xlink:href="#-r3" />
+    </clipPath>
+    <clipPath id="c-r1I-r0" clip-path="url(#c-r0)"> 
+      <use xlink:href="#-r1" />
+    </clipPath>
+    <clipPath id="cr1Ir2" clip-path="url(#cr2)"> 
+      <use xlink:href="#r1" />
+    </clipPath>
+    <clipPath id="cr1I-r2" clip-path="url(#c-r2)"> 
+      <use xlink:href="#r1" />
+    </clipPath>
+    <clipPath id="cr0I-r1" clip-path="url(#cr0)"> 
+      <use xlink:href="#-r1" />
+    </clipPath>
+    <clipPath id="cr0I-r2" clip-path="url(#cr0)"> 
+      <use xlink:href="#-r2" />
+    </clipPath>
+    <clipPath id="cr0r1" clip-path="url(#cr0)"> 
+      <use xlink:href="#r1" />
+    </clipPath>
+
+	</defs> 
+	
+	<!-- Same as clipping_intersection_test_1, except in reverse order to make sure theere's no overdraw -->
+	
+  <!-- 1110 -->
+	<g clip-path="url(#c-r0)">
+    <g clip-path="url(#cr0r1)">
+      <g clip-path="url(#cr0r1)" />
+    </g>
+    <g clip-path="url(#cr1)">
+      <g clip-path="url(#c-r2)">
+        <g clip-path="url(#c-r2)" />
+      </g>
+      <g clip-path="url(#cr2)">
+        <g clip-path="url(#cr2)">
+          <g clip-path="url(#c-r3)" />
+        </g>
+        <g clip-path="url(#cr3)">
+          <use xlink:href="#full-screen" fill="darkslategray" />
+        </g>
+      </g>
+    </g>
+  </g>
+	
+	
+	<!-- 0000 -->
+  <g clip-path="url(#c-r3I-r2)">
+    <use clip-path="url(#c-r1I-r0)" xlink:href="#full-screen" fill="blanchedalmond" />
+  </g>
+  
+  <!-- 0001 -->
+  <!-- Instead of using -r1, we'll divide into two subshapes so we can test the union.
+       The CNF equation is r3'r2'r0(a + b). We'll go with (r0r2')(a + b)(r3') -->
+	<g clip-path="url(#cr0I-r2)">
+    <clipPath id="caORb">
+      <rect x="0" y="0" width="250" height="500" />
+      <rect x="338" y="0" width="162" height="500" />
+    </clipPath>
+    <g clip-path="url(#caORb)">
+      <g clip-path="url(#c-r3)">
+        <use xlink:href="#full-screen" fill="cadetblue" />
+      </g>
+    </g>
+  </g>
+	
+	
+  <g clip-path="url(#c-r0)">
+    <!-- 0010 -->
+    <clipPath id="c-r2I-r3" clip-path="url(#c-r3)">
+      <use xlink:href="#-r2" />
+    </clipPath>
+    <use xlink:href="#r1" clip-path="url(#c-r2I-r3)" fill="blue" />
+    
+	  <g clip-path="url(#c-r1)">
+      <!-- 0100 -->
+      <g clip-path="url(#c-r3)">
+        <use clip-path="url(#cr2)" xlink:href="#full-screen" fill="red" />
+      </g>
+      
+      <!-- 1000 -->
+      <g clip-path="url(#c-r2)">
+        <g clip-path="url(#cr3)">
+           <use xlink:href="#full-screen" fill="lime" />
+        </g>
+      </g>
+    </g>
+  </g>
+	
+	
+  <!-- 0110 -->
+  <g clip-path="url(#cr1Ir2)">
+    <use clip-path="url(#c-r0)" xlink:href="#-r3" fill="thistle" />
+	</g>
+	
+  <g clip-path="url(#cr1I-r2)">
+    <!-- 1010 -->
+    <use clip-path="url(#c-r0)" xlink:href="#r3" fill="lightsalmon" />
+    <!-- 0011 -->
+    <use clip-path="url(#cr0)" xlink:href="#-r3" fill="yellow" />
+	</g>
+	
+	
+  <g clip-path="url(#cr0I-r1)">
+    <!-- 0101 -->
+    <use clip-path="url(#cr2)" xlink:href="#-r3" fill="lightgoldenrodyellow" />
+    <!-- 1001 -->
+    <use clip-path="url(#c-r2)" xlink:href="#r3" fill="brown" />
+	</g>
+	
+  <g clip-path="url(#cr3)">
+    <g clip-path="url(#cr2)">
+      <!-- 1100 -->
+      <use clip-path="url(#c-r0)" xlink:href="#-r1" fill="darkmagenta" />
+      <!-- 1101 -->
+      <use clip-path="url(#cr0)" xlink:href="#-r1" fill="crimson" />
+    </g>
+  </g>
+	
+	<!-- 1011 -->
+  <g clip-path="url(#cr3)">
+    <g clip-path="url(#cr0r1)">
+      <use xlink:href="#-r2" fill="forestgreen" />
+    </g>
+  </g>
+	
+	<!-- 0111 -->
+  <g clip-path="url(#cr3)">
+    <g clip-path="url(#cr0r1)">
+      <g clip-path="url(#cr2)">
+        <use xlink:href="#full-screen" fill="burlywood" />
+      </g>
+    </g>
+  </g>
+  
+  <!-- 1111 - leave the very middle intersection blank -->
+    	
+	<!-- The squares --> 
+	<g fill="none" stroke="midnightblue" stroke-width="3">
+		<rect id="r0" x="75" y="100" width="350" height="250"/>
+		<rect id="r1" x="250" y="50" width="88" height="400"/>
+		<rect id="r2" x="163" y="188" width="131" height="225"/>
+		<rect id="r3" x="211" y="218" width="165" height="165"/>
+	</g>
+	
+	<!-- The region outside the squares -->
+	<g fill="none" stroke="none">
+		<path id="-r0" d="M0 0 H500 V500 H0 V0 M75 100 v250 h350 v-250 h-350" />
+		<path id="-r1" d="M0 0 H500 V500 H0 V0 M250 50 v400 h88 v-400 h-88" />
+		<path id="-r2" d="M0 0 H500 V500 H0 V0 M163 188 v225 h131 v-225 h-131"/>
+		<path id="-r3" d="M0 0 H500 V500 H0 V0 M211 218 v165 h165 v-165 h-165"/>
+		<rect id="full-screen" x="0" y="0" width="100%" height="100%" /> 
+	</g>
+ 
+</svg>

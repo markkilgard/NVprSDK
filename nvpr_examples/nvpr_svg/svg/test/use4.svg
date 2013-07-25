@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+	width="100%" height="100%"
+	onload="startup(evt)"
+>
+<script>
+<![CDATA[
+
+xmlns="http://www.w3.org/2000/svg"
+var Doc;
+var O;
+var Boo=true
+function T(Boo){
+	if (Boo)O.pauseAnimations()
+	else O.unpauseAnimations()
+	return !Boo
+}
+function startup(evt){
+	O=evt.target
+	Doc=O.ownerDocument
+	O.setAttribute("onclick","Boo=T(Boo);")
+}
+
+//]]>
+</script>
+<rect id="BB" x="0" y="0" height="100%" width="100%" fill="white"/>
+<g id="firstone" stroke="black">
+<animateTransform attributeName="transform" id="AT" additive="sum" type="translate" dur="7s" values="50 0;0 0;50 0" repeatCount="indefinite"/>
+	<g id="g3" fill="none" stroke-width="2">
+		<animateTransform attributeName="transform" type="rotate" dur="4s" from="180 100 100" to="0 100 100" repeatCount="indefinite"/>
+		<g id="g2">
+			<ellipse id="g1" cx="100" cy="100" rx="75" ry="40">
+			<animate attributeName="ry" dur="3s" values="10; 60; 10"  repeatCount="indefinite"/>
+			</ellipse>
+			<use xlink:href="#g1" transform="rotate(30 100,100)"/>
+			<use xlink:href="#g1" transform="rotate(60 100,100)"/>
+		</g>
+		<use xlink:href="#g2" transform="rotate(90 100 100)"/>
+	</g>
+</g>
+<use xlink:href="#g3" transform="translate(50 0)" stroke="blue">
+<use xlink:href="#AT"/>
+<animateTransform attributeName="transform" additive="sum" type="translate" dur="7s" values="0 0;50 0;0 0" repeatCount="indefinite"/>
+</use>
+<use xlink:href="#g3" transform="translate(50 50)" stroke="green">
+<animateTransform attributeName="transform" additive="sum" type="translate" dur="7s" values="0 -50;50 0;0 -50" repeatCount="indefinite"/>
+</use>
+<use xlink:href="#g3" transform="translate(0 50)" stroke="red">
+<animateTransform attributeName="transform" additive="sum" type="translate" dur="7s" values="50 -50;0 0;50 -50" repeatCount="indefinite"/>
+</use>
+</svg>

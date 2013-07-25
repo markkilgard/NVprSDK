@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" width="400" height="100" viewBox="0 0 800 200">
+	
+	<!-- Matthew Bystedt http://pike.port5.com 2003 -->
+	
+	<!-- Pattern Definition -->
+	<defs>
+		<pattern id="checkerPattern" patternUnits="userSpaceOnUse" x="0" y="0" width="20" height="20" viewBox="0 0 10 10">
+				
+			<rect x="0" y="0" width="5" height="5" fill="lightblue"/>
+			<rect x="5" y="5" width="5" height="5" fill="lightblue"/>
+		</pattern>
+
+        <radialGradient id="myFillGrad" r="100%" spreadMethod="reflect">
+            <stop offset="5%" stop-color="blue" stop-opacity="0.5"/>
+            <stop offset="95%" stop-color="midnightblue"/>
+        </radialGradient>
+        
+        <clipPath id="clip1">
+            <polygon id="clip1Shape" points="100,10 40,180 190,60 10,60 160,180 100,10" stroke="blue"/>        
+        </clipPath>
+
+        <clipPath id="clip2">
+            <circle id="clip2Shape" cx="100" cy="100" r="65"/>
+        </clipPath>
+ 
+        <!-- Union -->
+        <!-- XXXmjk I added clipCoverageUnion -->
+        <clipPath id="clipUnion" clip-merge="clipCoverageUnion" >
+            <use x="0" y="0" width="200" height="200" xlink:href="#clip1Shape"/>
+            <use x="0" y="0" width="200" height="200" xlink:href="#clip2Shape"/>
+        </clipPath>        
+    
+        <!-- Intersection -->
+        <clipPath id="clipIntersection" clip-path="url(#clip1)">
+            <use x="0" y="0" width="200" height="200" xlink:href="#clip2Shape"/>
+        </clipPath>
+
+	</defs>
+
+	<!-- Background -->
+	<!--<rect x="0" y="0" width="100%" height="100%" fill="url(#checkerPattern)"/>-->
+	
+	<!-- Examples -->
+    
+	<rect x="10" y="10" width="180" height="180" fill="url(#myFillGrad)" clip-path="url(#clip1)"/>
+	<rect x="10" y="10" width="180" height="180" fill="url(#myFillGrad)" clip-path="url(#clip2)" transform="translate(200)"/>
+	<rect x="10" y="10" width="180" height="180" fill="url(#myFillGrad)" clip-path="url(#clipIntersection)" transform="translate(400)"/>
+	<rect x="10" y="10" width="180" height="180" fill="url(#myFillGrad)" clip-path="url(#clipUnion)" transform="translate(600)"/>
+
+    <text x="100" y="95%" fill="black" font-size="25" text-anchor="middle">Clip 1</text>
+    <text x="300" y="95%" fill="black" font-size="25" text-anchor="middle">Clip 2</text>
+    <text x="500" y="95%" fill="black" font-size="25" text-anchor="middle">Intersection</text>
+    <text x="700" y="95%" fill="black" font-size="25" text-anchor="middle">Union</text>
+
+</svg>

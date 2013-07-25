@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100%" height="100%" onload="startup(evt)">
+<script>
+<![CDATA[
+xmlns="http://www.w3.org/2000/svg"
+var Doc;
+var O;
+function startup(evt){
+	O=evt.target
+	Doc=O.ownerDocument
+}
+//]]>
+</script>
+
+<circle cx="80" cy="50" r="40"/>
+<circle cx="80" cy="110" r="40" fill="red"/>
+<circle cx="80" cy="170" r="40" fill="yellow" stroke="blue"/>
+<circle cx="80" cy="160" r="20" fill="red" stroke="black" stroke-width="10">
+<animateColor attributeName="fill" dur="5s" values="#ff0; #f00; #f0f; #00f; #0f0" repeatCount="indefinite"/>
+</circle>
+
+<circle cx="270" cy="110" r="75" fill="none" stroke="#59a" stroke-width="90" stroke-dasharray="3,5,8,13">
+<animate attributeName="stroke-dashoffset" dur="0.25s" repeatCount="indefinite" values="0;29"/>
+</circle>
+<circle cx="205" cy="190" r="70" fill="none" stroke="#35a" stroke-width="135" stroke-dasharray="3,5,8,13">
+<animate attributeName="stroke-dashoffset" dur="0.25s" repeatCount="indefinite" values="0;29"/>
+</circle>
+<circle cx="140" cy="110" r="40" fill="none" stroke="#579" stroke-width="70" stroke-dasharray="3,5,8,13">
+<animate attributeName="stroke-dashoffset" dur="0.25s" repeatCount="indefinite" values="0;29"/>
+</circle>
+</svg>

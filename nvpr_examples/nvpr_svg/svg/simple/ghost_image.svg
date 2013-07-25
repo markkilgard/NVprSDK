@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve"
+         width="500" height="500"
+         viewBox="0 0 500 500" > 
+	
+      <rect stroke="brown" fill="none" x="0" y="0" width="500" height="500" /> 
+      
+	  <g transform="translate(12, 12)">
+		<image xlink:href="ghost.png" stroke="none" fill="red" width="150" height="150" preserveAspectRatio="defer xMinYMin" /> 
+		<rect stroke="yellow" fill="none" width="150" height="150" /> 
+      </g>		
+	  
+	  <g transform="translate(174, 12)">
+		<image xlink:href="ghost.png" stroke="none" fill="red" width="150" height="150" preserveAspectRatio="defer xMidYMin slice" /> 
+		<rect stroke="yellow" fill="none" width="150" height="150" /> 
+      </g>		
+	  
+	  <g transform="translate(336, 12)">
+		<image xlink:href="ghost.png" stroke="none" fill="red" width="150" height="150" preserveAspectRatio="defer xMaxYMin meet" /> 
+		<rect stroke="yellow" fill="none" width="150" height="150" /> 
+      </g>		
+	  
+	  <g transform="translate(12, 174)">
+		<image xlink:href="ghost.png" stroke="none" fill="red" width="150" height="150"  preserveAspectRatio="xMinYMid meet" /> 
+		<rect stroke="yellow" fill="none" width="150" height="150" /> 
+      </g>		
+	  
+	  <g transform="translate(174, 174)">
+		<image xlink:href="ghost.png" stroke="none" fill="red" width="150" height="150"  preserveAspectRatio="defer" /> 
+		<rect stroke="yellow" fill="none" width="150" height="150" /> 
+      </g>		
+	  
+	  <g transform="translate(336, 174)">
+		<image xlink:href="ghost.png" stroke="none" fill="red" width="150" height="150"  preserveAspectRatio="xMaxYMid meet" /> 
+		<rect stroke="yellow" fill="none" width="150" height="150" /> 
+      </g>		
+	   
+	  <image xlink:href="ghost.png" stroke="none" fill="red" x="12" y="336" width="150" height="150"  preserveAspectRatio="xMinYMax slice" /> 
+	  <rect stroke="yellow" fill="none" x="12" y="336" width="150" height="150" /> 
+	  
+	  <image xlink:href="ghost.png" stroke="none" fill="red" x="174" y="336" width="150" height="150" preserveAspectRatio="defer xMidYMax" /> 
+	  <rect stroke="yellow" fill="none" x="174" y="336" width="150" height="150" /> 
+     
+	  <image xlink:href="ghost.png" stroke="none" fill="red" x="336" y="336" width="150" height="150" preserveAspectRatio="defer xMaxYMax slice" /> 
+	  <rect stroke="yellow" fill="none" x="336" y="336" width="150" height="150" /> 
+ 
+</svg>

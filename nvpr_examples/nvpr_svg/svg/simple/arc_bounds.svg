@@ -1,0 +1,26 @@
+<svg width="500" height="500">
+  <defs>
+    <radialGradient id="Psycho" spreadMethod="reflect">
+      <stop offset="0" stop-color="red" />
+      <stop offset=".167" stop-color="cyan" />
+      <stop offset=".333" stop-color="blue" />
+      <stop offset=".50" stop-color="yellow" />
+      <stop offset=".667" stop-color="brown" />
+      <stop offset=".833" stop-color="majenta" />
+      <stop offset="1" stop-color="lime" />
+    </radialGradient>
+
+    <clipPath id="CP">
+      <path d="M 180 300 A 120 40 0 1 1 180 301 M 258 294 A 45 15 0 1 1 258 295" />
+    </clipPath>
+  </defs>
+  
+  <g transform="scale(0.9)">
+    <g transform="translate(-100)">
+      <rect width="35%" height="40%" x="120" y="180" fill="url(#Psycho)" clip-path="url(#CP)" />
+      <path d="M300 200 A 100 50 0 0 1 300 400 L 300 350 A 150 50 0 0 0 300 250" fill="url(#Psycho)" transform="translate(600) scale(-1, 1)"/>
+      <path d="M300 200 A 100 50 0 0 1 300 400 L 300 350 A 150 50 0 0 0 300 250" fill="url(#Psycho)"/>
+    </g>
+  </g>
+
+</svg>

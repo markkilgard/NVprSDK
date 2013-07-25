@@ -1,0 +1,28 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" 
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="720px" height="720px" viewBox="0 0 722 722"
+     xmlns="http://www.w3.org/2000/svg" version="1.1">
+  <title>A path from gs_bezier</title>
+  <desc>A path from gs_bezier</desc>
+  <rect x="-100" y="-50" width="900" height="850"
+        fill="none" stroke="blue" />
+  <path stroke-dashoffset="0" stroke-dasharray="10,6" transform="translate(0,-50)"
+        stroke="purple" stroke-width="40" style="fill-rule:evenodd" fill="none"
+        d="M 95,20 L105,60 L190,60 L100,100 C 150,200 200,200 250,100 300,50 350,200 400,100 Q 500,200 600,100 L700,100 750,150 800,100 M220,40 A 50,50 -60 0 0 300,40 L 400,60 M450,60 L600,60 A 30 40 30 0 1 650,70 L 700,50 S 750,80 800,80 M 50,50 A20,25 0,0,1 0,100 A 20,20 0, 0,0 0,200 A 15,15 0,1,0 -20,150"/>
+  <path stroke-dashoffset="0" stroke-dasharray="10,6" transform="translate(0,100)"
+        stroke="red" stroke-width="40" style="fill-rule:evenodd" fill="none"
+        d="M 95,20 L105,60 L190,60 L100,100 C 150,200 200,200 250,100 300,50 350,200 400,100 Q 500,200 600,100 L700,100 750,150 800,100 M220,40 A 50,50 -60 0 0 300,40 L 400,60 M450,60 L600,60 A 30 40 30 0 1 650,70 L 700,50 S 750,80 800,80 M 50,50 A20,25 0,0,1 0,100 A 20,20 0, 0,0 0,200 A 15,15 0,1,0 -20,150"/>
+  <path stroke-dashoffset="0" stroke-dasharray="30,25" transform="translate(0,250)"
+        stroke="yellow" stroke-width="20" style="fill-rule:evenodd" fill="none" stroke-linecap="round"
+        d="M 95,20 L105,60 L190,60 L100,100 C 150,200 200,200 250,100 300,50 350,200 400,100 Q 500,200 600,100 L700,100 750,150 800,100 M220,40 A 50,50 -60 0 0 300,40 L 400,60 M450,60 L600,60 A 30 40 30 0 1 650,70 L 700,50 S 750,80 800,80 M 50,50 A20,25 0,0,1 0,100 A 20,20 0, 0,0 0,200 A 15,15 0,1,0 -20,150"/>
+  <path stroke-dashoffset="0" stroke-dasharray="30,25" transform="translate(0,400)"
+        stroke="orange" stroke-width="20" style="fill-rule:evenodd" fill="none" stroke-linecap="square" stroke-linejoin="bevel"
+        d="M 95,20 L105,60 L190,60 L100,100 C 150,200 200,200 250,100 300,50 350,200 400,100 Q 500,200 600,100 L700,100 750,150 800,100 M220,40 A 50,50 -60 0 0 300,40 L 400,60 M450,60 L600,60 A 30 40 30 0 1 650,70 L 700,50 S 750,80 800,80 M 50,50 A20,25 0,0,1 0,100 A 20,20 0, 0,0 0,200 A 15,15 0,1,0 -20,150"/>
+  <path stroke-dashoffset="0" stroke-dasharray="30,25" transform="translate(0,550)"
+        stroke="lightgreen" stroke-width="20" style="fill-rule:evenodd" fill="none" stroke-linecap="triangle" stroke-linejoin="bevel"
+        d="M 95,20 L105,60 L190,60 L100,100 C 150,200 200,200 250,100 300,50 350,200 400,100 Q 500,200 600,100 L700,100 750,150 800,100 M220,40 A 50,50 -60 0 0 300,40 L 400,60 M450,60 L600,60 A 30 40 30 0 1 650,70 L 700,50 S 750,80 800,80 M 50,50 A20,25 0,0,1 0,100 A 20,20 0, 0,0 0,200 A 15,15 0,1,0 -20,150"/>
+  <path stroke-dashoffset="0" stroke-dasharray="30,25" transform="translate(0,550)"
+        stroke="gray" stroke-width="5" style="fill-rule:evenodd" fill="none" stroke-linecap="none" stroke-linejoin="miter"
+        d="M 95,20 L105,60 L190,60 L100,100 C 150,200 200,200 250,100 300,50 350,200 400,100 Q 500,200 600,100 L700,100 750,150 800,100 M220,40 A 50,50 -60 0 0 300,40 L 400,60 M450,60 L600,60 A 30 40 30 0 1 650,70 L 700,50 S 750,80 800,80 M 50,50 A20,25 0,0,1 0,100 A 20,20 0, 0,0 0,200 A 15,15 0,1,0 -20,150"/>
+ /></svg>

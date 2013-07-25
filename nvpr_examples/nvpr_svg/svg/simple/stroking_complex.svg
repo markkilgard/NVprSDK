@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- author: georg held, revised A. Neumann -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="350" height="130" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+	<title>complex cartographic stroking</title>
+	<defs>
+		<path id="geometry" fill="none" d="M5,0 l340,0"/>
+	</defs>
+
+	<g transform="translate(0, 15)">
+		<use xlink:href="#geometry" stroke="rgb(0,0,0)" stroke-width="12"/>
+		<use xlink:href="#geometry" stroke="red" stroke-width="6"/>
+	</g>
+
+	<g transform="translate(0, 45)">
+		<use xlink:href="#geometry" stroke="rgb(0,0,0)" stroke-width="15"/>
+		<use xlink:href="#geometry" stroke="rgb(250,255,175)" stroke-width="9.5"/>
+		<use xlink:href="#geometry" stroke="rgb(0,0,0)" stroke-width="1.5"/>
+	</g>	
+	
+	<g transform="translate(0, 75)">
+		<use xlink:href="#geometry" stroke="black" stroke-width="12"/>
+		<use xlink:href="#geometry" stroke="white" stroke-width="8" stroke-dasharray="15,3"/>
+	</g>
+
+	<g transform="translate(0, 105)" stroke="rgb(0,150,0)" stroke-opacity="0.5" stroke-width="15">
+		<use xlink:href="#geometry"/>
+	</g>	
+</svg>

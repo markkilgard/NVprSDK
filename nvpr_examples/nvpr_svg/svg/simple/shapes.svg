@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/SVG/DTD/svg10.dtd">
+<svg viewBox="0 0 270 400" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+	<g id="mainlayer">
+		<rect fill="red" stroke="black" x="15" y="15" width="100" height="50"/>
+		<rect fill="blue" stroke="black" x="150" y="15" width="100" height="50" rx="12" ry="18"/>
+		<circle fill="yellow" stroke="black" cx="62" cy="135" r="20"/>
+		<ellipse fill="green" stroke="black" cx="200" cy="135" rx="50" ry="20"/>
+		<polyline fill="none" stroke="red" stroke-width="2" points="160,200 180,230 200,210 234,220"/>
+		<polygon fill="yellow" stroke="black" stroke-width="1" points="49,272 57,297 114,282 63,314 71,339 49,324 27,339 35,314 13,297 40,297"/>
+		<path stroke="black" fill="none" stroke-width="3" d="M150 280l19,10 -22,33 40,3c12,43 44,-83 83,20"/>
+		<g stroke="green" fill="none">
+			<line x1="15" y1="240" x2="30" y2="200" stroke-width="2"/>
+			<line x1="30" y1="240" x2="45" y2="200" stroke-width="4"/>
+			<line x1="45" y1="240" x2="60" y2="200" stroke-width="8"/>
+			<line x1="60" y1="240" x2="75" y2="200" stroke-width="10"/>
+			<line x1="75" y1="240" x2="90" y2="200" stroke-width="12"/>
+		</g>
+		<g font-size="20px">
+			<text x="44" y="88">rect</text>
+			<text x="140" y="88">rect (rounded)</text>
+			<text x="36" y="180">circle</text>
+			<text x="170" y="180">ellipse</text>
+			<text x="36" y="263">line</text>
+			<text x="156" y="255">polyline</text>
+			<text x="16" y="363">polygon</text>
+			<text x="140" y="363">path:<tspan x="140" y="383">simple + bezier</tspan></text>
+		</g>
+	</g>
+</svg>

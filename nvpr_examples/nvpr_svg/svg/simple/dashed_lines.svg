@@ -1,0 +1,20 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" 
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="720px" height="720px" viewBox="0 0 722 722"
+     xmlns="http://www.w3.org/2000/svg" version="1.1">
+  <title>A path from gs_bezier</title>
+  <desc>A path from gs_bezier</desc>
+  <rect x="1" y="1" width="721" height="721"
+        fill="none" stroke="blue" />
+  <g transform="translate(200,200)">
+  <path stroke-dashphase="movetoContinues" stroke-dashoffset="11" stroke-dasharray="10,46,5,16" stroke="green" stroke-width="60" style="fill-rule:evenodd" fill="none"
+ d="M 489.0625 , 121.25 L212.1875 , 19.583333333333314 471.5625 , 368.75, 222.8125 , 379.58333333333331 M 450,30 L 200,40 300,200"/>
+  </g>
+  <g transform="translate(-200,200)">
+  <path stroke-dashphase="movetoContinues" stroke-dashoffset="70" stroke-dasharray="10,20,30" stroke="white" stroke-width="40.5" style="fill-rule:evenodd" fill="none"
+ d="M 489.0625 , 231.25 L212.1875 , 219.583333333333314 471.5625 , 368.75, 222.8125 , 379.58333333333331 M 450,30 L 200,40 300,200"/>
+  </g>
+  <path stroke-dashoffset="21" stroke-dasharray="10,10,30" stroke="red" stroke-width="40" style="fill-rule:evenodd" fill="none"
+ d="M 489.0625 , 171.25 L282.1875 , 119.583333333333314 471.5625 , 368.75, 222.8125 , 379.58333333333331 M 450,30 L 200,40 200,200"/>
+</svg>

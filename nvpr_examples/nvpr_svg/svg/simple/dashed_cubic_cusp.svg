@@ -1,0 +1,10 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" 
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="500px" height="500px" viewBox="0 0 502 502"
+     xmlns="http://www.w3.org/2000/svg" version="1.1">
+  <title>A path from gs_bezier</title>
+  <desc>A path from gs_bezier</desc>
+  <rect x="1" y="1" width="501" height="501"
+        fill="none" stroke="blue" />
+  <path style="fill-rule:nonzero" fill="#000000" d="M 1,1H 722V 722H 1V 1z" transform="matrix(0.622407,0.000000,0.000000,0.622407,25.000000,25.000000)" />  <path style="fill-rule:evenodd" fill="#000000" d="M 489.0625,121.25C 212.1875,19.583334 471.5625,368.75 222.8125,379.583344M 450,30Q 200,40 300,200" transform="matrix(0.622407,0.000000,0.000000,0.622407,149.481323,149.481323)" />  <path style="fill-rule:evenodd" fill="#000000" d="M 434.573303,365.546661C 212.1875,219.583328 564.713318,413.746613 222.8125,379.583344M 450,30Q 200,40 300,200" transform="matrix(0.622407,0.000000,0.000000,0.622407,-99.481331,149.481323)" />  <path style="fill-rule:evenodd" fill="#000000" d="M 489.0625,171.25C 212.1875,19.583334 471.5625,368.75 222.8125,379.583344M 450,30Q 200,40 300,200" transform="matrix(0.622407,0.000000,0.000000,0.622407,25.000000,25.000000)" /></svg>

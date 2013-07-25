@@ -1,0 +1,26 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" 
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="720px" height="720px" viewBox="0 0 722 722"
+     xmlns="http://www.w3.org/2000/svg" version="1.1">
+  <title>A path from gs_bezier</title>
+  <desc>A path from gs_bezier</desc>
+  <rect x="1" y="1" width="721" height="721"
+        fill="none" stroke="blue" />
+  <g transform="translate(-150,-170)">
+  <path stroke-dashphase="movetoContinues" stroke-dashoffset="0" stroke-dasharray="60,60" stroke="gray25" stroke-width="40" style="fill-rule:evenodd" fill="none" stroke-linecap="none" stroke-linejoin="round"
+ d="M 489.0625 , 231.25 L212.1875 , 219.583333333333314 471.5625 , 368.75, 222.8125 , 379.58333333333331"/>
+  </g>
+  <g transform="translate(-150,200)">
+  <path stroke-dashphase="movetoContinues" stroke-dashoffset="0" stroke-dasharray="60,60" stroke="lightyellow" stroke-width="40" style="fill-rule:evenodd" fill="none" stroke-linecap="square"
+ d="M 489.0625 , 231.25 L212.1875 , 219.583333333333314 451.5625 , 368.75, 222.8125 , 449.58333333333331"/>
+  </g>
+  <g transform="translate(150,-100)">
+  <path stroke-dashphase="movetoContinues" stroke-dashoffset="0" stroke-dasharray="60,60" stroke="lightgreen" stroke-width="40" style="fill-rule:evenodd" fill="none" stroke-linecap="round" stroke-linejoin="bevel"
+ d="M 489.0625 , 231.25 L212.1875 , 219.583333333333314 471.5625 , 368.75, 222.8125 , 379.58333333333331"/>
+  </g>
+  <g transform="translate(180,270)">
+  <path stroke-dashphase="movetoContinues" stroke-dashoffset="0" stroke-dasharray="60,60" stroke="orange" stroke-width="40" style="fill-rule:evenodd" fill="none" stroke-linecap="triangle" stroke-linejoin="miter-truncate" stroke-miterlimit="1.0"
+ d="M 489.0625 , 231.25 L212.1875 , 219.583333333333314 471.5625 , 368.75, 222.8125 , 379.58333333333331"/>
+  </g>
+</svg>

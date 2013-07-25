@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   height="206.25000"
+   id="svg2"
+   version="1.0"
+   width="406.25000"
+   x="0.00000000"
+   y="0.00000000"
+   sodipodi:version="0.32"
+   inkscape:version="0.46"
+   sodipodi:docname="camera_linear_gradient_case.svg"
+   inkscape:output_extension="org.inkscape.output.svg.inkscape"
+   inkscape:export-filename="C:\joanna\Gfx\drawings_vector\admin\thumbs\AJ_Digital_Camera_ok.png"
+   inkscape:export-xdpi="55.827694"
+   inkscape:export-ydpi="55.827694">
+  <defs
+     id="defs3">
+    <linearGradient
+       id="linearGradient2143">
+      <stop
+         id="stop2145"
+         offset="0.00000000"
+         style="stop-color: rgb(0, 0, 0); stop-opacity: 1;" />
+      <stop
+         id="stop2147"
+         offset="1.0000000"
+         style="stop-color: rgb(255, 255, 255); stop-opacity: 1;" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient2143"
+       id="linearGradient2998"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.834046,0,0,1.19897,-86.294314,-354.39573)"
+       spreadMethod="reflect"
+       x1="337.99429"
+       y1="361.38681"
+       x2="336.71158"
+       y2="369.07602" />
+  </defs>
+  <path
+     d="M 86.420836,30.229449 C 82.228836,63.7463 82.227136,132.22691 86.420836,165.72945 L 219.27455,165.72945 C 227.66191,132.22674 227.65861,63.74612 219.27455,30.229449 L 86.420836,30.229449 z"
+     id="path2224"
+     style="opacity:0.02999998;fill:url(#linearGradient2998);fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dashoffset:0;stroke-opacity:1" />
+</svg>
