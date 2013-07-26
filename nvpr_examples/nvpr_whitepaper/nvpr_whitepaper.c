@@ -50,10 +50,10 @@
 #define GL_BOLD_BIT_NV                                      0x01
 #define GL_ITALIC_BIT_NV                                    0x02
 #define GL_GLYPH_HORIZONTAL_BEARING_ADVANCE_BIT_NV          0x10
-#define GL_FONT_Y_MIN_BOUNDS_NV                             0x00020000
-#define GL_FONT_Y_MAX_BOUNDS_NV                             0x00080000
-#define GL_FONT_UNDERLINE_POSITION_NV                       0x04000000
-#define GL_FONT_UNDERLINE_THICKNESS_NV                      0x08000000
+#define GL_FONT_Y_MIN_BOUNDS_BIT_NV                         0x00020000
+#define GL_FONT_Y_MAX_BOUNDS_BIT_NV                         0x00080000
+#define GL_FONT_UNDERLINE_POSITION_BIT_NV                   0x04000000
+#define GL_FONT_UNDERLINE_THICKNESS_BIT_NV                  0x08000000
 #define GL_ACCUM_ADJACENT_PAIRS_NV                          0x90AD
 #define GL_PATH_STROKE_WIDTH_NV                             0x9075
 #define GL_PATH_JOIN_STYLE_NV                               0x9079
@@ -87,6 +87,14 @@ typedef void (GLAPIENTRYP PFNGLSTENCILSTROKEPATHNVPROC) (GLuint path, GLint refe
 typedef void (GLAPIENTRYP PFNGLCOVERFILLPATHNVPROC) (GLuint path, GLenum coverMode);
 typedef void (GLAPIENTRYP PFNGLCOVERSTROKEPATHNVPROC) (GLuint path, GLenum coverMode);
 typedef void (GLAPIENTRYP PFNGLPATHGLYPHSNVPROC) (GLuint firstPathName, GLenum fontTarget, const GLvoid *fontName, GLbitfield fontStyle, GLsizei numGlyphs, GLenum type, const GLvoid *charcodes, GLenum handleMissingGlyphs, GLuint pathParameterTemplate, GLfloat emScale);
+#endif
+
+#ifdef GL_FONT_Y_MIN_BOUNDS_NV
+/* Due to an error in an early NV_path_rendering specification, the
+   _BIT suffix was left out of the GL_FONT_* and GL_GLYPH_* token names.
+   Some versions of glext.h in Mesa have this error.  Workaround... */
+#define GL_FONT_Y_MIN_BOUNDS_BIT_NV                         0x00020000
+#define GL_FONT_Y_MAX_BOUNDS_BIT_NV                         0x00080000
 #endif
 
 // Only include the minimal EXT_direct_state_access API used by this example for brevity.
@@ -297,7 +305,7 @@ void initOpenGLglyphs()
                      GL_TRANSLATE_X_NV,
                      xtranslate+1);
 
-glGetPathMetricRangeNV(GL_FONT_Y_MIN_BOUNDS_NV|GL_FONT_Y_MAX_BOUNDS_NV,
+glGetPathMetricRangeNV(GL_FONT_Y_MIN_BOUNDS_BIT_NV|GL_FONT_Y_MAX_BOUNDS_BIT_NV,
                        glyphBase, /*count*/1,
                        2*sizeof(GLfloat),
                        yMinMax);
@@ -337,7 +345,7 @@ void initFont()
                      GL_TRANSLATE_X_NV,
                      kerning+1);
 
-  glGetPathMetricRangeNV(GL_FONT_Y_MIN_BOUNDS_NV|GL_FONT_Y_MAX_BOUNDS_NV,
+  glGetPathMetricRangeNV(GL_FONT_Y_MIN_BOUNDS_BIT_NV|GL_FONT_Y_MAX_BOUNDS_BIT_NV,
                          glyphBase, /*count*/1,
                          2*sizeof(GLfloat),
                          yMinMaxFont);
@@ -633,7 +641,7 @@ int main(int argc, char **argv)
   printf("version: %s\n", glGetString(GL_VERSION));
   printf("renderer: %s\n", glGetString(GL_RENDERER));
   printf("samples = %d\n", glutGet(GLUT_WINDOW_NUM_SAMPLES));
-  printf("Executable: %d bit\n", (int)8*sizeof(int*));
+  printf("Executable: %d bit\n", (int)(8*sizeof(int*)));
 
   glutDisplayFunc(display);
   glutKeyboardFunc(keyboard);

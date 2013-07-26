@@ -96,7 +96,6 @@
 #undef max
 
 using namespace Cg;
-using namespace boost;
 using std::string;
 
 const char *myProgramName = "GPU-accelerated path rendering";
@@ -127,6 +126,7 @@ bool render_top_to_bottom;
 bool force_stencil_clear = false;
 bool only_necessary_stencil_clears;
 float zoom;
+bool webExMode = false;
 typedef enum {
     DRAW_PATH_DATA,
     DRAW_SVG_FILE,
@@ -770,7 +770,7 @@ int main(int argc, char **argv)
 {
     char display_string[200];
 
-	printf("Executable: %d bit\n", (int)8*sizeof(int*));
+    printf("Executable: %d bit\n", (int)(8*sizeof(int*)));
 
     glutInitWindowSize(gl_window_width, gl_window_height);
 
@@ -875,6 +875,10 @@ int main(int argc, char **argv)
         if (!stricmp("-dlist", argv[i])) {
             printf("use display lists\n");
             use_dlist = true;
+        } else
+        if (!stricmp("-webex", argv[i])) {
+            printf("WebEx mode reloads shaders on every scene change\n");
+            webExMode = true;
         } else
         if (!stricmp("-frameCount", argv[i])) {
             i++;
@@ -1295,6 +1299,10 @@ static void sceneChanged()
     updateTransform();
     do_redisplay(ALL_WINDOWS);
     invalidateFPS();
+
+	if (webExMode) {
+		nvpr_renderer->load_shaders();
+	}
 }
 
 #if USE_FREETYPE2

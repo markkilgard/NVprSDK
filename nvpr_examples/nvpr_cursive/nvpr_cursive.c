@@ -302,7 +302,7 @@ int main(int argc, char **argv)
   printf("version: %s\n", glGetString(GL_VERSION));
   printf("renderer: %s\n", glGetString(GL_RENDERER));
   printf("samples per pixel = %d\n", glutGet(GLUT_WINDOW_NUM_SAMPLES));
-  printf("Executable: %d bit\n", (int)8*sizeof(int*));
+  printf("Executable: %d bit\n", (int)(8*sizeof(int*)));
   printf("\n");
   printf("Use left mouse button to scale/zoom (vertical, up/down) and rotate (right=clockwise, left=ccw)\n");
   printf("Rotate and zooming is centered where you first left mouse click\n");
@@ -331,7 +331,8 @@ int main(int argc, char **argv)
   if (status != GLEW_OK) {
     fatalError("OpenGL Extension Wrangler (GLEW) failed to initialize");
   }
-  hasDSA = glewIsSupported("GL_EXT_direct_state_access");
+  // Use glutExtensionSupported because glewIsSupported is unreliable for DSA.
+  hasDSA = glutExtensionSupported("GL_EXT_direct_state_access");
   if (!hasDSA) {
     fatalError("OpenGL implementation doesn't support GL_EXT_direct_state_access (you should be using NVIDIA GPUs...)");
   }

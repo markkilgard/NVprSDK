@@ -35,8 +35,8 @@
 #define GL_UTF8_NV                                          0x909A
 #define GL_BOUNDING_BOX_OF_BOUNDING_BOXES_NV                0x909C
 #define GL_GLYPH_HORIZONTAL_BEARING_ADVANCE_BIT_NV          0x10
-#define GL_FONT_Y_MIN_BOUNDS_NV                             0x00020000
-#define GL_FONT_Y_MAX_BOUNDS_NV                             0x00080000
+#define GL_FONT_Y_MIN_BOUNDS_BIT_NV                         0x00020000
+#define GL_FONT_Y_MAX_BOUNDS_BIT_NV                         0x00080000
 #define GL_ADJACENT_PAIRS_NV                                0x90AE
 #define GL_SKIP_MISSING_GLYPH_NV                            0x90A9
 #define GL_USE_MISSING_GLYPH_NV                             0x90AA
@@ -47,6 +47,14 @@ typedef void (GLAPIENTRYP PFNGLSTENCILFILLPATHINSTANCEDNVPROC) (GLsizei numPaths
 typedef void (GLAPIENTRYP PFNGLCOVERFILLPATHINSTANCEDNVPROC) (GLsizei numPaths, GLenum pathNameType, const GLvoid *paths, GLuint pathBase, GLenum coverMode, GLenum transformType, const GLfloat *transformValues);
 typedef void (GLAPIENTRYP PFNGLGETPATHMETRICRANGENVPROC) (GLbitfield metricQueryMask, GLuint firstPathName, GLsizei numPaths, GLsizei stride, GLfloat *metrics);
 typedef void (GLAPIENTRYP PFNGLGETPATHMETRICSNVPROC) (GLbitfield metricQueryMask, GLsizei numPaths, GLenum pathNameType, const GLvoid *paths, GLuint pathBase, GLsizei stride, GLfloat *metrics);
+#endif
+
+#ifdef GL_FONT_Y_MIN_BOUNDS_NV
+/* Due to an error in an early NV_path_rendering specification, the
+   _BIT suffix was left out of the GL_FONT_* and GL_GLYPH_* token names.
+   Some versions of glext.h in Mesa have this error.  Workaround... */
+#define GL_FONT_Y_MIN_BOUNDS_BIT_NV                         0x00020000
+#define GL_FONT_Y_MAX_BOUNDS_BIT_NV                         0x00080000
 #endif
 
 #ifndef __APPLE__
@@ -172,7 +180,7 @@ initGraphics(void)
                      0, allOfUnicode, GL_USE_MISSING_GLYPH_NV, ~0, emScale);
   
   /* Query font and glyph metrics. */
-  glGetPathMetricRangeNV(GL_FONT_Y_MIN_BOUNDS_NV|GL_FONT_Y_MAX_BOUNDS_NV,
+  glGetPathMetricRangeNV(GL_FONT_Y_MIN_BOUNDS_BIT_NV|GL_FONT_Y_MAX_BOUNDS_BIT_NV,
                          glyphBase, /*count*/1,
                          2*sizeof(GLfloat),
                          yMinMax);
@@ -298,7 +306,7 @@ main(int argc, char **argv)
   printf("version: %s\n", glGetString(GL_VERSION));
   printf("renderer: %s\n", glGetString(GL_RENDERER));
   printf("samples per pixel = %d\n", glutGet(GLUT_WINDOW_NUM_SAMPLES));
-  printf("Executable: %d bit\n", (int)8*sizeof(int*));
+  printf("Executable: %d bit\n", (int)(8*sizeof(int*)));
 
   glutDisplayFunc(display);
   glutKeyboardFunc(keyboard);

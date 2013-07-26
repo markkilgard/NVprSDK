@@ -46,11 +46,11 @@ bool initDirect2D()
         }
         return false;
     }
-    LazyD2D1CreateFactory = reinterpret_cast<D2D1CreateFactoryFunc>(GetProcAddress(d2d_dll,TEXT("D2D1CreateFactory")));;
+    LazyD2D1CreateFactory = reinterpret_cast<D2D1CreateFactoryFunc>(GetProcAddress(d2d_dll,"D2D1CreateFactory"));;
     if (!LazyD2D1CreateFactory) {
         printf("GetProcAddress of D2D1CreateFactory from D2D1.DLL failed\n");
     }
-    LazyD3D10CreateDevice1 = reinterpret_cast<PFN_D3D10_CREATE_DEVICE1>(GetProcAddress(d3d_dll,TEXT("D3D10CreateDevice1")));;
+    LazyD3D10CreateDevice1 = reinterpret_cast<PFN_D3D10_CREATE_DEVICE1>(GetProcAddress(d3d_dll,"D3D10CreateDevice1"));;
     if (!LazyD3D10CreateDevice1) {
         printf("GetProcAddress of D3D10CreateDevice1 from D3D10_1.DLL failed\n");
     }

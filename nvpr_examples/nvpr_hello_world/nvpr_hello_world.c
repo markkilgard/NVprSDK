@@ -39,10 +39,10 @@
 #define GL_BOLD_BIT_NV                                      0x01
 #define GL_ITALIC_BIT_NV                                    0x02
 #define GL_GLYPH_HORIZONTAL_BEARING_ADVANCE_BIT_NV          0x10
-#define GL_FONT_Y_MIN_BOUNDS_NV                             0x00020000
-#define GL_FONT_Y_MAX_BOUNDS_NV                             0x00080000
-#define GL_FONT_UNDERLINE_POSITION_NV                       0x04000000
-#define GL_FONT_UNDERLINE_THICKNESS_NV                      0x08000000
+#define GL_FONT_Y_MIN_BOUNDS_BIT_NV                         0x00020000
+#define GL_FONT_Y_MAX_BOUNDS_BIT_NV                         0x00080000
+#define GL_FONT_UNDERLINE_POSITION_BIT_NV                   0x04000000
+#define GL_FONT_UNDERLINE_THICKNESS_BIT_NV                  0x08000000
 #define GL_ACCUM_ADJACENT_PAIRS_NV                          0x90AD
 #define GL_PATH_STROKE_WIDTH_NV                             0x9075
 #define GL_PATH_JOIN_STYLE_NV                               0x9079
@@ -65,6 +65,16 @@ typedef void (GLAPIENTRYP PFNGLGETPATHSPACINGNVPROC) (GLenum pathListMode, GLsiz
 typedef void (GLAPIENTRYP PFNGLPATHPARAMETERINVPROC) (GLuint path, GLenum pname, GLint value);
 typedef void (GLAPIENTRYP PFNGLPATHPARAMETERFNVPROC) (GLuint path, GLenum pname, GLfloat value);
 typedef void (GLAPIENTRYP PFNGLPATHCOLORGENNVPROC) (GLenum color, GLenum genMode, GLenum colorFormat, const GLfloat *coeffs);
+#endif
+
+#ifdef GL_FONT_Y_MIN_BOUNDS_NV
+/* Due to an error in an early NV_path_rendering specification, the
+   _BIT suffix was left out of the GL_FONT_* and GL_GLYPH_* token names.
+   Some versions of glext.h in Mesa have this error.  Workaround... */
+#define GL_FONT_Y_MIN_BOUNDS_BIT_NV                         0x00020000
+#define GL_FONT_Y_MAX_BOUNDS_BIT_NV                         0x00080000
+#define GL_FONT_UNDERLINE_POSITION_BIT_NV                   0x04000000
+#define GL_FONT_UNDERLINE_THICKNESS_BIT_NV                  0x08000000
 #endif
 
 #define GL_TRANSLATE_2D_NV                                  0x9090
@@ -223,6 +233,7 @@ initGraphics(int emScale)
   /* Choose a bold sans-serif font face, preferring Veranda over Arial; if
      neither font is available as a system font, settle for the "Sans" standard
      (built-in) font. */
+#if 0
   glPathGlyphRangeNV(glyphBase, 
                      GL_SYSTEM_FONT_NAME_NV, "Liberation Sans", GL_BOLD_BIT_NV,
                      0, numChars,
@@ -233,6 +244,7 @@ initGraphics(int emScale)
                      0, numChars,
                      GL_USE_MISSING_GLYPH_NV, pathTemplate,
                      emScale);
+#endif
   glPathGlyphRangeNV(glyphBase, 
                      GL_SYSTEM_FONT_NAME_NV, "Arial", GL_BOLD_BIT_NV,
                      0, numChars,
@@ -245,8 +257,8 @@ initGraphics(int emScale)
                      emScale);
   
   /* Query font and glyph metrics. */
-  glGetPathMetricRangeNV(GL_FONT_Y_MIN_BOUNDS_NV|GL_FONT_Y_MAX_BOUNDS_NV|
-                         GL_FONT_UNDERLINE_POSITION_NV|GL_FONT_UNDERLINE_THICKNESS_NV,
+  glGetPathMetricRangeNV(GL_FONT_Y_MIN_BOUNDS_BIT_NV|GL_FONT_Y_MAX_BOUNDS_BIT_NV|
+                         GL_FONT_UNDERLINE_POSITION_BIT_NV|GL_FONT_UNDERLINE_THICKNESS_BIT_NV,
                          glyphBase+' ', /*count*/1,
                          4*sizeof(GLfloat),
                          font_data);
@@ -485,7 +497,7 @@ main(int argc, char **argv)
   printf("version: %s\n", glGetString(GL_VERSION));
   printf("renderer: %s\n", glGetString(GL_RENDERER));
   printf("samples = %d\n", glutGet(GLUT_WINDOW_NUM_SAMPLES));
-  printf("Executable: %d bit\n", (int)8*sizeof(int*));
+  printf("Executable: %d bit\n", (int)(8*sizeof(int*)));
 
   glutDisplayFunc(display);
   glutReshapeFunc(reshape);

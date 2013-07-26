@@ -21,7 +21,7 @@
 #include <Cg/degrees.hpp>
 
 #if _MSC_VER
-# pragma comment (lib, "skia.lib")         // link with Skia lib
+# pragma comment (lib, "usp10.lib")         // link with Microsoft's Unicode Scripts Parser lib
 #endif
 
 // Release builds shouldn't have verbose conditions.

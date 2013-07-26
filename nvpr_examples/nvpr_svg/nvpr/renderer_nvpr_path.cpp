@@ -155,7 +155,10 @@ void NVprPathRendererState::validate()
             glPathDashArrayNV(path, GLsizei(owner->style.dash_array.size()), &owner->style.dash_array[0]);
             glPathParameteriNV(path, GL_PATH_DASH_CAPS_NV, lineCapConverter(owner));
             glPathParameterfNV(path, GL_PATH_DASH_OFFSET_NV, owner->style.dash_offset);
-            glPathParameteriNV(path, GL_PATH_DASH_OFFSET_RESET_NV, owner->style.dash_phase);
+            GLenum dash_offset_reset = (owner->style.dash_phase == PathStyle::MOVETO_RESETS)
+                ? GL_MOVE_TO_RESETS_NV
+                : GL_MOVE_TO_CONTINUES_NV;
+            glPathParameteriNV(path, GL_PATH_DASH_OFFSET_RESET_NV, dash_offset_reset);
         } else {
             glPathDashArrayNV(path, 0, NULL);
         }

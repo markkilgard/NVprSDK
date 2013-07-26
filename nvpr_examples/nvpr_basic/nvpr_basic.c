@@ -207,6 +207,7 @@ doGraphics(void)
     /* Before rendering to a window with a stencil buffer, clear the stencil
     buffer to zero and the color buffer to black: */
 
+    glDisable(GL_STENCIL_TEST);
     glClearStencil(0);
     glClearColor(0,0,0,0);
     glStencilMask(~0);
@@ -224,6 +225,7 @@ doGraphics(void)
 
         /* Stencil the path: */
 
+        glDisable(GL_STENCIL_TEST);
         glStencilFillPathNV(pathObj, GL_COUNT_UP_NV, 0x1F);
 
         /* The 0x1F mask means the counting uses modulo-32 arithmetic. In
@@ -333,6 +335,10 @@ main(int argc, char **argv)
     glutInitWindowSize(640, 480);
     glutInit(&argc, argv);
     for (i=1; i<argc; i++) {
+        if (!strcmp(argv[i], "-fillonly")) {
+            stroking = 0;
+            continue;
+        } else
         if (argv[i][0] == '-') {
             int value = atoi(argv[i]+1);
             if (value >= 1) {
@@ -354,8 +360,13 @@ main(int argc, char **argv)
         glutInitDisplayString(buffer);
     } else {
         /* Request a double-buffered window with at least 4 stencil bits and
-        8 samples per pixel. */
+           8 samples per pixel. */
         glutInitDisplayString("rgb stencil~4 double samples~8");
+    }
+    if (!glutGet(GLUT_DISPLAY_MODE_POSSIBLE)) {
+        printf("fallback GLUT display config!\n");
+        glutInitDisplayString(NULL);
+        glutInitDisplayMode(GLUT_RGB | GLUT_ALPHA | GLUT_DOUBLE | GLUT_STENCIL);
     }
 
     glutCreateWindow("Basic NV_path_rendering example");
@@ -363,7 +374,7 @@ main(int argc, char **argv)
     printf("version: %s\n", glGetString(GL_VERSION));
     printf("renderer: %s\n", glGetString(GL_RENDERER));
     printf("samples = %d\n", glutGet(GLUT_WINDOW_NUM_SAMPLES));
-    printf("Executable: %d bit\n", (int)8*sizeof(int*));
+    printf("Executable: %d bit\n", (int)(8*sizeof(int*)));
 
     glutDisplayFunc(display);
     glutKeyboardFunc(keyboard);

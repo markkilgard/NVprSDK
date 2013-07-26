@@ -56,7 +56,11 @@
 #undef min
 #undef max
 
-using namespace boost;
+// Use Boost shared pointer template names.
+using boost::shared_ptr;
+using boost::dynamic_pointer_cast;
+using boost::static_pointer_cast;
+
 using std::string;
 using std::vector;
 using std::stack;

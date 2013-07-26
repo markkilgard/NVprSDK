@@ -42,7 +42,10 @@
 #undef max
 
 using namespace Cg;
-using namespace boost;
+
+// Use Boost shared pointer template names.
+using boost::shared_ptr;
+
 using std::string;
 using std::vector;
 using std::cout;

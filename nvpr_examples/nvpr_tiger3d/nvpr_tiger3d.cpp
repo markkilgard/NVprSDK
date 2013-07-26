@@ -26,7 +26,7 @@ using namespace Cg;
 #include "trackball.h"
 #include "showfps.h"
 #include "request_vsync.h"
-#include "xform.hpp"
+#include "cg4cpp_xform.hpp"
 #include "render_font.hpp"
 
 const char *programName = "nvpr_tiger3d";
@@ -52,6 +52,20 @@ float ztrans = -150;
 int numTigers = 4;
 bool wireframe_teapot = true;
 bool force_stencil_clear = true;
+bool texture_tigers = false;
+bool draw_center_teapot = true;
+
+typedef enum _Mode {
+    FBO_TEXTURE,
+    FBO_RENDERBUFFER,
+} Mode;
+
+Mode fbo_mode = FBO_RENDERBUFFER;
+int fbo_width = 512, fbo_height = 512;
+int renderbuffer_samples = 8;
+GLenum blit_filter = GL_NEAREST;
+GLuint tex_color = 0;
+GLfloat tiger_bounds[4];  // (x1,y1,x2,y2) for lower-left and upper-right of tiger scene
 
 static void fatalError(const char *message)
 {
@@ -79,12 +93,38 @@ int emScale = 2048;
 FontFace *font;
 Message *msg;
 
+enum ClearColor {
+  CC_BLUE,
+  CC_BLACK
+} clear_color = CC_BLUE;
+
+void clearToBlue()
+{
+  glClearColor(0.1, 0.3, 0.6, 0.0);
+  clear_color = CC_BLUE;
+}
+
+void clearToBlack()
+{
+  glClearColor(0, 0, 0, 0);
+  clear_color = CC_BLACK;
+}
+
+void restoreClear()
+{
+  switch (clear_color) {
+  case CC_BLACK:
+    glClearColor(0,0,0,0);
+    break;
+  case CC_BLUE:
+    glClearColor(0.1, 0.3, 0.6, 0.0);
+    break;
+  }
+}
+
 void initGraphics()
 {
   trackball(curquat, 0.0, 0.0, 0.0, 0.0);
-  /* Use an orthographic path-to-clip-space transform to map the
-  [0..1000]x[0..1000] range of the star's path coordinates to the [-1..1]
-  clip space cube: */
   glMatrixLoadIdentityEXT(GL_MODELVIEW);
   glMatrixTranslatefEXT(GL_MODELVIEW, 0,0,ztrans);
 
@@ -94,11 +134,11 @@ void initGraphics()
   glClearColor(0.1, 0.3, 0.6, 0.0);
 
   initTiger();
+  getTigerBounds(tiger_bounds, 1, 1);
 
   glStencilFunc(GL_NOTEQUAL, 0, 0x1F);
   glStencilOp(GL_KEEP, GL_KEEP, GL_ZERO);
   glEnable(GL_DEPTH_TEST);
-
   GLfloat slope = -0.05;
   GLint bias = -1;
   glPathStencilDepthOffsetNV(slope, bias);
@@ -111,7 +151,6 @@ void initGraphics()
   glPathParameteriNV(path_template, GL_PATH_JOIN_STYLE_NV, GL_ROUND_NV);
 
   font = new FontFace(GL_SYSTEM_FONT_NAME_NV, "ParkAvenue BT", 256, path_template);
-  //font = new FontFace(GL_SYSTEM_FONT_NAME_NV, "MATTEROFFACT", 256, path_template);
   float2 to_quad[4];
   to_quad[0] = float2(30,300);
   to_quad[1] = float2(610,230);
@@ -120,43 +159,214 @@ void initGraphics()
   msg = new Message(font, "Path rendering and 3D meet!", to_quad);
 }
 
+GLuint
+initFBO(Mode fbo_mode, int width, int height, int num_samples)
+{
+  GLuint fbo = 0, tex_depthstencil = 0;
+  GLuint rb_color = 0, rb_depth_stencil = 0;
+  GLint got_samples = -666;
+
+  int tex_width = width, tex_height = height;
+
+  if (tex_color == 0) {
+    glGenTextures(1, &tex_color);
+  }
+  glBindTexture(GL_TEXTURE_2D, tex_color);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8,
+    tex_width, tex_height, 0, GL_RGBA, GL_INT, NULL);
+  glGenerateMipmap(GL_TEXTURE_2D);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+
+  glGenFramebuffers(1, &fbo);
+  glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+  if (fbo_mode == FBO_RENDERBUFFER) {
+    glGenRenderbuffers(1, &rb_color);
+    glGenRenderbuffers(1, &rb_depth_stencil);
+
+    glBindRenderbuffer(GL_RENDERBUFFER, rb_depth_stencil);
+    if (num_samples > 1) {
+      glRenderbufferStorageMultisample(GL_RENDERBUFFER,
+        num_samples, GL_DEPTH24_STENCIL8, 
+        width, height);
+    } else {
+      glRenderbufferStorage(GL_RENDERBUFFER,
+        GL_DEPTH24_STENCIL8, 
+        width, height);
+    }
+    glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER,
+      GL_DEPTH_ATTACHMENT,
+      GL_RENDERBUFFER, rb_depth_stencil);
+    glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER,
+      GL_STENCIL_ATTACHMENT,
+      GL_RENDERBUFFER, rb_depth_stencil);
+
+    glBindRenderbuffer(GL_RENDERBUFFER, rb_color);
+    if (num_samples > 1) {
+      glRenderbufferStorageMultisample(GL_RENDERBUFFER,
+        num_samples, GL_RGBA8,
+        width, height);
+    } else {
+      glRenderbufferStorage(GL_RENDERBUFFER,
+        GL_RGBA8,
+        width, height);
+    }
+    glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER,
+      GL_COLOR_ATTACHMENT0,
+      GL_RENDERBUFFER, rb_color);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    glGetIntegerv(GL_SAMPLES, &got_samples);
+  } else {
+    glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,
+      GL_COLOR_ATTACHMENT0,
+      GL_TEXTURE_2D, tex_color, 0);
+
+    // Setup depth_stencil texture (not mipmap)
+    glGenTextures(1, &tex_depthstencil);
+    glBindTexture(GL_TEXTURE_2D, tex_depthstencil);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8,
+      width, height, 0, GL_DEPTH_STENCIL,
+      GL_UNSIGNED_INT_24_8, NULL);
+    glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,
+      GL_DEPTH_ATTACHMENT,
+      GL_TEXTURE_2D, tex_depthstencil, 0);
+    glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,
+      GL_STENCIL_ATTACHMENT,
+      GL_TEXTURE_2D, tex_depthstencil, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+  }
+  glViewport(0, 0, width, height);
+  glClearColor(0,0,0,0);
+  glClearStencil(0);
+  glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+  glMatrixLoadIdentityEXT(GL_PROJECTION);
+  glMatrixLoadIdentityEXT(GL_MODELVIEW);
+
+  glStencilFunc(GL_NOTEQUAL, 0, 0x1F);
+  glStencilOp(GL_KEEP, GL_KEEP, GL_ZERO);
+  glDisable(GL_DEPTH_TEST);
+
+  glEnable(GL_STENCIL_TEST);
+  glDisable(GL_DEPTH_TEST);
+  glMatrixOrthoEXT(GL_MODELVIEW,
+    tiger_bounds[0], tiger_bounds[2],  // left,right
+    tiger_bounds[1], tiger_bounds[3],  // bottom,top
+    -1, 1);
+  {
+    GLint stencil = -666;
+    glGetIntegerv(GL_STENCIL_BITS, &stencil);
+    printf("stencil = %d\n", stencil);
+  }
+  drawTiger(filling, stroking);
+
+  if (fbo_mode == FBO_RENDERBUFFER && num_samples > 1) {
+    GLuint fbo_texture = 0;
+    glGenFramebuffers(1, &fbo_texture);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo_texture);
+    glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,
+      GL_COLOR_ATTACHMENT0,
+      GL_TEXTURE_2D, tex_color, 0);
+
+#if 1
+    glBlitFramebuffer(0, 0, width, height,  // source (x,y,w,h)
+                      0, 0, tex_width, tex_height,  // destination (x,y,w,h)
+                      GL_COLOR_BUFFER_BIT, GL_NEAREST);
+#endif
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glDeleteFramebuffers(1, &fbo_texture);
+  } 
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  glBindTexture(GL_TEXTURE_2D, tex_color);
+  glGenerateMipmap(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+  if (tex_depthstencil) {
+    glDeleteTextures(1, &tex_depthstencil);
+  }
+  if (rb_color) {
+    glDeleteRenderbuffers(1, &rb_color);
+  }
+  if (rb_depth_stencil) {
+    glDeleteRenderbuffers(1, &rb_depth_stencil);
+  }
+
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  glDeleteFramebuffers(1, &fbo);
+  return tex_color;
+}
+
 void
 recalcModelView()
 {
   build_rotmatrix(m, curquat);
   glMatrixLoadIdentityEXT(GL_MODELVIEW);
-  glTranslatef(0,0,ztrans);
+  glMatrixTranslatefEXT(GL_MODELVIEW, 0,0,ztrans);
   newModel = 0;
 }
 
 void scene()
 {
   float separation = 60;
-  glEnable(GL_STENCIL_TEST);
-  for (int i=0; i<numTigers; i++) {
-    float angle = i*360/numTigers;
-    glMatrixPushEXT(GL_MODELVIEW); {
-      glRotatef(angle, 0,1,0);
-      glTranslatef(0, 0, -separation);
-      glScalef(0.3, 0.3, 1);
-      renderTiger(filling, stroking);
-    } glMatrixPopEXT(GL_MODELVIEW);
+  if (texture_tigers) {
+    glBindTexture(GL_TEXTURE_2D, tex_color);
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+    glEnable(GL_TEXTURE_2D);
+    glDisable(GL_STENCIL_TEST);
+    glEnable(GL_ALPHA_TEST);
+    glAlphaFunc(GL_GREATER, 0.25);
+    for (int i=0; i<numTigers; i++) {
+      float angle = i*360/numTigers;
+      glMatrixPushEXT(GL_MODELVIEW); {
+        glRotatef(angle, 0,1,0);
+        glTranslatef(0, 0, -separation);
+        glScalef(0.3, 0.3, 1);
+        // Draw a textured rectangle.
+        glBegin(GL_TRIANGLE_FAN); {
+          glTexCoord2f(0,0);
+          glVertex2f(tiger_bounds[0],tiger_bounds[1]);
+          glTexCoord2f(1,0);
+          glVertex2f(tiger_bounds[2],tiger_bounds[1]);
+          glTexCoord2f(1,1);
+          glVertex2f(tiger_bounds[2],tiger_bounds[3]);
+          glTexCoord2f(0,1);
+          glVertex2f(tiger_bounds[0],tiger_bounds[3]);
+        } glEnd();
+      } glMatrixPopEXT(GL_MODELVIEW);
+    }
+    glDisable(GL_ALPHA_TEST);
+    glDisable(GL_TEXTURE_2D);
+  } else {
+    glEnable(GL_STENCIL_TEST);
+    for (int i=0; i<numTigers; i++) {
+      float angle = i*360/numTigers;
+      glMatrixPushEXT(GL_MODELVIEW); {
+        glRotatef(angle, 0,1,0);
+        glTranslatef(0, 0, -separation);
+        glScalef(0.3, 0.3, 1);
+        renderTiger(filling, stroking);
+      } glMatrixPopEXT(GL_MODELVIEW);
+    }
   }
 
-  glDisable(GL_STENCIL_TEST);
-  glColor3f(0,1,0);
-
-  glMatrixPushEXT(GL_MODELVIEW); {
-    glScalef(1,-1,1);
-    if (wireframe_teapot) {
-      glutWireTeapot(teapotSize);
-    } else {
-      glEnable(GL_LIGHTING);
-      glEnable(GL_LIGHT0);
-      glutSolidTeapot(teapotSize);
-      glDisable(GL_LIGHTING);
-    }
-  } glMatrixPopEXT(GL_MODELVIEW);
+  if (draw_center_teapot) {
+    glDisable(GL_STENCIL_TEST);
+    glColor3f(0,1,0);
+    glMatrixPushEXT(GL_MODELVIEW); {
+      glScalef(1,-1,1);
+      if (wireframe_teapot) {
+        glutWireTeapot(teapotSize);
+      } else {
+        glEnable(GL_LIGHTING);
+        glEnable(GL_LIGHT0);
+        glutSolidTeapot(teapotSize);
+        glDisable(GL_LIGHTING);
+      }
+    } glMatrixPopEXT(GL_MODELVIEW);
+  }
 }
 
 
@@ -167,9 +377,10 @@ display(void)
   if (force_stencil_clear) {
     glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     force_stencil_clear = false;
-} else {
+  } else {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   }
+#if 1
   if (newModel) {
     recalcModelView();
   }
@@ -194,6 +405,29 @@ display(void)
       } glMatrixPopEXT(GL_MODELVIEW);
     } glMatrixPopEXT(GL_PROJECTION);
   }
+#else
+  glDisable(GL_STENCIL_TEST);
+  glDisable(GL_DEPTH_TEST);
+  glMatrixLoadIdentityEXT(GL_PROJECTION);
+  glMatrixLoadIdentityEXT(GL_MODELVIEW);
+  glBindTexture(GL_TEXTURE_2D, tex_color);
+  glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+  glEnable(GL_TEXTURE_2D);
+  glBegin(GL_TRIANGLE_FAN); {
+    glColor3f(1,0,0);
+    glTexCoord2f(0,1);
+    glVertex2f(-1,-1);
+    glColor3f(0,1,0);
+    glTexCoord2f(1,1);
+    glVertex2f(1,-1);
+    glColor3f(0,0,1);
+    glTexCoord2f(1,0);
+    glVertex2f(1,1);
+    glColor3f(1,1,0);
+    glTexCoord2f(0,0);
+    glVertex2f(-1,1);
+  } glEnd();
+#endif
 
   glDisable(GL_STENCIL_TEST);
   handleFPS();
@@ -254,6 +488,12 @@ keyboard(unsigned char c, int x, int y)
   case '9':
     numTigers = c - '1' + 1;
     break;
+  case '!':
+    clearToBlack();
+    break;
+  case '@':
+    clearToBlue();
+    break;
   case 'F':
     colorFPS(0,1,0);
     toggleFPS();
@@ -262,6 +502,12 @@ keyboard(unsigned char c, int x, int y)
     enable_vsync = !enable_vsync;
     printf("enable_vsync = %d\n", enable_vsync);
     requestSynchornizedSwapBuffers(enable_vsync);
+    break;
+  case 'p':
+    texture_tigers = !texture_tigers;
+    break;
+  case 'c':
+    draw_center_teapot = !draw_center_teapot;
     break;
   default:
     return;
@@ -353,6 +599,31 @@ void menu(int item)
   keyboard(item, 0, 0);
 }
 
+void fbo_menu(int item)
+{
+  switch (item) {
+  case 1:
+    initFBO(FBO_RENDERBUFFER, 512, 512, 8);
+    break;
+  case 2:
+    initFBO(FBO_RENDERBUFFER, 1024, 1024, 2);
+    break;
+  case 3:
+    initFBO(FBO_TEXTURE, 64, 64, 1);
+    break;
+  case 4:
+    initFBO(FBO_RENDERBUFFER, 64, 64, 16);
+    break;
+  case 5:
+    initFBO(FBO_RENDERBUFFER, 256, 256, 16);
+    break;
+  }
+  reshape(window_width, window_height);
+  restoreClear();
+  recalcModelView();
+  glutPostRedisplay();
+}
+
 int
 main(int argc, char **argv)
 {
@@ -397,7 +668,7 @@ main(int argc, char **argv)
   printf("version: %s\n", glGetString(GL_VERSION));
   printf("renderer: %s\n", glGetString(GL_RENDERER));
   printf("samples per pixel = %d\n", glutGet(GLUT_WINDOW_NUM_SAMPLES));
-  printf("Executable: %d bit\n", (int)8*sizeof(int*));
+  printf("Executable: %d bit\n", (int)(8*sizeof(int*)));
   printf("\n");
   printf("Spin the scene by clicking and dragging with the left mouse button\n");
   printf("Hold down Shift at left mouse click to zoom in/out\n");
@@ -409,6 +680,13 @@ main(int argc, char **argv)
   glutMouseFunc(mouse);
   glutMotionFunc(motion);
 
+  int fbo_menu_id = glutCreateMenu(fbo_menu);
+  glutAddMenuEntry("512x512x8", 1);
+  glutAddMenuEntry("1024x1024x2", 2);
+  glutAddMenuEntry("64x64x1", 3);
+  glutAddMenuEntry("64x64x16", 4);
+  glutAddMenuEntry("256x256x16", 5);
+
   glutCreateMenu(menu);
   glutAddMenuEntry("[f] Toggle filling", 'f');
   glutAddMenuEntry("[s] Toggle stroking", 's');
@@ -417,9 +695,12 @@ main(int argc, char **argv)
   glutAddMenuEntry("[F] Toggle frame counter", 'F');
   glutAddMenuEntry("[+] Increase teapot size", '+');
   glutAddMenuEntry("[-] Decrease teapot size", '+');
+  glutAddMenuEntry("[T] Toggle overlaid text", 'T');
+  glutAddMenuEntry("[p] Toggle paths versus textures", 'p');
   glutAddMenuEntry("[3] 3 Tigers", '3');
   glutAddMenuEntry("[4] 4 Tigers", '4');
   glutAddMenuEntry("[5] 5 Tigers", '5');
+  glutAddSubMenu("FBO texture...", fbo_menu_id);
   glutAddMenuEntry("[Esc] Quit", 27);
   glutAttachMenu(GLUT_RIGHT_BUTTON);
 
@@ -427,7 +708,8 @@ main(int argc, char **argv)
   if (status != GLEW_OK) {
     fatalError("OpenGL Extension Wrangler (GLEW) failed to initialize");
   }
-  hasDSA = glewIsSupported("GL_EXT_direct_state_access");
+  // Use glutExtensionSupported because glewIsSupported is unreliable for DSA.
+  hasDSA = glutExtensionSupported("GL_EXT_direct_state_access");
   if (!hasDSA) {
     fatalError("OpenGL implementation doesn't support GL_EXT_direct_state_access (you should be using NVIDIA GPUs...)");
   }
@@ -437,7 +719,9 @@ main(int argc, char **argv)
     fatalError("required NV_path_rendering OpenGL extension is not present");
   }
   initGraphics();
-  colorFPS(1,0,1);
+  initFBO(fbo_mode, fbo_width, fbo_height, renderbuffer_samples);
+  restoreClear();
+  colorFPS(0,1,0);
 
   glutMainLoop();
   return 0;

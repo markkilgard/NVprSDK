@@ -10,17 +10,36 @@
 
 #include "nvpr_svg_config.h"  // configure path renderers to use
 
+#if USE_SKIA
+
 #include "path.hpp"
 #include "scene.hpp"
 
-#if USE_SKIA
-
+#ifdef _WIN32
+#define GR_WIN32_BUILD 1
+#define GR_GL_FUNCTION_TYPE __stdcall
+#define SK_SCALAR_IS_FLOAT
+#define SK_CAN_USE_FLOAT
+#define SK_BUILD_FOR_WIN32
 #define SK_IGNORE_STDINT_DOT_H
+#else
+#define GR_GL_FUNCTION_TYPE /* default calling convention */
+#endif
+
+#ifdef _MSC_VER
+# pragma warning(push)
+# pragma warning(disable : 4267)
+#endif
+
 #include <SkBitmap.h>  // http://skia.googlecode.com/svn/trunk/docs/html/class_sk_bitmap.html
 #include <SkCanvas.h>  // http://skia.googlecode.com/svn/trunk/docs/html/class_sk_canvas.html
 #include <SkPath.h>    // http://skia.googlecode.com/svn/trunk/docs/html/class_sk_path.html
 #include <SkShader.h>  // http://skia.googlecode.com/svn/trunk/docs/html/class_sk_shader.html
 #include <SkGradientShader.h>  // http://skia.googlecode.com/svn/trunk/docs/html/class_sk_gradient_shader.html
+
+#ifdef _MSC_VER
+# pragma warning(pop)
+#endif
 
 typedef shared_ptr<struct SkiaRenderer> SkiaRendererPtr;
 

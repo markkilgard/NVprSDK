@@ -46,7 +46,7 @@ using std::vector;
 #include "countof.h"
 #include "request_vsync.h"
 #include "showfps.h"
-#include "xform.hpp"
+#include "cg4cpp_xform.hpp"
 #include "render_font.hpp"
 
 bool stroking = true;
@@ -456,7 +456,7 @@ main(int argc, char **argv)
   printf("version: %s\n", glGetString(GL_VERSION));
   printf("renderer: %s\n", glGetString(GL_RENDERER));
   printf("samples = %d\n", glutGet(GLUT_WINDOW_NUM_SAMPLES));
-  printf("Executable: %d bit\n", (int)8*sizeof(int*));
+  printf("Executable: %d bit\n", (int)(8*sizeof(int*)));
 
   glutDisplayFunc(display);
   glutReshapeFunc(reshape);
@@ -469,7 +469,8 @@ main(int argc, char **argv)
   if (status != GLEW_OK) {
     fatalError("OpenGL Extension Wrangler (GLEW) failed to initialize");
   }
-  hasDSA = glewIsSupported("GL_EXT_direct_state_access");
+  // Use glutExtensionSupported because glewIsSupported is unreliable for DSA.
+  hasDSA = glutExtensionSupported("GL_EXT_direct_state_access");
   if (!hasDSA) {
     fatalError("OpenGL implementation doesn't support GL_EXT_direct_state_access (you should be using NVIDIA GPUs...)");
   }

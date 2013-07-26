@@ -45,7 +45,13 @@
 #undef max
 
 using namespace Cg;
-using namespace boost;
+
+// Use Boost shared pointer template names.
+using boost::shared_ptr;
+using boost::enable_shared_from_this;
+using boost::weak_ptr;
+using boost::lexical_cast;
+
 using std::string;
 
 using std::vector;

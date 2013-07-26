@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 #include <GL/glew.h>
 #ifdef __APPLE__
@@ -214,6 +215,10 @@ int main(int argc, char **argv)
   glutInitWindowSize(canvas_width, canvas_height);
   glutInit(&argc, argv);
   for (i=1; i<argc; i++) {
+    if (!strcmp(argv[i], "-fillonly")) {
+      stroking = 0;
+      continue;
+    } else
     if (argv[i][0] == '-') {
       int value = atoi(argv[i]+1);
       if (value >= 1) {
@@ -238,13 +243,18 @@ int main(int argc, char **argv)
     8 samples per pixel. */
     glutInitDisplayString("rgb stencil~4 double samples~8");
   }
+  if (!glutGet(GLUT_DISPLAY_MODE_POSSIBLE)) {
+      printf("fallback GLUT display config!\n");
+      glutInitDisplayString(NULL);
+      glutInitDisplayMode(GLUT_RGB | GLUT_ALPHA | GLUT_DOUBLE | GLUT_STENCIL);
+  }
 
   glutCreateWindow("Classic PostScript tiger NV_path_rendering example");
   printf("vendor: %s\n", glGetString(GL_VENDOR));
   printf("version: %s\n", glGetString(GL_VERSION));
   printf("renderer: %s\n", glGetString(GL_RENDERER));
   printf("samples per pixel = %d\n", glutGet(GLUT_WINDOW_NUM_SAMPLES));
-  printf("Executable: %d bit\n", (int)8*sizeof(int*));
+  printf("Executable: %d bit\n", (int)(8*sizeof(int*)));
   printf("\n");
   printf("Use left mouse button to scale/zoom (vertical, up/down) and rotate (right=clockwise, left=ccw)\n");
   printf("Rotate and zooming is centered where you first left mouse click\n");
@@ -272,7 +282,8 @@ int main(int argc, char **argv)
   if (status != GLEW_OK) {
     fatalError("OpenGL Extension Wrangler (GLEW) failed to initialize");
   }
-  hasDSA = glewIsSupported("GL_EXT_direct_state_access");
+  // Use glutExtensionSupported because glewIsSupported is unreliable for DSA.
+  hasDSA = glutExtensionSupported("GL_EXT_direct_state_access");
   if (!hasDSA) {
     fatalError("OpenGL implementation doesn't support GL_EXT_direct_state_access (you should be using NVIDIA GPUs...)");
   }

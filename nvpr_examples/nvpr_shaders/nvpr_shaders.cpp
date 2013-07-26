@@ -190,8 +190,8 @@ initGraphics(int emScale)
                      GL_SKIP_MISSING_GLYPH_NV, pathTemplate, emScale);
   
   /* Query font and glyph metrics. */
-  glGetPathMetricRangeNV(GL_FONT_Y_MIN_BOUNDS_NV|GL_FONT_Y_MAX_BOUNDS_NV|
-                         GL_FONT_UNDERLINE_POSITION_NV|GL_FONT_UNDERLINE_THICKNESS_NV,
+  glGetPathMetricRangeNV(GL_FONT_Y_MIN_BOUNDS_BIT_NV|GL_FONT_Y_MAX_BOUNDS_BIT_NV|
+                         GL_FONT_UNDERLINE_POSITION_BIT_NV|GL_FONT_UNDERLINE_THICKNESS_BIT_NV,
                          glyphBase+' ', /*count*/1,
                          4*sizeof(GLfloat),
                          font_data);
@@ -373,7 +373,6 @@ void
 display(void)
 {
   glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-#if 1
   glMatrixPushEXT(GL_MODELVIEW); {
     Transform3x2 mat;
 
@@ -381,17 +380,6 @@ display(void)
     MatrixLoadToGL(mat);
     doGraphics();
   } glMatrixPopEXT(GL_MODELVIEW);
-#endif
-
-#if 0
-  glDisable(GL_DEPTH_TEST);
-  glDisable(GL_STENCIL_TEST);
-  glWindowPos2i(0,0);
-  //glRasterPos2f(0,0);
-
-  int size = 128;
-  glDrawPixels(size, size, GL_RGB, GL_UNSIGNED_BYTE, myBrickNormalMapImage);
-#endif
 
   glutSwapBuffers();
 }
@@ -666,7 +654,7 @@ main(int argc, char **argv)
   printf("version: %s\n", glGetString(GL_VERSION));
   printf("renderer: %s\n", glGetString(GL_RENDERER));
   printf("samples = %d\n", glutGet(GLUT_WINDOW_NUM_SAMPLES));
-  printf("Executable: %d bit\n", (int)8*sizeof(int*));
+  printf("Executable: %d bit\n", (int)(8*sizeof(int*)));
 
   glutDisplayFunc(display);
   glutReshapeFunc(reshape);
@@ -679,7 +667,8 @@ main(int argc, char **argv)
   if (status != GLEW_OK) {
     fatalError("OpenGL Extension Wrangler (GLEW) failed to initialize");
   }
-  hasDSA = glewIsSupported("GL_EXT_direct_state_access");
+  // Use glutExtensionSupported because glewIsSupported is unreliable for DSA.
+  hasDSA = glutExtensionSupported("GL_EXT_direct_state_access");
   if (!hasDSA) {
     fatalError("OpenGL implementation doesn't support GL_EXT_direct_state_access (you should be using NVIDIA GPUs...)");
   }

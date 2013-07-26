@@ -26,7 +26,13 @@
 #include <Cg/matrix.hpp>
 
 using std::vector;
-using namespace boost;
+
+// Use Boost shared pointer template names.
+using boost::shared_ptr;
+using boost::enable_shared_from_this;
+using boost::weak_ptr;
+using boost::static_pointer_cast;
+using boost::dynamic_pointer_cast;
 
 // Path scene graph classes to which a Renderer implementation can attach a RenderState
 struct Shape;

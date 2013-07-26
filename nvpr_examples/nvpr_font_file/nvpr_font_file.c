@@ -1,7 +1,7 @@
 
 /* nvpr_font_file.c - fonts loaded from files rendered with NV_path_rendering */
 
-// Copyright (c) NVIDIA Corporation. All rights reserved.
+/* Copyright (c) NVIDIA Corporation. All rights reserved. */
 
 #include <assert.h>
 #include <stdio.h>
@@ -109,7 +109,7 @@ initGraphics(int emScale)
 {
   const unsigned char *message_ub = (const unsigned char*)message;
   float font_data[4];
-  const int numChars = 256;  // ISO/IEC 8859-1 8-bit character range
+  const int numChars = 256;  /* ISO/IEC 8859-1 8-bit character range */
   GLfloat horizontalAdvance[256];
 
   if (hasFramebufferSRGB) {
@@ -125,8 +125,11 @@ initGraphics(int emScale)
 
   /* Create a range of path objects corresponding to Latin-1 character codes. */
   glyphBase = glGenPathsNV(1+numChars);
-  pathTemplate = glyphBase;
-  glPathParameteriNV(pathTemplate, GL_PATH_STROKE_WIDTH_NV, 50);
+  /* Use the path object at the end of the range as a template. */
+  pathTemplate = glyphBase+numChars;
+  glPathCommandsNV(pathTemplate, 0, NULL, 0, GL_FLOAT, NULL);
+  /* Stroke width is 5% of the em scale. */
+  glPathParameteriNV(pathTemplate, GL_PATH_STROKE_WIDTH_NV, 0.05 * emScale);
   glPathParameteriNV(pathTemplate, GL_PATH_JOIN_STYLE_NV, GL_ROUND_NV);
   glyphBase++;
   /* Choose a bold sans-serif font face, preferring Veranda over Arial; if
@@ -142,8 +145,8 @@ initGraphics(int emScale)
                      GL_SKIP_MISSING_GLYPH_NV, pathTemplate, emScale);
   
   /* Query font and glyph metrics. */
-  glGetPathMetricRangeNV(GL_FONT_Y_MIN_BOUNDS_NV|GL_FONT_Y_MAX_BOUNDS_NV|
-                         GL_FONT_UNDERLINE_POSITION_NV|GL_FONT_UNDERLINE_THICKNESS_NV,
+  glGetPathMetricRangeNV(GL_FONT_Y_MIN_BOUNDS_BIT_NV|GL_FONT_Y_MAX_BOUNDS_BIT_NV|
+                         GL_FONT_UNDERLINE_POSITION_BIT_NV|GL_FONT_UNDERLINE_THICKNESS_BIT_NV,
                          glyphBase+' ', /*count*/1,
                          4*sizeof(GLfloat),
                          font_data);
@@ -217,7 +220,7 @@ doGraphics(void)
       GL_UNSIGNED_BYTE, message, glyphBase,
       1, ~0,  /* Use all stencil bits */
       GL_TRANSLATE_X_NV, xtranslate);
-    glColor3f(0.5,0.5,0.5);  // gray
+    glColor3f(0.5,0.5,0.5);  /* gray */
     glCoverStrokePathInstancedNV((GLsizei)messageLen,
       GL_UNSIGNED_BYTE, message, glyphBase,
       GL_BOUNDING_BOX_OF_BOUNDING_BOXES_NV,
@@ -244,13 +247,13 @@ doGraphics(void)
       }
       break;
     case 1:
-      glColor3ub(192, 192, 192);  // gray
+      glColor3ub(192, 192, 192);  /* gray */
       break;
     case 2:
-      glColor3ub(255, 255, 255);  // white
+      glColor3ub(255, 255, 255);  /* white */
       break;
     case 3:
-      glColor3ub(0, 0, 0);  // black
+      glColor3ub(0, 0, 0);  /* black */
       break;
     }
     glCoverFillPathInstancedNV((GLsizei)messageLen,
@@ -473,14 +476,29 @@ main(int argc, char **argv)
   glutInitWindowSize(640, 480);
   glutInit(&argc, argv);
   for (i=1; i<argc; i++) {
-    if (argv[i][0] == '-') {
+    if (!strcmp("-emscale", argv[i])) {
+      i++;
+      if (i < argc) {
+        emScale = atoi(argv[i]);
+        printf("emScale = %d\n", emScale);
+        continue;
+      } else {
+        printf("%s: -emscale must be followed by value\n",
+            programName);
+        exit(1);
+      }
+    } else if (argv[i][0] == '-') {
+      /* Set number of samples per pixel. */
       int value = atoi(argv[i]+1);
       if (value >= 1) {
         samples = value;
         continue;
       }
     }
-    fprintf(stderr, "usage: %s [-#]\n       where # is the number of samples/pixel\n",
+    /* Unrecognized option so print usage message and exit. */
+    fprintf(stderr, "usage: %s [-#] [-emscale n]\n"
+                    "where # is the number of samples/pixel\n",
+                    "where n is the em scale (default is 2048)\n",
       programName);
     exit(1);
   }
@@ -503,7 +521,7 @@ main(int argc, char **argv)
   printf("version: %s\n", glGetString(GL_VERSION));
   printf("renderer: %s\n", glGetString(GL_RENDERER));
   printf("samples = %d\n", glutGet(GLUT_WINDOW_NUM_SAMPLES));
-  printf("Executable: %d bit\n", (int)8*sizeof(int*));
+  printf("Executable: %d bit\n", (int)(8*sizeof(int*)));
 
   glutDisplayFunc(display);
   glutReshapeFunc(reshape);
@@ -516,7 +534,8 @@ main(int argc, char **argv)
   if (status != GLEW_OK) {
     fatalError("OpenGL Extension Wrangler (GLEW) failed to initialize");
   }
-  hasDSA = glewIsSupported("GL_EXT_direct_state_access");
+  // Use glutExtensionSupported because glewIsSupported is unreliable for DSA.
+  hasDSA = glutExtensionSupported("GL_EXT_direct_state_access");
   if (!hasDSA) {
     fatalError("OpenGL implementation doesn't support GL_EXT_direct_state_access (you should be using NVIDIA GPUs...)");
   }

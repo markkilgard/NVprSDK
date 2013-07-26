@@ -17,7 +17,9 @@
 #include <Cg/vector.hpp>
 #include <Cg/matrix.hpp>
 
-using namespace boost;
+// Use Boost shared pointer template names.
+using boost::shared_ptr;
+
 using namespace Cg;
 
 typedef shared_ptr<struct Path> PathPtr;
