@@ -187,6 +187,9 @@
       <Project>{05ffade4-2b93-c899-00ca-aa717ca7a077}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
+    <ProjectReference Include="..\glut\glut_2010.vcxproj">
+      <Project>{216878f4-f20b-4aa3-ba83-e6d37e9a87c6}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

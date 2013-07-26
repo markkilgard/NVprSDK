@@ -20,14 +20,13 @@
 	<Configurations>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
+			OutputDirectory="$(PlatformName)_2008\$(ConfigurationName)"
+			IntermediateDirectory="$(PlatformName)_2008\$(ConfigurationName)"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
-			BuildLogFile="$(PlatformName)_2008\$(ConfigurationName)\nvpr_svg.html"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -47,10 +46,11 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/MP"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="&quot;../cairo-1.9.6&quot;;&quot;../cairo-1.9.6/src&quot;;.;include;tinyxml;&quot;../boost-1.38.0&quot;;../cg4cpp/include;&quot;$(CG_INC_PATH)&quot;;&quot;c:\Program Files\NVIDIA Corporation\Cg\include&quot;;&quot;C:\Program Files\GnuWin32\include&quot;;..\qt\include;..\glew\include;..\qt\include\QtGui;&quot;..\openvg-1_1-ri\ri_package\ri\include&quot;;..\skia\include\core;..\skia\include\config;..\skia\include\effects;&quot;$(DXSDK_DIR)\Include&quot;;..\common"
-				PreprocessorDefinitions="TIXML_USE_STL;_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;CAIRO_WIN32_STATIC_BUILD;GLEW_STATIC"
+				AdditionalIncludeDirectories="&quot;../cairo-1.9.6&quot;;&quot;../cairo-1.9.6/src&quot;;.;include;tinyxml;&quot;../boost-1.50.0&quot;;../cg4cpp/include;&quot;$(CG_INC_PATH)&quot;;&quot;c:\Program Files\NVIDIA Corporation\Cg\include&quot;;&quot;C:\Program Files\GnuWin32\include&quot;;..\qt\include;..\glew\include;..\qt\include\QtGui;&quot;..\openvg-1_1-ri\ri_package\ri\include&quot;;..\skia\include\core;..\skia\include\config;..\skia\include\effects;&quot;$(DXSDK_DIR)\Include&quot;;..\common"
+				PreprocessorDefinitions="TIXML_USE_STL;_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;CAIRO_WIN32_STATIC_BUILD;GLEW_STATIC;GLUT_STATIC_LIB;BOOST_SP_DISABLE_THREADS"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -77,7 +77,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkLibraryDependencies="true"
-				AdditionalDependencies="freetype.lib cg.lib cgGL.lib glut32.lib opengl32.lib Msimg32.lib"
+				AdditionalDependencies="freetype.lib cg.lib cgGL.lib opengl32.lib Msimg32.lib"
 				OutputFile="$(OutDir)\nvpr_svg.exe"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="lib;&quot;$(CG_LIB_PATH)&quot;;&quot;c:\Program Files\NVIDIA Corporation\Cg\lib&quot;;..\qt\lib;&quot;$(DXSDK_DIR)\Lib\x86&quot;"
@@ -87,7 +87,7 @@
 				ProgramDatabaseFile="$(IntDir)/nvpr_svg.pdb"
 				GenerateMapFile="true"
 				SubSystem="1"
-				LinkTimeCodeGeneration="0"
+				LinkTimeCodeGeneration="1"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
 				TargetMachine="1"
@@ -115,15 +115,107 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
+			Name="Release|x64"
+			OutputDirectory="$(PlatformName)_2008\$(ConfigurationName)"
+			IntermediateDirectory="$(PlatformName)_2008\$(ConfigurationName)"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
-			BuildLogFile="$(PlatformName)_2008\$(ConfigurationName)\nvpr_svg.html"
+			WholeProgramOptimization="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TargetEnvironment="3"
+				HeaderFileName=""
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/MP"
+				Optimization="2"
+				InlineFunctionExpansion="1"
+				AdditionalIncludeDirectories="&quot;../cairo-1.9.6&quot;;&quot;../cairo-1.9.6/src&quot;;.;include;tinyxml;&quot;../boost-1.50.0&quot;;../cg4cpp/include;&quot;$(CG_INC_PATH)&quot;;&quot;c:\Program Files\NVIDIA Corporation\Cg\include&quot;;&quot;C:\Program Files\GnuWin32\include&quot;;..\qt\include;..\glew\include;..\qt\include\QtGui;&quot;..\openvg-1_1-ri\ri_package\ri\include&quot;;..\skia\include\core;..\skia\include\config;..\skia\include\effects;&quot;$(DXSDK_DIR)\Include&quot;;..\common"
+				PreprocessorDefinitions="TIXML_USE_STL;_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;CAIRO_WIN32_STATIC_BUILD;GLEW_STATIC;GLUT_STATIC_LIB;BOOST_SP_DISABLE_THREADS"
+				StringPooling="true"
+				RuntimeLibrary="0"
+				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="0"
+				AssemblerListingLocation="$(IntDir)/"
+				ObjectFile="$(IntDir)/"
+				ProgramDataBaseFileName="$(IntDir)/"
+				WarningLevel="3"
+				SuppressStartupBanner="true"
+				CompileAs="0"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="1033"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="cg.lib cgGL.lib Msimg32.lib"
+				OutputFile="$(OutDir)\$(ProjectName).exe"
+				SuppressStartupBanner="true"
+				AdditionalLibraryDirectories="lib.x64;$(CG_LIB64_PATH);c:\Program Files\NVIDIA Corporation\Cg\lib.x64;&quot;$(DXSDK_DIR)\Lib\x64&quot;"
+				GenerateManifest="false"
+				IgnoreEmbeddedIDL="true"
+				ProgramDatabaseFile="$(IntDir)/nvpr_svg.pdb"
+				SubSystem="1"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+				TargetMachine="17"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Debug|Win32"
+			OutputDirectory="$(PlatformName)_2008\$(ConfigurationName)"
+			IntermediateDirectory="$(PlatformName)_2008\$(ConfigurationName)"
+			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -145,8 +237,8 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;../cairo-1.9.6&quot;;&quot;../cairo-1.9.6/src&quot;;.;include;tinyxml;&quot;../boost-1.38.0&quot;;../cg4cpp/include;&quot;$(CG_INC_PATH)&quot;;&quot;c:\Program Files\NVIDIA Corporation\Cg\include&quot;;&quot;C:\Program Files\GnuWin32\include&quot;;..\qt\include;..\glew\include;..\qt\include\QtGui;&quot;..\openvg-1_1-ri\ri_package\ri\include&quot;;..\skia\include\core;..\skia\include\config;..\skia\include\effects;&quot;$(DXSDK_DIR)\Include&quot;;..\common"
-				PreprocessorDefinitions="TIXML_USE_STL;_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;CAIRO_WIN32_STATIC_BUILD;GLEW_STATIC"
+				AdditionalIncludeDirectories="&quot;../cairo-1.9.6&quot;;&quot;../cairo-1.9.6/src&quot;;.;include;tinyxml;&quot;../boost-1.50.0&quot;;../cg4cpp/include;&quot;$(CG_INC_PATH)&quot;;&quot;c:\Program Files\NVIDIA Corporation\Cg\include&quot;;&quot;C:\Program Files\GnuWin32\include&quot;;..\qt\include;..\glew\include;..\qt\include\QtGui;&quot;..\openvg-1_1-ri\ri_package\ri\include&quot;;..\skia\include\core;..\skia\include\config;..\skia\include\effects;&quot;$(DXSDK_DIR)\Include&quot;;..\common"
+				PreprocessorDefinitions="TIXML_USE_STL;_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;CAIRO_WIN32_STATIC_BUILD;GLEW_STATIC;GLUT_STATIC_LIB;BOOST_SP_DISABLE_THREADS"
 				GeneratePreprocessedFile="0"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -172,7 +264,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="freetype.lib cg.lib cgGL.lib glut32.lib opengl32.lib Msimg32.lib"
+				AdditionalDependencies="freetype.lib cg.lib cgGL.lib opengl32.lib Msimg32.lib"
 				ShowProgress="0"
 				OutputFile="$(OutDir)\nvpr_svg.exe"
 				SuppressStartupBanner="true"
@@ -211,107 +303,14 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Release|x64"
-			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
-			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
-			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="false"
-			CharacterSet="2"
-			BuildLogFile="$(PlatformName)\$(ConfigurationName)\nvpr_svg.html"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				TargetEnvironment="3"
-				HeaderFileName=""
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="2"
-				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="&quot;../cairo-1.9.6&quot;;&quot;../cairo-1.9.6/src&quot;;.;include;tinyxml;&quot;../boost-1.38.0&quot;;../cg4cpp/include;&quot;$(CG_INC_PATH)&quot;;&quot;c:\Program Files\NVIDIA Corporation\Cg\include&quot;;&quot;C:\Program Files\GnuWin32\include&quot;;..\qt\include;..\glew\include;..\qt\include\QtGui;&quot;..\openvg-1_1-ri\ri_package\ri\include&quot;;..\skia\include\core;..\skia\include\config;..\skia\include\effects;&quot;$(DXSDK_DIR)\Include&quot;;..\common"
-				PreprocessorDefinitions="TIXML_USE_STL;_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;CAIRO_WIN32_STATIC_BUILD;GLEW_STATIC"
-				StringPooling="true"
-				RuntimeLibrary="0"
-				EnableFunctionLevelLinking="true"
-				UsePrecompiledHeader="0"
-				AssemblerListingLocation="$(IntDir)/"
-				ObjectFile="$(IntDir)/"
-				ProgramDataBaseFileName="$(IntDir)/"
-				WarningLevel="3"
-				SuppressStartupBanner="true"
-				CompileAs="0"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG"
-				Culture="1033"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="cg.lib cgGL.lib glut32.lib glew64.lib"
-				OutputFile="$(OutDir)\$(ProjectName).exe"
-				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="lib.x64;$(CG_LIB64_PATH);c:\Program Files\NVIDIA Corporation\Cg\lib.x64;&quot;$(DXSDK_DIR)\Lib\x64&quot;"
-				GenerateManifest="false"
-				IgnoreEmbeddedIDL="true"
-				ProgramDatabaseFile="$(IntDir)/nvpr_svg.pdb"
-				SubSystem="1"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
-				TargetMachine="17"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
 			Name="Debug|x64"
-			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
+			OutputDirectory="$(PlatformName)_2008\$(ConfigurationName)"
+			IntermediateDirectory="$(PlatformName)_2008\$(ConfigurationName)"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
-			BuildLogFile="$(PlatformName)\$(ConfigurationName)\nvpr_svg.html"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -332,9 +331,10 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/MP"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;../cairo-1.9.6&quot;;&quot;../cairo-1.9.6/src&quot;;.;include;tinyxml;&quot;../boost-1.38.0&quot;;../cg4cpp/include;&quot;$(CG_INC_PATH)&quot;;&quot;c:\Program Files\NVIDIA Corporation\Cg\include&quot;;&quot;C:\Program Files\GnuWin32\include&quot;;..\qt\include;..\glew\include;..\qt\include\QtGui;&quot;..\openvg-1_1-ri\ri_package\ri\include&quot;;..\skia\include\core;..\skia\include\config;..\skia\include\effects;&quot;$(DXSDK_DIR)\Include&quot;;..\common"
-				PreprocessorDefinitions="TIXML_USE_STL;_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;CAIRO_WIN32_STATIC_BUILD;GLEW_STATIC"
+				AdditionalIncludeDirectories="&quot;../cairo-1.9.6&quot;;&quot;../cairo-1.9.6/src&quot;;.;include;tinyxml;&quot;../boost-1.50.0&quot;;../cg4cpp/include;&quot;$(CG_INC_PATH)&quot;;&quot;c:\Program Files\NVIDIA Corporation\Cg\include&quot;;&quot;C:\Program Files\GnuWin32\include&quot;;..\qt\include;..\glew\include;..\qt\include\QtGui;&quot;..\openvg-1_1-ri\ri_package\ri\include&quot;;..\skia\include\core;..\skia\include\config;..\skia\include\effects;&quot;$(DXSDK_DIR)\Include&quot;;..\common"
+				PreprocessorDefinitions="TIXML_USE_STL;_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;CAIRO_WIN32_STATIC_BUILD;GLEW_STATIC;GLUT_STATIC_LIB;BOOST_SP_DISABLE_THREADS"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="0"
@@ -359,7 +359,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="cg.lib cgGL.lib glut32.lib glew64.lib"
+				AdditionalDependencies="cg.lib cgGL.lib Msimg32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="lib.x64;$(CG_LIB64_PATH);c:\Program Files\NVIDIA Corporation\Cg\lib.x64;&quot;$(DXSDK_DIR)\Lib\x64&quot;"
@@ -467,7 +467,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|Win32"
+					Name="Release|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -476,7 +476,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release|x64"
+					Name="Debug|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -598,7 +598,7 @@
 						/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Debug|Win32"
+						Name="Release|x64"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -607,7 +607,7 @@
 						/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Release|x64"
+						Name="Debug|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -642,7 +642,7 @@
 						/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Debug|Win32"
+						Name="Release|x64"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -651,7 +651,7 @@
 						/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Release|x64"
+						Name="Debug|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -954,15 +954,15 @@
 				Name="boost"
 				>
 				<File
-					RelativePath="..\boost-1.38.0\boost\enable_shared_from_this.hpp"
+					RelativePath="..\boost-1.50.0\boost\enable_shared_from_this.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\boost-1.38.0\boost\lexical_cast.hpp"
+					RelativePath="..\boost-1.50.0\boost\lexical_cast.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\boost-1.38.0\boost\scoped_ptr.hpp"
+					RelativePath="..\boost-1.50.0\boost\scoped_ptr.hpp"
 					>
 				</File>
 			</Filter>

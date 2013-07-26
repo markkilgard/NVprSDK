@@ -169,11 +169,11 @@
     <ClCompile Include="nvpr_pick.cpp" />
     <ClCompile Include="..\common\request_vsync.c" />
     <ClCompile Include="..\common\showfps.c" />
-    <ClCompile Include="..\common\xform_cpp.cpp" />
+    <ClCompile Include="..\common\cg4cpp_xform.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\common\nvpr_init.h" />
-    <ClInclude Include="..\common\xform.hpp" />
+    <ClInclude Include="..\common\cg4cpp_xform.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\cg4cpp\src\cg4cpp_2010.vcxproj">
@@ -183,6 +183,9 @@
     <ProjectReference Include="..\glew\glewlib_2010.vcxproj">
       <Project>{05ffade4-2b93-c899-00ca-aa717ca7a077}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\glut\glut_2010.vcxproj">
+      <Project>{216878f4-f20b-4aa3-ba83-e6d37e9a87c6}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

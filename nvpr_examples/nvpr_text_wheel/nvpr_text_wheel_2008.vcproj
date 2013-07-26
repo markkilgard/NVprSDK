@@ -21,8 +21,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
+			OutputDirectory="$(PlatformName)_2008\$(ConfigurationName)"
+			IntermediateDirectory="$(PlatformName)_2008\$(ConfigurationName)"
 			ConfigurationType="1"
 			CharacterSet="1"
 			>
@@ -45,10 +45,10 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="&quot;$(CG_INC_PATH)&quot;;&quot;c:\Program Files\NVIDIA Corporation\Cg\include&quot;;..\common;..\glew\include;..\cg4cpp\include"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;GLEW_STATIC;_CRT_SECURE_NO_WARNINGS"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;GLEW_STATIC;GLUT_STATIC_LIB;_CRT_SECURE_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				RuntimeLibrary="1"
 				UsePrecompiledHeader="0"
 				BrowseInformation="1"
 				WarningLevel="3"
@@ -95,8 +95,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
+			OutputDirectory="$(PlatformName)_2008\$(ConfigurationName)"
+			IntermediateDirectory="$(PlatformName)_2008\$(ConfigurationName)"
 			ConfigurationType="1"
 			CharacterSet="1"
 			>
@@ -120,10 +120,10 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="&quot;$(CG_INC_PATH)&quot;;&quot;c:\Program Files\NVIDIA Corporation\Cg\include&quot;;..\common;..\glew\include;..\cg4cpp\include"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;WIN32;NDEBUG;_CONSOLE;GLEW_STATIC;_CRT_SECURE_NO_WARNINGS"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;WIN32;NDEBUG;_CONSOLE;GLEW_STATIC;GLUT_STATIC_LIB;_CRT_SECURE_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				RuntimeLibrary="1"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="3"
@@ -169,8 +169,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
+			OutputDirectory="$(PlatformName)_2008\$(ConfigurationName)"
+			IntermediateDirectory="$(PlatformName)_2008\$(ConfigurationName)"
 			ConfigurationType="1"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
@@ -195,8 +195,8 @@
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
 				AdditionalIncludeDirectories="&quot;$(CG_INC_PATH)&quot;;&quot;c:\Program Files\NVIDIA Corporation\Cg\include&quot;;..\common;..\glew\include;..\cg4cpp\include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;GLEW_STATIC;_CRT_SECURE_NO_WARNINGS"
-				RuntimeLibrary="2"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;GLEW_STATIC;GLUT_STATIC_LIB;_CRT_SECURE_NO_WARNINGS"
+				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
@@ -245,8 +245,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
+			OutputDirectory="$(PlatformName)_2008\$(ConfigurationName)"
+			IntermediateDirectory="$(PlatformName)_2008\$(ConfigurationName)"
 			ConfigurationType="1"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
@@ -272,8 +272,8 @@
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
 				AdditionalIncludeDirectories="&quot;$(CG_INC_PATH)&quot;;&quot;c:\Program Files\NVIDIA Corporation\Cg\include&quot;;..\common;..\glew\include;..\cg4cpp\include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;WIN32;NDEBUG;_CONSOLE;GLEW_STATIC;_CRT_SECURE_NO_WARNINGS"
-				RuntimeLibrary="2"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;WIN32;NDEBUG;_CONSOLE;GLEW_STATIC;GLUT_STATIC_LIB;_CRT_SECURE_NO_WARNINGS"
+				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
@@ -366,11 +366,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\common\xform.hpp"
+				RelativePath="..\common\cg4cpp_xform.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\common\xform_cpp.cpp"
+				RelativePath="..\common\cg4cpp_xform.cpp"
 				>
 			</File>
 		</Filter>

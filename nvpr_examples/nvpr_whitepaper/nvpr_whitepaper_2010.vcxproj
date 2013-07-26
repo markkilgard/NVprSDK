@@ -167,6 +167,11 @@
   <ItemGroup>
     <ClCompile Include="nvpr_whitepaper.c" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\glut\glut_2010.vcxproj">
+      <Project>{216878f4-f20b-4aa3-ba83-e6d37e9a87c6}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
