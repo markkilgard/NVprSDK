@@ -1,7 +1,7 @@
 #ifndef XFORM_HPP
 #define XFORM_HPP
 
-/* xform.hpp - C++ transform routines for path rendering */
+/* cg4cpp_xform.hpp - C++ transform routines for path rendering */
 
 #include <Cg/double.hpp>
 #include <Cg/vector.hpp>

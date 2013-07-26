@@ -9,7 +9,7 @@
 #include <Cg/matrix.hpp>
 
 #include "nvpr_init.h"
-#include "xform.hpp"
+#include "cg4cpp_xform.hpp"
 
 struct FontFace {
   static const int em_scale = 2048;

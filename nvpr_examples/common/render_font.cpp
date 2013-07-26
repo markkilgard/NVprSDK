@@ -29,8 +29,8 @@ FontFace::FontFace(GLenum target, const char *name, int num_chars_, GLuint path_
 
   /* Query font and glyph metrics. */
   GLfloat font_data[4];
-  glGetPathMetricRangeNV(GL_FONT_Y_MIN_BOUNDS_NV|GL_FONT_Y_MAX_BOUNDS_NV|
-    GL_FONT_UNDERLINE_POSITION_NV|GL_FONT_UNDERLINE_THICKNESS_NV,
+  glGetPathMetricRangeNV(GL_FONT_Y_MIN_BOUNDS_BIT_NV|GL_FONT_Y_MAX_BOUNDS_BIT_NV|
+    GL_FONT_UNDERLINE_POSITION_BIT_NV|GL_FONT_UNDERLINE_THICKNESS_BIT_NV,
     glyph_base+' ', /*count*/1,
     4*sizeof(GLfloat),
     font_data);

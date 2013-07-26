@@ -12,6 +12,7 @@ extern void renderTiger(int filling, int stroking);
 extern void tigerDlistUsage(int b);
 extern unsigned int getTigerPathCount();
 extern GLuint getTigerBasePath();
+extern void getTigerBounds(GLfloat bounds[4], int filling, int stroking);
 
 #ifdef __cplusplus
 }

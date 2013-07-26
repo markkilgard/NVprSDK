@@ -20,7 +20,7 @@
 #include <Cg/stdlib.hpp>
 #include <Cg/iostream.hpp>
 
-#include "xform.hpp"
+#include "cg4cpp_xform.hpp"
 
 using namespace Cg;
 

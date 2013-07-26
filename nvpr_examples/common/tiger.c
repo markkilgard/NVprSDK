@@ -7,7 +7,7 @@
 #include <math.h>
 
 #include <GL/glew.h>
-#include "nvpr_init.h"
+//#include "nvpr_init.h"
 
 static const unsigned int tiger_path_count = 240;
 const char *tiger_path[240] = {
@@ -21,6 +21,8 @@ static const struct TigerStyle {
 #include "tiger_style.h"
 };
 static GLuint tiger_path_base;
+
+static int use_dlist = 1;
 
 void initTiger()
 {
@@ -37,6 +39,7 @@ void initTiger()
       (GLsizei)svg_len, svg_str);
     glPathParameterfNV(tiger_path_base+i, GL_PATH_STROKE_WIDTH_NV, stroke_width);
   }
+  use_dlist = 0;
 }
 
 static void sendColor(GLuint color)
@@ -96,8 +99,6 @@ void drawTigerRange(int filling, int stroking, unsigned int start, unsigned int 
   }
 }
 
-static int use_dlist = 1;
-
 void tigerDlistUsage(int b)
 {
   use_dlist = b;
@@ -133,4 +134,40 @@ GLuint getTigerBasePath()
 unsigned int getTigerPathCount()
 {
   return tiger_path_count;
+}
+
+void getTigerBounds(GLfloat bounds[4], int filling, int stroking)
+{
+  unsigned int i;
+
+  for (i=0; i<tiger_path_count; i++) {
+    const struct TigerStyle *style = &tiger_style[i];
+    GLfloat stroke_width = style->stroke_width;
+
+    GLfloat layer_bounds[4] = { 0, 0, 0, 0 };
+    if (stroking && stroke_width != 0) {
+      glGetPathParameterfvNV(tiger_path_base+i, GL_PATH_OBJECT_BOUNDING_BOX_NV, layer_bounds);
+      layer_bounds[0] -= stroke_width;
+      layer_bounds[1] -= stroke_width;
+      layer_bounds[2] += stroke_width;
+      layer_bounds[3] += stroke_width;
+    } else if (filling && stroke_width >= 0) {
+      glGetPathParameterfvNV(tiger_path_base+i, GL_PATH_OBJECT_BOUNDING_BOX_NV, layer_bounds);
+    }
+    if (i==0) {
+      bounds[0] = layer_bounds[0];
+      bounds[1] = layer_bounds[1];
+      bounds[2] = layer_bounds[2];
+      bounds[3] = layer_bounds[3];
+    } else {
+      if (layer_bounds[0] < bounds[0])
+        bounds[0] = layer_bounds[0];
+      if (layer_bounds[1] < bounds[1])
+        bounds[1] = layer_bounds[1];
+      if (layer_bounds[2] > bounds[2])
+        bounds[2] = layer_bounds[2];
+      if (layer_bounds[3] > bounds[3])
+        bounds[3] = layer_bounds[3];
+    }
+  }
 }
