@@ -11,3 +11,15 @@
 *.lai
 *.la
 *.a
+
+# Visual Studio build results
+Win32_2008
+Win32_2010
+Win32_2012
+x64_2008
+x64_2010
+x64_2012
+*.ncb
+*.vcproj.*
+*.vcxproj.*
+*.suo
