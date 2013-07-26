@@ -10,13 +10,13 @@
 
 #include <Cg/vector.hpp>
 
+namespace Cg {
+
 #if defined(__GNUC__) && (__GNUC__>3 || (__GNUC__==3 && __GNUC_MINOR__>=3))
 #define __CGmay_alias __attribute__((__may_alias__))
 #else
 #define __CGmay_alias 
 #endif
-
-namespace Cg {
 
 // Utility macros for constructing matrix swizzles
 
@@ -632,7 +632,10 @@ template <typename T, int ROWS, int COLS, typename Ttrait = __CGtype_trait<T,T> 
 class __CGmatrix { };
 
 template <typename T, int ROWS, int COLS>
-class __CGmatrix_usage : public __CGmatrix_storage<T,ROWS,COLS> {
+class __CGmatrix_usage
+    : public __CGmatrix_storage<T,ROWS,COLS>
+    __CG_DERIVE_FROM_BASE_CLASS
+{
 private:
     static const int rows = ROWS;
     static const int cols = COLS;

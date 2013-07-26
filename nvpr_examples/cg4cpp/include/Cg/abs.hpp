@@ -14,7 +14,6 @@
 
 #include <Cg/vector.hpp>
 
-// <cmath> abs just works for floating-point, not ints
 #include <stdlib.h>  // for ::abs
 #include <math.h>    // for ::fabs
 

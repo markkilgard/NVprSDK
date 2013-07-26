@@ -10,6 +10,12 @@
 
 namespace Cg {
 
+#if defined(__GNUC__) && (__GNUC__>3 || (__GNUC__==3 && __GNUC_MINOR__>=3))
+#define __CGmay_alias __attribute__((__may_alias__))
+#else
+#define __CGmay_alias 
+#endif
+
 /* __CGcustom_float_storage is the pure storage required for a __CGcustom_float.
    Importantly, it has no constructor, destructor, etc. so it can be
    kept within a union, unlike __CGcustom_float that has a constructor, etc. */
@@ -23,7 +29,7 @@ struct __CGcustom_float_storage {
     static const int bytesPerFloat = (bits + 7) / 8;
 
     unsigned char v[bytesPerFloat];
-};
+} __CGmay_alias;
 
 // satToMaxFloat is whether or not values greater than MAXFLOAT map to Infinity
 template <unsigned int manBits, unsigned int expBits, bool sgnBit, bool satToMaxFloat>
@@ -327,6 +333,9 @@ typedef __CGcustom_float_storage<10,5,1> __CGcustom_float_storageS10E5;
 // Cg data type for fp30/fp40 profile
 typedef __CGcustom_floatS10E5 half;
 typedef __CGcustom_float_storageS10E5 __CGhalf_storage;
+
+// Undefine helper #defines
+#undef __CGmay_alias
 
 } // namespace Cg
 

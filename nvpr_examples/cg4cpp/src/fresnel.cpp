@@ -14,20 +14,23 @@
 namespace Cg {
 
 template <typename T>
-static inline __CGvector<T,1> __CGfresnel(const __CGvector<T,3> & i, const __CGvector<T,3> & n, T eta,
-                                          T& ktOut,
-                                          __CGvector<T,3>& rOut,
-                                          __CGvector<T,3>& tOut)
+static inline __CGvector<typename __CGtype_trait<T>::realType,1> __CGfresnel(
+    const __CGvector<T,3> & i, const __CGvector<T,3> & n,
+    T eta,
+    T& ktOut,
+    __CGvector<T,3>& rOut,
+    __CGvector<T,3>& tOut)
 {
+    typedef typename __CGtype_trait<T>::dotType dotType;
     // floats except doubles when T is double
-    typename __CGtype_trait<T>::dotType result;
-    typename __CGtype_trait<T>::dotType c1;
-    typename __CGtype_trait<T>::dotType cs2;
-    typename __CGtype_trait<T>::dotType tflag;
-    __CGvector<typename __CGtype_trait<T>::dotType,3> t;
+    T result;
+    dotType c1;
+    dotType cs2;
+    dotType tflag;
+    __CGvector<dotType,3> t;
 
     // Refraction vector courtesy Paul Heckbert.
-    c1 = __CGvector<typename __CGtype_trait<T>::dotType,1>(dot(-i,n));
+    c1 = __CGvector<dotType,1>(dot(-i,n));
     cs2 = 1-eta*eta*(1-c1*c1);
     tflag = cs2 >= 0;
     t = tflag * (((eta*c1-std::sqrt(cs2))*n) + eta*i);
@@ -35,14 +38,14 @@ static inline __CGvector<T,1> __CGfresnel(const __CGvector<T,3> & i, const __CGv
 
     // From Global Illumination Compendeum.
     // floats except doubles when T is double
-    typename __CGtype_trait<T>::dotType ndott;
-    typename __CGtype_trait<T>::dotType cosr_div_cosi;
-    typename __CGtype_trait<T>::dotType cosi_div_cosr;
-    typename __CGtype_trait<T>::dotType fs;
-    typename __CGtype_trait<T>::dotType fp;
-    typename __CGtype_trait<T>::dotType kr;
+    dotType ndott;
+    dotType cosr_div_cosi;
+    dotType cosi_div_cosr;
+    dotType fs;
+    dotType fp;
+    dotType kr;
 
-    ndott = dot(-__CGvector<typename __CGtype_trait<T>::dotType,3>(n),t);
+    ndott = dot(-__CGvector<dotType,3>(n),t);
     cosr_div_cosi = ndott / c1;
     cosi_div_cosr = c1 / ndott;
     fs = (cosr_div_cosi - eta) / (cosr_div_cosi + eta);
@@ -50,11 +53,11 @@ static inline __CGvector<T,1> __CGfresnel(const __CGvector<T,3> & i, const __CGv
     fp = (cosi_div_cosr - eta) / (cosi_div_cosr + eta);
     fp = fp * fp;
     kr = (fs+fp) / 2;
-    result = tflag*kr + (1-tflag);
+    result = T(tflag*kr + (1-tflag));
 
     // Extra outputs
-    ktOut = tflag * ((1-kr)/(eta*eta));
-    tOut = t;
+    ktOut = T(tflag * ((1-kr)/(eta*eta)));
+    tOut = __CGvector<T,3>(t);
     rOut = reflect(i, n);
 
     return __CGvector<T,1>(result);

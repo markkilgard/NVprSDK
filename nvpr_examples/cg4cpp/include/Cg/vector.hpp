@@ -54,6 +54,14 @@
 
 namespace Cg {
 
+// FUNDAMENTAL BASE CLASS
+
+#ifdef __CG_BASE_CLASS
+#define __CG_DERIVE_FROM_BASE_CLASS , public __CG_BASE_CLASS
+#else
+#define __CG_DERIVE_FROM_BASE_CLASS
+#endif
+
 // TYPE COMBINATION TRAITS
 
 // Homogenous binary type traits default to the singular (specialized) type trait.
@@ -70,7 +78,11 @@ template <>
 struct __CGtype_trait<float> {
     typedef float storageType;
     typedef float resultType;
+#ifdef __CG_FLOAT_DOT_TYPE_IS_FLOAT
     typedef float dotType;
+#else
+    typedef double dotType;
+#endif
     typedef bool boolType;
     typedef resultType numericType;
     typedef resultType realType;
@@ -1016,7 +1028,10 @@ public:
 
 //// PLURAL VERSION OF VECTOR BASE CLASS
 template <typename T, int N>
-class __CGvector_plural : public __CGvector_plural_usage<T,N,__CGvector_storage<T,N> > {
+class __CGvector_plural
+    : public __CGvector_plural_usage<T,N,__CGvector_storage<T,N> >
+    __CG_DERIVE_FROM_BASE_CLASS
+{
 public:
     inline __CGvector_plural() { }
     inline __CGvector_plural(const T & s) {
@@ -1049,7 +1064,10 @@ public:
 
 /// ONE-COMPONENT TEMPLATED VECTOR TYPE
 template <typename T>
-class __CGvector<T,1> : public __CGvector_usage<T,1,__CGvector_storage<T,1> > {
+class __CGvector<T,1> :
+    public __CGvector_usage<T,1,__CGvector_storage<T,1> >
+    __CG_DERIVE_FROM_BASE_CLASS
+{
 private:
     static const int N = 1;
 public:

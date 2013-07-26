@@ -14,7 +14,7 @@
 
 #include <Cg/vector.hpp>
 
-#include <cmath>  // for std::sqrt
+#include <math.h>  // for ::sqrt
 
 namespace Cg {
 
@@ -22,19 +22,21 @@ template <typename T, int N>
 static inline __CGvector<typename __CGtype_trait<T>::numericType,1> distance(const __CGvector<T,N> & a, 
                                                                              const __CGvector<T,N> & b)
 {
+    typedef typename __CGtype_trait<T>::numericType numericType;
     typename __CGtype_trait<T>::dotType distsq = (a[0] - b[0])*(a[0] - b[0]);
     for (int i=1; i<N; i++)
         distsq += (a[i] - b[i])*(a[i] - b[i]);
-    return __CGvector<typename __CGtype_trait<T>::numericType,1>(std::sqrt(distsq));
+    return __CGvector<numericType,1>(numericType(::sqrt(distsq)));
 }
 template <typename TA, typename TB, int N, typename TAstore, typename TBstore>
 static inline __CGvector<typename __CGtype_trait<TA,TB>::numericType,1> distance(const __CGvector_usage<TA,N,TAstore> & a,
                                                                                  const __CGvector_usage<TB,N,TBstore> & b)
 {
+    typedef typename __CGtype_trait<TA,TB>::numericType numericType;
     typename __CGtype_trait<TA,TB>::dotType distsq = (a[0] - b[0])*(a[0] - b[0]);
     for (int i=1; i<N; i++)
         distsq += (a[i] - b[i])*(a[i] - b[i]);
-    return __CGvector<typename __CGtype_trait<TA,TB>::numericType,1>(std::sqrt(distsq));
+    return __CGvector<numericType,1>(numericType(::sqrt(distsq)));
 }
 
 } // namespace Cg

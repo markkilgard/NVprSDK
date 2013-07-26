@@ -14,6 +14,12 @@
 
 namespace Cg {
 
+#if defined(__GNUC__) && (__GNUC__>3 || (__GNUC__==3 && __GNUC_MINOR__>=3))
+#define __CGmay_alias __attribute__((__may_alias__))
+#else
+#define __CGmay_alias 
+#endif
+
 /* __CGcustom_fixed_storage is the pure storage required for a cgCustomFloat.
    Importantly, it has no constructor, destructor, etc. so it can be
    kept within a union, unlike __CGcustom_fixed that has a constructor, etc. */
@@ -27,7 +33,7 @@ struct __CGcustom_fixed_storage {
     static const unsigned int bytesPerFixed = (bits + 7) / 8;             // 2 bytes for s1.10
 
     unsigned char v[bytesPerFixed];
-};
+} __CGmay_alias;
 
 template <unsigned int intBits, unsigned int fracBits, bool sgnBit>
 struct __CGcustom_fixed : private __CGcustom_fixed_storage<intBits,fracBits,sgnBit> {
@@ -208,6 +214,9 @@ int __CGcustom_fixed<intBits,fracBits,sgnBit>::floatToCustomFixed(float f)
         return 0;
     }
 }
+
+// Undefine helper #defines
+#undef __CGmay_alias
 
 typedef __CGcustom_fixed<1,10,1> __CGcustom_fixedS1_10;
 typedef __CGcustom_fixed_storage<1,10,1> __CGcustom_fixed_storageS1_10;

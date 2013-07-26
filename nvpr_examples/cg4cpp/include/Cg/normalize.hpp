@@ -14,7 +14,7 @@
 
 #include <Cg/vector.hpp>
 
-#include <cmath>  // for std::sqrt
+#include <math.h>  // for ::sqrt
 
 namespace Cg {
 
@@ -24,7 +24,7 @@ static inline __CGvector<typename __CGtype_trait<T>::realType,N> normalize(const
     typename __CGtype_trait<T>::dotType sum = v[0] * v[0];
     for (int i=1; i<N; i++)
         sum += v[i] * v[i];
-    return __CGvector<T,N>(v / std::sqrt(sum));
+    return __CGvector<T,N>(v / ::sqrt(sum));
 }
 template <typename T, int N, typename Tstore>
 static inline __CGvector<typename __CGtype_trait<T>::realType,N> normalize(const __CGvector_usage<T,N,Tstore> & v)
@@ -32,7 +32,7 @@ static inline __CGvector<typename __CGtype_trait<T>::realType,N> normalize(const
     typename __CGtype_trait<T>::dotType sum = v[0] * v[0];
     for (int i=1; i<N; i++)
         sum += v[i] * v[i];
-    return __CGvector<T,N>(v / std::sqrt(sum));
+    return __CGvector<T,N>(v / ::sqrt(sum));
 }
 
 } // namespace Cg

@@ -14,7 +14,7 @@
 
 #include <Cg/vector.hpp>
 
-#include <cmath>  // for std::sin
+#include <math.h>  // for ::sin
 
 namespace Cg {
 
@@ -23,7 +23,7 @@ static inline __CGvector<typename __CGtype_trait<T>::realType,N> sin(const __CGv
 {
     __CGvector<T,N> rv;
     for (int i=0; i<N; i++)
-        rv[i] = std::sin(v[i]);
+        rv[i] = ::sin(v[i]);
     return rv;
 }
 template <typename T, int N, typename Tstore>
@@ -31,13 +31,13 @@ static inline __CGvector<typename __CGtype_trait<T>::realType,N> sin(const __CGv
 {
     __CGvector<T,N> rv;
     for (int i=0; i<N; i++)
-        rv[i] = std::sin(v[i]);
+        rv[i] = ::sin(v[i]);
     return rv;
 }
 template <typename T>
 static inline __CGvector<typename __CGtype_trait<T>::realType,1> sin(const T & v)
 {
-    __CGvector<typename __CGtype_trait<T>::realType,1> rv(std::sin(static_cast<T>(v)));
+    __CGvector<typename __CGtype_trait<T>::realType,1> rv(::sin(static_cast<T>(v)));
     return rv;
 }
 

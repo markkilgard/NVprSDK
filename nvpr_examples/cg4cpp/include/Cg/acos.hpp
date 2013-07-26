@@ -14,7 +14,7 @@
 
 #include <Cg/vector.hpp>
 
-#include <cmath>  // for std::acos
+#include <math.h>  // for ::acos
 
 namespace Cg {
 
@@ -23,7 +23,7 @@ static inline __CGvector<typename __CGtype_trait<T>::realType,N> acos(const __CG
 {
     __CGvector<T,N> rv;
     for (int i=0; i<N; i++)
-        rv[i] = std::acos(v[i]);
+        rv[i] = ::acos(v[i]);
     return rv;
 }
 template <typename T, int N, typename Tstore>
@@ -31,13 +31,13 @@ static inline __CGvector<typename __CGtype_trait<T>::realType,N> acos(const __CG
 {
     __CGvector<T,N> rv;
     for (int i=0; i<N; i++)
-        rv[i] = std::acos(v[i]);
+        rv[i] = ::acos(v[i]);
     return rv;
 }
 template <typename T>
 static inline __CGvector<typename __CGtype_trait<T>::realType,1> acos(const T & v)
 {
-    __CGvector<typename __CGtype_trait<T>::realType,1> rv(std::acos(static_cast<T>(v)));
+    __CGvector<typename __CGtype_trait<T>::realType,1> rv(::acos(static_cast<T>(v)));
     return rv;
 }
 

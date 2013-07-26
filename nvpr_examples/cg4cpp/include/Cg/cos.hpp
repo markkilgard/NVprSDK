@@ -14,7 +14,7 @@
 
 #include <Cg/vector.hpp>
 
-#include <cmath> // for std::cos
+#include <math.h> // for ::cos
 
 namespace Cg {
 
@@ -23,7 +23,7 @@ static inline __CGvector<typename __CGtype_trait<T>::realType,N> cos(const __CGv
 {
     __CGvector<T,N> rv;
     for (int i=0; i<N; i++)
-        rv[i] = std::cos(v[i]);
+        rv[i] = ::cos(v[i]);
     return rv;
 }
 template <typename T, int N, typename Tstore>
@@ -31,13 +31,13 @@ static inline __CGvector<typename __CGtype_trait<T>::realType,N> cos(const __CGv
 {
     __CGvector<T,N> rv;
     for (int i=0; i<N; i++)
-        rv[i] = std::cos(v[i]);
+        rv[i] = ::cos(v[i]);
     return rv;
 }
 template <typename T>
 static inline __CGvector<typename __CGtype_trait<T>::realType,1> cos(const T & v)
 {
-    __CGvector<typename __CGtype_trait<T>::realType,1> rv(std::cos(static_cast<T>(v)));
+    __CGvector<typename __CGtype_trait<T>::realType,1> rv(::cos(static_cast<T>(v)));
     return rv;
 }
 

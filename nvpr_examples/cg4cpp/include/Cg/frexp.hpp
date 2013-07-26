@@ -14,7 +14,7 @@
 
 #include <Cg/vector.hpp>
 
-#include <cmath>  // for std::frexp
+#include <math.h>  // for ::frexp
 
 namespace Cg {
 
@@ -25,7 +25,7 @@ static inline __CGvector<T,N> frexp(__CGvector<T,N> x, __CGvector<T,N>& expOut)
 
     for (int i=0; i<N; i++) {
         int expVal;
-        rv[i] = T(std::frexp(x[i], &expVal));
+        rv[i] = T(::frexp(x[i], &expVal));
         expOut[i] = T(expVal);
     }
     return rv;
@@ -37,7 +37,7 @@ static inline __CGvector<T,N> frexp(__CGvector<T,N> x, __CGvector_usage<T,N,Tsto
 
     for (int i=0; i<N; i++) {
         int expVal;
-        rv[i] = T(std::frexp(x[i], &expVal));
+        rv[i] = T(::frexp(x[i], &expVal));
         expOut[i] = T(expVal);
     }
     return rv;

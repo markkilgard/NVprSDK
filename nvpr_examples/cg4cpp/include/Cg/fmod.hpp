@@ -14,7 +14,7 @@
 
 #include <Cg/vector.hpp>
 
-#include <cmath> // for std::abs & std::floor
+#include <math.h> // for ::abs & ::floor
 
 namespace Cg {
 
@@ -25,8 +25,8 @@ static inline __CGvector<typename __CGtype_trait<T>::realType,N> fmod(const __CG
     typedef typename __CGtype_trait<T>::resultType ResultType;
     __CGvector<ResultType,N> rv;
     for (int i=0; i<N; i++) {
-        ResultType div = std::abs(a[i]/b[i]);
-        rv[i] = (div - std::floor(div)) * std::abs(b[i]);
+        ResultType div = ::fabs(a[i]/b[i]);
+        rv[i] = (div - ::floor(div)) * ::fabs(b[i]);
         if (a[i] < 0)
             rv[i] = -rv[i];
     }
@@ -39,8 +39,8 @@ static inline __CGvector<typename __CGtype_trait<TA,TB>::realType,N> fmod(const 
     typedef typename __CGtype_trait<TA,TB>::resultType ResultType;
     __CGvector<ResultType,N> rv;
     for (int i=0; i<N; i++) {
-        ResultType div = std::abs(a[i]/b[i]);
-        rv[i] = (div - std::floor(div)) * std::abs(b[i]);
+        ResultType div = ::fabs(a[i]/b[i]);
+        rv[i] = (div - ::floor(div)) * ::fabs(b[i]);
         if (a[i] < 0)
             rv[i] = -rv[i];
     }
@@ -54,8 +54,8 @@ static inline __CGvector<typename __CGtype_trait<TA,TB>::realType,N> fmod(const 
     typedef typename __CGtype_trait<TA,TB>::resultType ResultType;
     __CGvector<ResultType,N> rv;
     for (int i=0; i<N; i++) {
-        ResultType div = std::abs(a[i]/b[0]);
-        rv[i] = (div - std::floor(div)) * std::abs(b[0]);
+        ResultType div = ::fabs(a[i]/b[0]);
+        rv[i] = (div - ::floor(div)) * ::fabs(b[0]);
         if (a[i] < 0)
             rv[i] = -rv[i];
     }
@@ -68,8 +68,8 @@ static inline __CGvector<typename __CGtype_trait<TA,TB>::realType,N> fmod(const 
     typedef typename __CGtype_trait<TA,TB>::resultType ResultType;
     __CGvector<ResultType,N> rv;
     for (int i=0; i<N; i++) {
-        ResultType div = std::abs(a[0]/b[i]);
-        rv[i] = (div - std::floor(div)) * std::abs(b[i]);
+        ResultType div = ::fabs(a[0]/b[i]);
+        rv[i] = (div - ::floor(div)) * ::fabs(b[i]);
         if (a[0] < 0)
             rv[i] = -rv[i];
     }
@@ -82,8 +82,8 @@ static inline __CGvector<typename __CGtype_trait<TA,TB>::realType,N> fmod(const 
     typedef typename __CGtype_trait<TA,TB>::resultType ResultType;
     __CGvector<ResultType,N> rv;
     for (int i=0; i<N; i++) {
-        ResultType div = std::abs(a[i]/b);
-        rv[i] = (div - std::floor(div)) * std::abs(b);
+        ResultType div = ::fabs(a[i]/b);
+        rv[i] = (div - ::floor(div)) * ::fabs(b);
         if (a[i] < 0)
             rv[i] = -rv[i];
     }
@@ -96,8 +96,8 @@ static inline __CGvector<typename __CGtype_trait<TA,TB>::realType,N> fmod(const 
     typedef typename __CGtype_trait<TA,TB>::resultType ResultType;
     __CGvector<ResultType,N> rv;
     for (int i=0; i<N; i++) {
-        ResultType div = std::abs(a/b[i]);
-        rv[i] = (div - std::floor(div)) * std::abs(b[i]);
+        ResultType div = ::fabs(a/b[i]);
+        rv[i] = (div - ::floor(div)) * ::fabs(b[i]);
         if (a < 0)
             rv[i] = -rv[i];
     }
@@ -109,8 +109,8 @@ static inline __CGvector<typename __CGtype_trait<TA,TB>::realType,1> fmod(const 
 {
     typedef typename __CGtype_trait<TA,TB>::resultType ResultType;
     __CGvector<ResultType,1> rv;
-    ResultType div = ResultType(std::abs(a/b));
-    rv = ResultType((div - std::floor(div)) * std::abs(b));
+    ResultType div = ResultType(::fabs(a/b));
+    rv = ResultType((div - ::floor(div)) * ::fabs(b));
     if (a < 0)
         rv = -rv;
     return rv;

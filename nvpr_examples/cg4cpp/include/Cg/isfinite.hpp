@@ -12,6 +12,8 @@
 #pragma message("error: include this header file (" __FILE__ ") before <Cg/stdlib.hpp>")
 #endif
 
+#undef isfinite  // g++ headers may defined this
+
 #include <Cg/vector.hpp>
 
 #undef isfinite  // g++ <math.h> header may have defined this
