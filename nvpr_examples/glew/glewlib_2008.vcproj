@@ -21,13 +21,12 @@
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="$(PlatformName)_2008\$(ConfigurationName)"
-			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)\glewlib"
+			IntermediateDirectory="$(PlatformName)_2008\$(ConfigurationName)\glewlib"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
-			BuildLogFile="$(IntDir)\BuildLog.htm"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -94,14 +93,13 @@
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory="$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)\glewlib"
+			OutputDirectory="$(PlatformName)_2008\$(ConfigurationName)"
+			IntermediateDirectory="$(PlatformName)_2008\$(ConfigurationName)\glewlib"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
-			BuildLogFile="$(PlatformName)\$(ConfigurationName)\glewlib.html"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -170,13 +168,12 @@
 		<Configuration
 			Name="Debug|Win32"
 			OutputDirectory="$(PlatformName)_2008\$(ConfigurationName)"
-			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)\glewlib"
+			IntermediateDirectory="$(PlatformName)_2008\$(ConfigurationName)\glewlib"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
-			BuildLogFile="$(IntDir)\BuildLog.htm"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -242,14 +239,13 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory="$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)\glewlib"
+			OutputDirectory="$(PlatformName)_2008\$(ConfigurationName)"
+			IntermediateDirectory="$(PlatformName)_2008\$(ConfigurationName)\glewlib"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
-			BuildLogFile="$(PlatformName)\$(ConfigurationName)\glewlib.html"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
