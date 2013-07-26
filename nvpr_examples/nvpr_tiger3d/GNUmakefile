@@ -13,7 +13,7 @@ CSRCS = \
   $(NULL)
 CPPSRCS = $(TARGET:=.cpp) \
   ../common/render_font.cpp \
-  ../common/xform_cpp.cpp \
+  ../common/cg4cpp_xform.cpp \
   ../cg4cpp/src/inverse.cpp \
   $(NULL)
 OBJS = $(CSRCS:.c=.o) $(CPPSRCS:.cpp=.o)

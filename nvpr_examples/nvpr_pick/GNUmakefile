@@ -10,7 +10,7 @@ CSRCS = \
   ../glew/src/glew.c \
   $(NULL)
 CPPSRCS = $(TARGET:=.cpp) \
-  ../common/xform_cpp.cpp \
+  ../common/cg4cpp_xform.cpp \
   ../cg4cpp/src/inverse.cpp \
   $(NULL)
 OBJS = $(CSRCS:.c=.o) $(CPPSRCS:.cpp=.o)

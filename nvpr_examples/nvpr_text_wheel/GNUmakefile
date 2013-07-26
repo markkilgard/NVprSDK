@@ -14,7 +14,7 @@ CSRCS = \
 CPPSRCS = \
   nvpr_text_wheel.cpp \
   ../common/render_font.cpp \
-  ../common/xform_cpp.cpp \
+  ../common/cg4cpp_xform.cpp \
   $(NULL)
 OBJS = $(CSRCS:.c=.o) $(CPPSRCS:.cpp=.o)
 
