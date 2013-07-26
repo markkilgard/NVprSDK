@@ -125,17 +125,17 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "glutstatic", "glut\glut_200
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Skia", "Skia", "{21D62F7D-C196-4917-9D78-ABF8AEA96177}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "core", "skia\out\gyp\core.vcproj", "{B7760B5E-BFA8-486B-ACFD-49E3A6DE8E76}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "core", "skia\out\gyp\core_2008.vcproj", "{B7760B5E-BFA8-486B-ACFD-49E3A6DE8E76}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "effects", "skia\out\gyp\effects.vcproj", "{AF856AAE-D5FE-5F74-FC73-5ED5B1DF40EB}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "effects", "skia\out\gyp\effects_2008.vcproj", "{AF856AAE-D5FE-5F74-FC73-5ED5B1DF40EB}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gr", "skia\out\gyp\gr.vcproj", "{4D8956A7-545C-D682-0F42-47158B3928C6}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gr", "skia\out\gyp\gr_2008.vcproj", "{4D8956A7-545C-D682-0F42-47158B3928C6}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "opts", "skia\out\gyp\opts.vcproj", "{A20D3F81-B5D7-42EF-6F06-8C83EB85D193}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "opts", "skia\out\gyp\opts_2008.vcproj", "{A20D3F81-B5D7-42EF-6F06-8C83EB85D193}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "skgr", "skia\out\gyp\skgr.vcproj", "{3A0016AA-AC89-6CC6-3EF1-AFE5DCD5B8E6}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "skgr", "skia\out\gyp\skgr_2008.vcproj", "{3A0016AA-AC89-6CC6-3EF1-AFE5DCD5B8E6}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ports", "skia\out\gyp\ports.vcproj", "{F20EF7EF-C145-53CA-920E-F55DE550D2E0}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ports", "skia\out\gyp\ports_2008.vcproj", "{F20EF7EF-C145-53CA-920E-F55DE550D2E0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
