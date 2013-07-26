@@ -1,19 +1,11 @@
-/* libs/graphics/images/SkImageDecoder_libico.cpp
-**
-** Copyright 2006, The Android Open Source Project
-**
-** Licensed under the Apache License, Version 2.0 (the "License"); 
-** you may not use this file except in compliance with the License. 
-** You may obtain a copy of the License at 
-**
-**     http://www.apache.org/licenses/LICENSE-2.0 
-**
-** Unless required by applicable law or agreed to in writing, software 
-** distributed under the License is distributed on an "AS IS" BASIS, 
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-** See the License for the specific language governing permissions and 
-** limitations under the License.
-*/
+
+/*
+ * Copyright 2006 The Android Open Source Project
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
+
 
 #include "SkImageDecoder.h"
 #include "SkStream.h"
@@ -31,6 +23,10 @@ public:
 protected:
     virtual bool onDecode(SkStream* stream, SkBitmap* bm, Mode);
 };
+
+SkImageDecoder* SkCreateICOImageDecoder() {
+    return new SkICOImageDecoder;
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
@@ -363,15 +359,20 @@ static void editPixelBit32(const int pixelNo, const unsigned char* buf,
     int green = readByte(buf, xorOffset + 4*pixelNo + 1);
     int red = readByte(buf, xorOffset + 4*pixelNo + 2);
     int alphaBit = (alphaByte & m) >> shift;
+#if 1 // don't trust the alphaBit for 32bit images <mrr>
+    alphaBit = 0;
+#endif
     int alpha = readByte(buf, xorOffset + 4*pixelNo + 3) & ((alphaBit-1)&0xFF);
     *address = SkPreMultiplyARGB(alpha, red, green, blue);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+DEFINE_DECODER_CREATOR(ICOImageDecoder);
 /////////////////////////////////////////////////////////////////////////////////////////
 
 #include "SkTRegistry.h"
 
-static SkImageDecoder* Factory(SkStream* stream) {
+SkImageDecoder* sk_libico_dfactory(SkStream* stream) {
     // Check to see if the first four bytes are 0,0,1,0
     // FIXME: Is that required and sufficient?
     SkAutoMalloc autoMal(4);
@@ -386,5 +387,5 @@ static SkImageDecoder* Factory(SkStream* stream) {
     return SkNEW(SkICOImageDecoder);
 }
 
-static SkTRegistry<SkImageDecoder*, SkStream*> gReg(Factory);
+static SkTRegistry<SkImageDecoder*, SkStream*> gReg(sk_libico_dfactory);
 

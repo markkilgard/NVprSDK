@@ -1,19 +1,11 @@
-/* libs/graphics/animator/SkScriptDecompile.cpp
-**
-** Copyright 2006, The Android Open Source Project
-**
-** Licensed under the Apache License, Version 2.0 (the "License"); 
-** you may not use this file except in compliance with the License. 
-** You may obtain a copy of the License at 
-**
-**     http://www.apache.org/licenses/LICENSE-2.0 
-**
-** Unless required by applicable law or agreed to in writing, software 
-** distributed under the License is distributed on an "AS IS" BASIS, 
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-** See the License for the specific language governing permissions and 
-** limitations under the License.
-*/
+
+/*
+ * Copyright 2006 The Android Open Source Project
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
+
 
 #include "SkScript2.h"
 
@@ -114,7 +106,7 @@ static size_t gOperandNamesSize = sizeof(gOperandNames) / sizeof(gOperandNames[0
 // check to see that there are no missing or duplicate entries
 void SkScriptEngine2::ValidateDecompileTable() {
     SkScriptEngine2::TypeOp op = SkScriptEngine2::kNop;
-    int index;
+    size_t index;
     for (index = 0; index < gOpNamesSize; index++) {
         SkASSERT(gOpNames[index].fOp == op);
         op = (SkScriptEngine2::TypeOp) (op + 1);
@@ -132,9 +124,9 @@ void SkScriptEngine2::decompile(const unsigned char* start, size_t length) {
     SkASSERT(length > 0);
     const unsigned char* opCode = start;
     do {
-        SkASSERT(opCode - start < length);
+        SkASSERT((size_t)(opCode - start) < length);
         SkScriptEngine2::TypeOp op = (SkScriptEngine2::TypeOp) *opCode++;
-        SkASSERT(op < gOpNamesSize);
+        SkASSERT((size_t)op < gOpNamesSize);
         SkDebugf("%d: %s", opCode - start - 1, gOpNames[op].fName);
         switch (op) {
         case SkScriptEngine2::kCallback: {
@@ -184,7 +176,7 @@ void SkScriptEngine2::decompile(const unsigned char* start, size_t length) {
             SkOperand2::OpType type;
             memcpy(&type, opCode, sizeof(type));
             opCode += sizeof(type);
-            int index = 0;
+            size_t index = 0;
             if (type == 0)
                 SkDebugf(" type: %s", gOperandNames[index].fName);
             else {
@@ -211,6 +203,8 @@ void SkScriptEngine2::decompile(const unsigned char* start, size_t length) {
             goto done;
         case SkScriptEngine2::kNop:
                 SkASSERT(0);
+        default:
+            break;
     }
     SkDebugf("\n");
     } while (true);

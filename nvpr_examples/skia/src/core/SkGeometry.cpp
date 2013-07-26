@@ -1,30 +1,29 @@
-/* libs/graphics/sgl/SkGeometry.cpp
-**
-** Copyright 2006, The Android Open Source Project
-**
-** Licensed under the Apache License, Version 2.0 (the "License"); 
-** you may not use this file except in compliance with the License. 
-** You may obtain a copy of the License at 
-**
-**     http://www.apache.org/licenses/LICENSE-2.0 
-**
-** Unless required by applicable law or agreed to in writing, software 
-** distributed under the License is distributed on an "AS IS" BASIS, 
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-** See the License for the specific language governing permissions and 
-** limitations under the License.
-*/
+
+/*
+ * Copyright 2006 The Android Open Source Project
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
+
 
 #include "SkGeometry.h"
 #include "Sk64.h"
 #include "SkMatrix.h"
 
-bool SkXRayCrossesLine(const SkXRay& pt, const SkPoint pts[2]) {
+bool SkXRayCrossesLine(const SkXRay& pt, const SkPoint pts[2], bool* ambiguous) {
+    if (ambiguous) {
+        *ambiguous = false;
+    }
     // Determine quick discards.
     // Consider query line going exactly through point 0 to not
     // intersect, for symmetry with SkXRayCrossesMonotonicCubic.
-    if (pt.fY == pts[0].fY)
+    if (pt.fY == pts[0].fY) {
+        if (ambiguous) {
+            *ambiguous = true;
+        }
         return false;
+    }
     if (pt.fY < pts[0].fY && pt.fY < pts[1].fY)
         return false;
     if (pt.fY > pts[0].fY && pt.fY > pts[1].fY)
@@ -34,10 +33,27 @@ bool SkXRayCrossesLine(const SkXRay& pt, const SkPoint pts[2]) {
     // Determine degenerate cases
     if (SkScalarNearlyZero(pts[0].fY - pts[1].fY))
         return false;
-    if (SkScalarNearlyZero(pts[0].fX - pts[1].fX))
+    if (SkScalarNearlyZero(pts[0].fX - pts[1].fX)) {
         // We've already determined the query point lies within the
         // vertical range of the line segment.
-        return pt.fX <= pts[0].fX;
+        if (pt.fX <= pts[0].fX) {
+            if (ambiguous) {
+                *ambiguous = (pt.fY == pts[1].fY);
+            }
+            return true;
+        }
+        return false;
+    }
+    // Ambiguity check
+    if (pt.fY == pts[1].fY) {
+        if (pt.fX <= pts[1].fX) {
+            if (ambiguous) {
+                *ambiguous = true;
+            }
+            return true;
+        }
+        return false;
+    }
     // Full line segment evaluation
     SkScalar delta_y = pts[1].fY - pts[0].fY;
     SkScalar delta_x = pts[1].fX - pts[0].fX;
@@ -424,18 +440,20 @@ int SkChopQuadAtMaxCurvature(const SkPoint src[3], SkPoint dst[5])
     }
 }
 
-void SkConvertQuadToCubic(const SkPoint src[3], SkPoint dst[4])
-{
-    SkScalar two = SkIntToScalar(2);
-    SkScalar one_third = SkScalarDiv(SK_Scalar1, SkIntToScalar(3));
-    dst[0].set(src[0].fX, src[0].fY);
-    dst[1].set(
-        SkScalarMul(SkScalarMulAdd(src[1].fX, two, src[0].fX), one_third),
-        SkScalarMul(SkScalarMulAdd(src[1].fY, two, src[0].fY), one_third));
-    dst[2].set(
-        SkScalarMul(SkScalarMulAdd(src[1].fX, two, src[2].fX), one_third),
-        SkScalarMul(SkScalarMulAdd(src[1].fY, two, src[2].fY), one_third));
-    dst[3].set(src[2].fX, src[2].fY);
+#ifdef SK_SCALAR_IS_FLOAT
+    #define SK_ScalarTwoThirds  (0.666666666f)
+#else
+    #define SK_ScalarTwoThirds  ((SkFixed)(43691))
+#endif
+
+void SkConvertQuadToCubic(const SkPoint src[3], SkPoint dst[4]) {
+    const SkScalar scale = SK_ScalarTwoThirds;
+    dst[0] = src[0];
+    dst[1].set(src[0].fX + SkScalarMul(src[1].fX - src[0].fX, scale),
+               src[0].fY + SkScalarMul(src[1].fY - src[0].fY, scale));
+    dst[2].set(src[2].fX + SkScalarMul(src[1].fX - src[2].fX, scale),
+               src[2].fY + SkScalarMul(src[1].fY - src[2].fY, scale));
+    dst[3] = src[2];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -816,6 +834,65 @@ static SkScalar refine_cubic_root(const SkFP coeff[4], SkScalar root)
 }
 #endif
 
+/**
+ *  Given an array and count, remove all pair-wise duplicates from the array,
+ *  keeping the existing sorting, and return the new count
+ */
+static int collaps_duplicates(float array[], int count) {
+    int n = count;
+    for (int n = count; n > 1; --n) {
+        if (array[0] == array[1]) {
+            for (int i = 1; i < n; ++i) {
+                array[i - 1] = array[i];
+            }
+            count -= 1;
+        } else {
+            array += 1;
+        }
+    }
+    return count;
+}
+
+#ifdef SK_DEBUG
+
+#define TEST_COLLAPS_ENTRY(array)   array, SK_ARRAY_COUNT(array)
+
+static void test_collaps_duplicates() {
+    static bool gOnce;
+    if (gOnce) { return; }
+    gOnce = true;
+    const float src0[] = { 0 };
+    const float src1[] = { 0, 0 };
+    const float src2[] = { 0, 1 };
+    const float src3[] = { 0, 0, 0 };
+    const float src4[] = { 0, 0, 1 };
+    const float src5[] = { 0, 1, 1 };
+    const float src6[] = { 0, 1, 2 };
+    const struct {
+        const float* fData;
+        int fCount;
+        int fCollapsedCount;
+    } data[] = {
+        { TEST_COLLAPS_ENTRY(src0), 1 },
+        { TEST_COLLAPS_ENTRY(src1), 1 },
+        { TEST_COLLAPS_ENTRY(src2), 2 },
+        { TEST_COLLAPS_ENTRY(src3), 1 },
+        { TEST_COLLAPS_ENTRY(src4), 2 },
+        { TEST_COLLAPS_ENTRY(src5), 2 },
+        { TEST_COLLAPS_ENTRY(src6), 3 },
+    };
+    for (size_t i = 0; i < SK_ARRAY_COUNT(data); ++i) {
+        float dst[3];
+        memcpy(dst, data[i].fData, data[i].fCount * sizeof(dst[0]));
+        int count = collaps_duplicates(dst, data[i].fCount);
+        SkASSERT(data[i].fCollapsedCount == count);
+        for (int j = 1; j < count; ++j) {
+            SkASSERT(dst[j-1] < dst[j]);
+        }
+    }
+}
+#endif
+
 #if defined _WIN32 && _MSC_VER >= 1300  && defined SK_SCALAR_IS_FIXED // disable warning : unreachable code if building fixed point for windows desktop
 #pragma warning ( disable : 4702 )
 #endif
@@ -823,6 +900,9 @@ static SkScalar refine_cubic_root(const SkFP coeff[4], SkScalar root)
 /*  Solve coeff(t) == 0, returning the number of roots that
     lie withing 0 < t < 1.
     coeff[0]t^3 + coeff[1]t^2 + coeff[2]t + coeff[3]
+ 
+    Eliminates repeated roots (so that all tValues are distinct, and are always
+    in increasing order.
 */
 static int solve_cubic_polynomial(const SkFP coeff[4], SkScalar tValues[3])
 {
@@ -877,8 +957,14 @@ static int solve_cubic_polynomial(const SkFP coeff[4], SkScalar tValues[3])
         if (is_unit_interval(r))
             *roots++ = r;
 
+        SkDEBUGCODE(test_collaps_duplicates();)
+
         // now sort the roots
-        bubble_sort(tValues, (int)(roots - tValues));
+        int count = (int)(roots - tValues);
+        SkASSERT((unsigned)count <= 3);
+        bubble_sort(tValues, count);
+        count = collaps_duplicates(tValues, count);
+        roots = tValues + count;    // so we compute the proper count below
 #endif
     }
     else                // we have 1 real root
@@ -986,7 +1072,11 @@ int SkChopCubicAtMaxCurvature(const SkPoint src[4], SkPoint dst[13], SkScalar tV
     return count + 1;
 }
 
-bool SkXRayCrossesMonotonicCubic(const SkXRay& pt, const SkPoint cubic[4]) {
+bool SkXRayCrossesMonotonicCubic(const SkXRay& pt, const SkPoint cubic[4], bool* ambiguous) {
+    if (ambiguous) {
+        *ambiguous = false;
+    }
+
     // Find the minimum and maximum y of the extrema, which are the
     // first and last points since this cubic is monotonic
     SkScalar min_y = SkMinScalar(cubic[0].fY, cubic[3].fY);
@@ -996,8 +1086,13 @@ bool SkXRayCrossesMonotonicCubic(const SkXRay& pt, const SkPoint cubic[4]) {
         || pt.fY < min_y
         || pt.fY > max_y) {
         // The query line definitely does not cross the curve
+        if (ambiguous) {
+            *ambiguous = (pt.fY == cubic[0].fY);
+        }
         return false;
     }
+
+    bool pt_at_extremum = (pt.fY == cubic[3].fY);
 
     SkScalar min_x =
         SkMinScalar(
@@ -1007,6 +1102,9 @@ bool SkXRayCrossesMonotonicCubic(const SkXRay& pt, const SkPoint cubic[4]) {
             cubic[3].fX);
     if (pt.fX < min_x) {
         // The query line definitely crosses the curve
+        if (ambiguous) {
+            *ambiguous = pt_at_extremum;
+        }
         return true;
     }
 
@@ -1053,23 +1151,39 @@ bool SkXRayCrossesMonotonicCubic(const SkXRay& pt, const SkPoint cubic[4]) {
     } while (++iter < kMaxIter
              && !SkScalarNearlyZero(eval.fY - pt.fY));
     if (pt.fX <= eval.fX) {
+        if (ambiguous) {
+            *ambiguous = pt_at_extremum;
+        }
         return true;
     }
     return false;
 }
 
-int SkNumXRayCrossingsForCubic(const SkXRay& pt, const SkPoint cubic[4]) {
+int SkNumXRayCrossingsForCubic(const SkXRay& pt, const SkPoint cubic[4], bool* ambiguous) {
     int num_crossings = 0;
     SkPoint monotonic_cubics[10];
     int num_monotonic_cubics = SkChopCubicAtYExtrema(cubic, monotonic_cubics);
-    if (SkXRayCrossesMonotonicCubic(pt, &monotonic_cubics[0]))
+    if (ambiguous) {
+        *ambiguous = false;
+    }
+    bool locally_ambiguous;
+    if (SkXRayCrossesMonotonicCubic(pt, &monotonic_cubics[0], &locally_ambiguous))
         ++num_crossings;
+    if (ambiguous) {
+        *ambiguous |= locally_ambiguous;
+    }
     if (num_monotonic_cubics > 0)
-        if (SkXRayCrossesMonotonicCubic(pt, &monotonic_cubics[3]))
+        if (SkXRayCrossesMonotonicCubic(pt, &monotonic_cubics[3], &locally_ambiguous))
             ++num_crossings;
+    if (ambiguous) {
+        *ambiguous |= locally_ambiguous;
+    }
     if (num_monotonic_cubics > 1)
-        if (SkXRayCrossesMonotonicCubic(pt, &monotonic_cubics[6]))
+        if (SkXRayCrossesMonotonicCubic(pt, &monotonic_cubics[6], &locally_ambiguous))
             ++num_crossings;
+    if (ambiguous) {
+        *ambiguous |= locally_ambiguous;
+    }
     return num_crossings;
 }
 

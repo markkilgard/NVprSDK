@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "SampleCode.h"
 #include "SkView.h"
 #include "SkCanvas.h"
@@ -11,9 +18,9 @@ public:
 	AnimGifView() {
         fMovie = SkMovie::DecodeFile("/skimages/dollarblk.gif");
     }
-    
+
     virtual ~AnimGifView() {
-        fMovie->safeUnref();
+        SkSafeUnref(fMovie);
     }
 
 protected:
@@ -25,14 +32,14 @@ protected:
         }
         return this->INHERITED::onQuery(evt);
     }
-    
+
     void drawBG(SkCanvas* canvas) {
         canvas->drawColor(0xFFDDDDDD);
     }
-    
+
     virtual void onDraw(SkCanvas* canvas) {
         this->drawBG(canvas);
-        
+
         if (fMovie) {
             if (fMovie->duration()) {
                 fMovie->setTime(SkTime::GetMSecs() % fMovie->duration());
@@ -44,7 +51,7 @@ protected:
             this->inval(NULL);
         }
     }
-    
+
 private:
     SkRect      fClip;
     SkIPoint*   fPoints;

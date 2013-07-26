@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #ifndef SkScaledBitmapSampler_DEFINED
 #define SkScaledBitmapSampler_DEFINED
 
@@ -21,7 +28,8 @@ public:
         kIndex, // 1 byte per pixel
         kRGB,   // 3 bytes per pixel
         kRGBX,  // 4 byes per pixel (ignore 4th)
-        kRGBA   // 4 bytes per pixel
+        kRGBA,  // 4 bytes per pixel
+        kRGB_565 // 2 bytes per pixel
     };
 
     // Given a dst bitmap (with pixels already allocated) and a src-config,

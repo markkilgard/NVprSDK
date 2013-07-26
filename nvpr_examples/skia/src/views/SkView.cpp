@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "SkView.h"
 #include "SkCanvas.h"
 
@@ -8,7 +15,7 @@ SkView::SkView(uint32_t flags) : fFlags(SkToU8(flags))
 	fWidth = fHeight = 0;
 	fLoc.set(0, 0);
 	fParent = fFirstChild = fNextSibling = fPrevSibling = NULL;
-	
+    fMatrix.setIdentity();
 	fContainsFocus = 0;
 }
 
@@ -49,6 +56,10 @@ void SkView::setFocusableP(bool pred)
 	this->setFlags(SkSetClearShift(fFlags, pred, kFocusable_Shift));
 }
 
+void SkView::setClipToBounds(bool pred) {
+    this->setFlags(SkSetClearShift(fFlags, !pred, kNoClip_Shift));
+}
+
 void SkView::setSize(SkScalar width, SkScalar height)
 {
 	width = SkMaxScalar(0, width);
@@ -71,7 +82,7 @@ void SkView::setLoc(SkScalar x, SkScalar y)
 	{
 		this->inval(NULL);
 		fLoc.set(x, y);
-		this->inval(NULL);
+        this->inval(NULL);
 	}
 }
 
@@ -81,20 +92,33 @@ void SkView::offset(SkScalar dx, SkScalar dy)
 		this->setLoc(fLoc.fX + dx, fLoc.fY + dy);
 }
 
+void SkView::setLocalMatrix(const SkMatrix& matrix) 
+{
+    this->inval(NULL);
+    fMatrix = matrix;
+    this->inval(NULL);
+}
+
 void SkView::draw(SkCanvas* canvas)
 {
 	if (fWidth && fHeight && this->isVisible())
 	{
 		SkRect	r;
 		r.set(fLoc.fX, fLoc.fY, fLoc.fX + fWidth, fLoc.fY + fHeight);
-		if (canvas->quickReject(r, SkCanvas::kBW_EdgeType))
-			return;
+		if (this->isClipToBounds() &&
+            canvas->quickReject(r, SkCanvas::kBW_EdgeType)) {
+                return;
+        }
 
 		SkAutoCanvasRestore	as(canvas, true);
 
-		canvas->clipRect(r);
-		canvas->translate(fLoc.fX, fLoc.fY);
-
+        if (this->isClipToBounds()) {
+            canvas->clipRect(r);
+        }
+        
+        canvas->translate(fLoc.fX, fLoc.fY);		
+        canvas->concat(fMatrix);
+        
         if (fParent) {
             fParent->beforeChild(this, canvas);
         }
@@ -119,37 +143,36 @@ void SkView::draw(SkCanvas* canvas)
 	}
 }
 
-void SkView::inval(SkRect* rect)
-{
-	if (!this->isVisible())
-		return;
-
-	SkRect	bounds;
-
-	this->getLocalBounds(&bounds);
-	if (rect && !bounds.intersect(*rect))
-		return;
-
-	rect = &bounds;
+void SkView::inval(SkRect* rect) {
 	SkView*	view = this;
+    SkRect storage;
 
-	for (;;)
-	{
-		if (view->handleInval(bounds))
-			break;
+	for (;;) {
+        if (!view->isVisible()) {
+            return;
+        }
+        if (view->isClipToBounds()) {
+            SkRect bounds;
+            view->getLocalBounds(&bounds);
+            if (rect && !bounds.intersect(*rect)) {
+                return;
+            }
+            storage = bounds;
+            rect = &storage;
+        }
+        if (view->handleInval(rect)) {
+            return;
+        }
 
-		SkRect	parentR;
 		SkView* parent = view->fParent;
+        if (parent == NULL) {
+            return;
+        }
 
-		if (parent == NULL || !parent->isVisible())
-			break;
-
-		bounds.offset(view->fLoc.fX, view->fLoc.fY);
-		parent->getLocalBounds(&parentR);
-		if (!bounds.intersect(parentR))
-			return;
-
-		view = parent;
+        if (rect) {
+            rect->offset(view->fLoc.fX, view->fLoc.fY);
+        }
+        view = parent;
 	}
 }
 
@@ -289,10 +312,11 @@ void SkView::onFocusChange(bool gainFocusP)
 
 SkView::Click::Click(SkView* target)
 {
-	SkASSERT(target);
-	fTargetID = target->getSinkID();
-	fType = NULL;
-	fWeOwnTheType = false;
+    SkASSERT(target);
+    fTargetID = target->getSinkID();
+    fType = NULL;
+    fWeOwnTheType = false;
+    fOwner = NULL;
 }
 
 SkView::Click::~Click()
@@ -348,17 +372,20 @@ void SkView::Click::copyType(const char type[])
 SkView::Click* SkView::findClickHandler(SkScalar x, SkScalar y)
 {
 	if (x < 0 || y < 0 || x >= fWidth || y >= fHeight) {
-		return false;
+		return NULL;
     }
 
     if (this->onSendClickToChildren(x, y)) {
         F2BIter	iter(this);
         SkView*	child;
-
+        
         while ((child = iter.next()) != NULL)
         {
-            Click* click = child->findClickHandler(x - child->fLoc.fX,
-                                                   y - child->fLoc.fY);
+            SkPoint p;
+            child->globalToLocal(x, y, &p);
+            
+            Click* click = child->findClickHandler(p.fX, p.fY);
+            
             if (click) {
                 return click;
             }
@@ -456,7 +483,7 @@ bool SkView::onClick(Click*) {
 	return false;
 }
 
-bool SkView::handleInval(const SkRect& r) {
+bool SkView::handleInval(const SkRect*) {
 	return false;
 }
 
@@ -545,7 +572,7 @@ SkView* SkView::attachChildToFront(SkView* child)
 {
 	SkASSERT(child != this);
 
-	if (child == NULL || fFirstChild && fFirstChild->fPrevSibling == child)
+	if (child == NULL || (fFirstChild && fFirstChild->fPrevSibling == child))
 		goto DONE;
 
 	child->ref();
@@ -579,20 +606,30 @@ void SkView::detachAllChildren()
 		fFirstChild->detachFromParent_NoLayout();
 }
 
+void SkView::localToGlobal(SkMatrix* matrix) const
+{
+    if (matrix) {
+        matrix->reset();
+        const SkView* view = this;
+        while (view)
+        {
+            matrix->preConcat(view->getLocalMatrix());
+            matrix->preTranslate(-view->fLoc.fX, -view->fLoc.fY);
+            view = view->fParent;
+        }
+    }
+}
 void SkView::globalToLocal(SkScalar x, SkScalar y, SkPoint* local) const
 {
 	SkASSERT(this);
-
 	if (local)
 	{
-		const SkView* view = this;
-		while (view)
-		{
-			x -= view->fLoc.fX;
-			y -= view->fLoc.fY;
-			view = view->fParent;
-		}
-		local->set(x, y);
+        SkMatrix m;
+        this->localToGlobal(&m);
+        SkPoint p;
+        m.invert(&m);
+        m.mapXY(x, y, &p);
+		local->set(p.fX, p.fY);
 	}
 }
 

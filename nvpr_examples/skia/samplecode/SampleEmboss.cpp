@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "SampleCode.h"
 #include "SkView.h"
 #include "SkCanvas.h"
@@ -19,11 +26,10 @@
 #include "SkTypeface.h"
 #include "SkXfermode.h"
 
-class EmbossView : public SkView {
+class EmbossView : public SampleView {
     SkEmbossMaskFilter::Light   fLight;
 public:
-	EmbossView()
-    {
+	EmbossView() {
         fLight.fDirection[0] = SK_Scalar1;
         fLight.fDirection[1] = SK_Scalar1;
         fLight.fDirection[2] = SK_Scalar1;
@@ -33,25 +39,15 @@ public:
     
 protected:
     // overrides from SkEventSink
-    virtual bool onQuery(SkEvent* evt)
-    {
-        if (SampleCode::TitleQ(*evt))
-        {
+    virtual bool onQuery(SkEvent* evt) {
+        if (SampleCode::TitleQ(*evt)) {
             SampleCode::TitleR(evt, "Emboss");
             return true;
         }
         return this->INHERITED::onQuery(evt);
     }
 
-    void drawBG(SkCanvas* canvas)
-    {
-        canvas->drawColor(SK_ColorWHITE);
-    }
-    
-    virtual void onDraw(SkCanvas* canvas)
-    {
-        this->drawBG(canvas);
-
+    virtual void onDrawContent(SkCanvas* canvas) {
         SkPaint paint;
         
         paint.setAntiAlias(true);
@@ -67,7 +63,7 @@ protected:
     
 private:
 
-    typedef SkView INHERITED;
+    typedef SampleView INHERITED;
 };
 
 //////////////////////////////////////////////////////////////////////////////

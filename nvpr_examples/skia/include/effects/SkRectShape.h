@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #ifndef SkRectShape_DEFINED
 #define SkRectShape_DEFINED
 
@@ -12,11 +19,9 @@ public:
     SkPaint& paint() { return fPaint; }
     const SkPaint& paint() const { return fPaint; }
 
-    // overrides
-    virtual void flatten(SkFlattenableWriteBuffer&);
-    
 protected:
     SkPaintShape(SkFlattenableReadBuffer& buffer);
+    virtual void flatten(SkFlattenableWriteBuffer&) const SK_OVERRIDE;
     
 private:
     SkPaint fPaint;
@@ -33,15 +38,11 @@ public:
     void setCircle(SkScalar x, SkScalar y, SkScalar radius);
     void setRRect(const SkRect&, SkScalar rx, SkScalar ry);
 
-    // overrides
-    virtual Factory getFactory();
-    virtual void flatten(SkFlattenableWriteBuffer&);
-
-    // public for Registrar
-    static SkFlattenable* CreateProc(SkFlattenableReadBuffer&);
+    SK_DECLARE_PUBLIC_FLATTENABLE_DESERIALIZATION_PROCS(SkRectShape)
 
 protected:
     SkRectShape(SkFlattenableReadBuffer&);
+    virtual void flatten(SkFlattenableWriteBuffer&) const SK_OVERRIDE;
 
     // overrides
     virtual void onDraw(SkCanvas*);

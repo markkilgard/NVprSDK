@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "SampleCode.h"
 #include "SkCanvas.h"
 #include "SkPaint.h"
@@ -5,9 +12,11 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class LayerMaskView : public SkView {
+class LayerMaskView : public SampleView {
 public:
-	LayerMaskView() {}
+	LayerMaskView() {
+        this->setBGColor(0xFFDDDDDD);
+    }
     
 protected:
     // overrides from SkEventSink
@@ -46,13 +55,7 @@ protected:
         }
     }
 
-    void drawBG(SkCanvas* canvas) {
-        canvas->drawColor(0xFFDDDDDD);
-    }
-    
-    virtual void onDraw(SkCanvas* canvas) {
-        this->drawBG(canvas);
-        
+    virtual void onDrawContent(SkCanvas* canvas) {
         SkRect  r;
         r.set(SkIntToScalar(20), SkIntToScalar(20), SkIntToScalar(120), SkIntToScalar(120));
         canvas->saveLayer(&r, NULL, SkCanvas::kARGB_ClipLayer_SaveFlag);
@@ -62,7 +65,7 @@ protected:
     }
     
 private:
-    typedef SkView INHERITED;
+    typedef SampleView INHERITED;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

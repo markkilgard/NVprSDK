@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "SampleCode.h"
 #include "SkView.h"
 #include "SkCanvas.h"
@@ -23,26 +30,27 @@
 static void drawtriangle(SkCanvas* canvas, const SkPaint& paint,
                          const SkPoint pts[3]) {
     SkPath path;
-    
+
     path.moveTo(pts[0]);
     path.lineTo(pts[1]);
     path.lineTo(pts[2]);
-    
+
     canvas->drawPath(path, paint);
 }
 
 static SkShader* make_shader0(SkIPoint* size) {
     SkBitmap    bm;
-    
+
 //    SkImageDecoder::DecodeFile("/skimages/progressivejpg.jpg", &bm);
-    SkImageDecoder::DecodeFile("/skimages/beach.jpg", &bm);
+    SkImageDecoder::DecodeFile("/skimages/logo.png", &bm);
     size->set(bm.width(), bm.height());
     return SkShader::CreateBitmapShader(bm, SkShader::kClamp_TileMode,
                                         SkShader::kClamp_TileMode);
 }
 
 static SkShader* make_shader1(const SkIPoint& size) {
-    SkPoint pts[] = { 0, 0, SkIntToScalar(size.fX), SkIntToScalar(size.fY) };
+    SkPoint pts[] = { { 0, 0, },
+                      { SkIntToScalar(size.fX), SkIntToScalar(size.fY) } };
     SkColor colors[] = { SK_ColorRED, SK_ColorGREEN, SK_ColorBLUE, SK_ColorRED };
     return SkGradientShader::CreateLinear(pts, colors, NULL,
                     SK_ARRAY_COUNT(colors), SkShader::kMirror_TileMode, NULL);
@@ -54,7 +62,7 @@ class Patch {
 public:
     Patch() { sk_bzero(fPts, sizeof(fPts)); }
     ~Patch() {}
-    
+
     void setPatch(const SkPoint pts[12]) {
         memcpy(fPts, pts, 12 * sizeof(SkPoint));
         fPts[12] = pts[0];  // the last shall be first
@@ -63,7 +71,7 @@ public:
 
     void draw(SkCanvas*, const SkPaint&, int segsU, int segsV,
               bool doTextures, bool doColors);
-    
+
 private:
     SkPoint fPts[13];
     int     fW, fH;
@@ -89,12 +97,12 @@ static void eval_sheet(const SkPoint edge[], int nu, int nv, int iu, int iv,
 
     SkScalar u = SkIntToScalar(iu) / nu;
     SkScalar v = SkIntToScalar(iv) / nv;
-    
+
     SkScalar uv = SkScalarMul(u, v);
     SkScalar Uv = SkScalarMul(SK_Scalar1 - u, v);
     SkScalar uV = SkScalarMul(u, SK_Scalar1 - v);
     SkScalar UV = SkScalarMul(SK_Scalar1 - u, SK_Scalar1 - v);
-    
+
     SkScalar x0 = SkScalarMul(UV, edge[TL].fX) + SkScalarMul(uV, edge[TR].fX) +
                   SkScalarMul(Uv, edge[BL].fX) + SkScalarMul(uv, edge[BR].fX);
     SkScalar y0 = SkScalarMul(UV, edge[TL].fY) + SkScalarMul(uV, edge[TR].fY) +
@@ -123,7 +131,7 @@ static int ScalarTo255(SkScalar v) {
 
 static SkColor make_color(SkScalar s, SkScalar t) {
     int cs = ScalarTo255(s);
-    int ct = ScalarTo255(t);    
+    int ct = ScalarTo255(t);
     return SkColorSetARGB(0xFF, cs, 0, 0) + SkColorSetARGB(0, 0, ct, 0);
 }
 
@@ -139,22 +147,22 @@ void Patch::draw(SkCanvas* canvas, const SkPaint& paint, int nu, int nv,
     SkPoint* edge1 = edge0 + nu;
     SkPoint* edge2 = edge1 + nv;
     SkPoint* edge3 = edge2 + nu;
-    
+
     // evaluate the edge points
     eval_patch_edge(fPts + 0, edge0, nu);
     eval_patch_edge(fPts + 3, edge1, nv);
     eval_patch_edge(fPts + 6, edge2, nu);
     eval_patch_edge(fPts + 9, edge3, nv);
     edge3[nv] = edge0[0];   // the last shall be first
-    
+
     for (i = 0; i < npts; i++) {
 //        canvas->drawLine(edge0[i].fX, edge0[i].fY, edge0[i+1].fX, edge0[i+1].fY, paint);
     }
-    
+
     int row, vertCount = (nu + 1) * (nv + 1);
     SkAutoTMalloc<SkPoint>  vertStorage(vertCount);
     SkPoint* verts = vertStorage.get();
-    
+
     // first row
     memcpy(verts, edge0, (nu + 1) * sizeof(SkPoint));
     // rows
@@ -172,9 +180,9 @@ void Patch::draw(SkCanvas* canvas, const SkPaint& paint, int nu, int nv,
     for (i = 0; i <= nu; i++) {
         last[i] = edge2[nu - i];
     }
-    
+
 //    canvas->drawPoints(verts, vertCount, paint);
-    
+
     int stripCount = (nu + 1) * 2;
     SkAutoTMalloc<SkPoint>  stripStorage(stripCount * 2);
     SkAutoTMalloc<SkColor>  colorStorage(stripCount);
@@ -221,13 +229,13 @@ static void drawpatches(SkCanvas* canvas, const SkPaint& paint, int nu, int nv,
     patch->draw(canvas, paint, 10, 10, true, true);
 }
 
-class PatchView : public SkView {
+class PatchView : public SampleView {
     SkShader*   fShader0;
     SkShader*   fShader1;
     SkIPoint    fSize0, fSize1;
     SkPoint     fPts[12];
-    
-public:    
+
+public:
 	PatchView() {
         fShader0 = make_shader0(&fSize0);
         fSize1 = fSize0;
@@ -250,13 +258,15 @@ public:
         fPts[9].set(S*0, T*4);
         fPts[10].set(S*0, T*3);
         fPts[11].set(S*0, T*2);
+
+        this->setBGColor(SK_ColorGRAY);
     }
-    
+
     virtual ~PatchView() {
-        fShader0->safeUnref();
-        fShader1->safeUnref();
+        SkSafeUnref(fShader0);
+        SkSafeUnref(fShader1);
     }
-    
+
 protected:
     // overrides from SkEventSink
     virtual bool onQuery(SkEvent* evt)  {
@@ -268,93 +278,16 @@ protected:
         }
         return this->INHERITED::onQuery(evt);
     }
-    
-    void drawBG(SkCanvas* canvas) {
-        canvas->drawColor(SK_ColorGRAY);
-    }
-    
-    virtual void onDraw(SkCanvas* canvas) {
-        this->drawBG(canvas);
-        
+
+    virtual void onDrawContent(SkCanvas* canvas) {
         SkPaint paint;
         paint.setDither(true);
         paint.setFilterBitmap(true);
 
-        if (false) {
-            SkPath p;
-            p.moveTo(0, 0);
-            p.lineTo(SkIntToScalar(30000), SkIntToScalar(30000));
-            paint.setStyle(SkPaint::kStroke_Style);
-            paint.setStrokeWidth(SkIntToScalar(4));
-            paint.setAntiAlias(true);
-            canvas->scale(SkIntToScalar(3), SkIntToScalar(3));
-            canvas->drawPath(p, paint);
-            return;
-        }
-        
-        if (false) {
-            for (int dy = -1; dy <= 2; dy++) {
-                canvas->save();
-                if (dy == 2) {
-                    canvas->translate(0, SK_Scalar1/2);
-                } else {
-                    canvas->translate(0, SkIntToScalar(dy)/100);
-                }
-            
-                SkBitmap bm;
-                bm.setConfig(SkBitmap::kARGB_8888_Config, 20, 20);
-                bm.allocPixels();
-                SkCanvas c(bm);
-                SkRect r = { 0, 0, 20*SK_Scalar1, SK_Scalar1 };
-                for (int y = 0; y < 20; y++) {
-                    SkPaint p;
-                    p.setARGB(0xFF, y*5&0xFF, y*13&0xFF, y*29&0xFF);
-                    c.drawRect(r, p);
-                    r.offset(0, SK_Scalar1);
-                }
-                SkIRect src;
-                SkRect  dst;
-                
-                static const int srcPts[] = {
-                 //   2, 0, 15, 2,
-                    2, 2, 15, 16,
-                    17, 2, 2, 16,
-                    19, 2, 1, 16,
-                //    2, 18, 15, 2
-                };
-                static const double dstPts[] = {
-                //    7, 262 15, 24.5,
-                    7, 286.5, 15, 16,
-                    22, 286.5, 5, 16,
-                    27, 286.5, 1, 16,
-                 //   7, 302.5, 15, 24.5
-                };
-                
-                SkPaint p;
-//                p.setFilterBitmap(true);
-                const int* s = srcPts;
-                const double* d = dstPts;
-                for (int i = 0; i < 3; i++) {
-                    src.set(s[0], s[1], s[0]+s[2], s[1]+s[3]);
-                    dst.set(SkDoubleToScalar(d[0]),
-                            SkDoubleToScalar(d[1]),
-                            SkDoubleToScalar(d[0]+d[2]),
-                            SkDoubleToScalar(d[1]+d[3]));
-                    canvas->drawBitmapRect(bm, &src, dst, &p);
-                    canvas->translate(SkDoubleToScalar(1), 0);
-                    s += 4;
-                    d += 4;
-                }
-                canvas->restore();
-                canvas->translate(SkIntToScalar(32), 0);
-            }
-            return;
-        }
-        
         canvas->translate(SkIntToScalar(20), 0);
 
         Patch   patch;
-        
+
         paint.setShader(fShader0);
         if (fSize0.fX == 0) {
             fSize0.fX = 1;
@@ -363,51 +296,50 @@ protected:
             fSize0.fY = 1;
         }
         patch.setBounds(fSize0.fX, fSize0.fY);
-        
-        patch.setPatch(fPts);        
+
+        patch.setPatch(fPts);
         drawpatches(canvas, paint, 10, 10, &patch);
-        
+
         paint.setShader(NULL);
         paint.setAntiAlias(true);
         paint.setStrokeWidth(SkIntToScalar(5));
-        canvas->drawPoints(SkCanvas::kPoints_PointMode, SK_ARRAY_COUNT(fPts),
-                           fPts, paint);
-        
+        canvas->drawPoints(SkCanvas::kPoints_PointMode, SK_ARRAY_COUNT(fPts), fPts, paint);
+
         canvas->translate(0, SkIntToScalar(300));
-        
+
         paint.setAntiAlias(false);
         paint.setShader(fShader1);
         patch.setBounds(fSize1.fX, fSize1.fY);
         drawpatches(canvas, paint, 10, 10, &patch);
     }
-    
+
     class PtClick : public Click {
     public:
         int fIndex;
         PtClick(SkView* view, int index) : Click(view), fIndex(index) {}
     };
-    
+
     static bool hittest(const SkPoint& pt, SkScalar x, SkScalar y) {
         return SkPoint::Length(pt.fX - x, pt.fY - y) < SkIntToScalar(5);
     }
-    
+
     virtual SkView::Click* onFindClickHandler(SkScalar x, SkScalar y) {
-        for (int i = 0; i < SK_ARRAY_COUNT(fPts); i++) {
+        for (size_t i = 0; i < SK_ARRAY_COUNT(fPts); i++) {
             if (hittest(fPts[i], x, y)) {
                 return new PtClick(this, i);
             }
         }
         return this->INHERITED::onFindClickHandler(x, y);
     }
-    
+
     virtual bool onClick(Click* click) {
         fPts[((PtClick*)click)->fIndex].set(click->fCurr.fX, click->fCurr.fY);
         this->inval(NULL);
         return true;
     }
-    
+
 private:
-    typedef SkView INHERITED;
+    typedef SampleView INHERITED;
 };
 
 //////////////////////////////////////////////////////////////////////////////

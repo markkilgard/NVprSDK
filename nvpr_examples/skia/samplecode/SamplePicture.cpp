@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "SampleCode.h"
 #include "SkDumpCanvas.h"
 #include "SkView.h"
@@ -14,74 +21,12 @@
 #include "SkUtils.h"
 #include "SkColorPriv.h"
 #include "SkColorFilter.h"
-#include "SkShape.h"
 #include "SkTime.h"
 #include "SkTypeface.h"
 #include "SkXfermode.h"
 
 #include "SkStream.h"
 #include "SkXMLParser.h"
-
-class SignalShape : public SkShape {
-public:
-    SignalShape() : fSignal(0) {}
-
-    SkShape* setSignal(int n) {
-        fSignal = n;
-        return this;
-    }
-
-protected:
-    virtual void onDraw(SkCanvas* canvas) {
-        SkDebugf("---- sc %d\n", canvas->getSaveCount() - 1);
-    }
-
-private:
-    int fSignal;
-};
-
-static SkPMColor SignalProc(SkPMColor src, SkPMColor dst) {
-    return dst;
-}
-
-/*  Picture playback will skip blocks of draw calls that follow a clip() call
-    that returns empty, and jump down to the corresponding restore() call.
-
-    This is a great preformance win for drawing very large/tall pictures with
-    a small visible window (think scrolling a long document). These tests make
-    sure that (a) we are performing the culling, and (b) we don't get confused
-    by nested save() calls, nor by calls to restoreToCount().
- */
-static void test_saveRestoreCulling() {
-    SkPaint signalPaint;
-    SignalShape signalShape;
-
-    SkPicture pic;
-    SkRect r = SkRect::MakeWH(0, 0);
-    int n;
-    SkCanvas* canvas = pic.beginRecording(100, 100);
-    int startN = canvas->getSaveCount();
-    SkDebugf("---- start sc %d\n", startN);
-    canvas->drawShape(signalShape.setSignal(1));
-    canvas->save();
-    canvas->drawShape(signalShape.setSignal(2));
-    n = canvas->save();
-    canvas->drawShape(signalShape.setSignal(3));
-    canvas->save();
-    canvas->clipRect(r);
-    canvas->drawShape(signalShape.setSignal(4));
-    canvas->restoreToCount(n);
-    canvas->drawShape(signalShape.setSignal(5));
-    canvas->restore();
-    canvas->drawShape(signalShape.setSignal(6));
-    SkASSERT(canvas->getSaveCount() == startN);
-
-    SkBitmap bm;
-    bm.setConfig(SkBitmap::kARGB_8888_Config, 100, 100);
-    bm.allocPixels();
-    SkCanvas c(bm);
-    c.drawPicture(pic);
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -109,7 +54,7 @@ static void drawCircle(SkCanvas* canvas, int r, SkColor color) {
                        paint);
 }
 
-class PictureView : public SkView {
+class PictureView : public SampleView {
     SkBitmap fBitmap;
 public:
 	PictureView() {
@@ -137,8 +82,6 @@ public:
         // unref fPicture in our destructor, and it will in turn take care of
         // the other references to fSubPicture
         fSubPicture->unref();
-
-        test_saveRestoreCulling();
     }
     
     virtual ~PictureView() {
@@ -155,12 +98,6 @@ protected:
         return this->INHERITED::onQuery(evt);
     }
 
-    void drawBG(SkCanvas* canvas) {
-//        canvas->drawColor(0xFFDDDDDD);
-        canvas->drawColor(SK_ColorWHITE);
-   //     canvas->drawColor(SK_ColorBLACK);
-    }
-    
     void drawSomething(SkCanvas* canvas) {
         SkPaint paint;
 
@@ -186,9 +123,7 @@ protected:
         
     }
 
-    virtual void onDraw(SkCanvas* canvas) {
-        this->drawBG(canvas);
-
+    virtual void onDrawContent(SkCanvas* canvas) {
         drawSomething(canvas);
 
         SkPicture* pict = new SkPicture;
@@ -238,7 +173,7 @@ private:
     #define INVAL_ALL_TYPE  "inval-all"
     
     void delayInval(SkMSec delay) {
-        (new SkEvent(INVAL_ALL_TYPE))->post(this->getSinkID(), delay);
+        (new SkEvent(INVAL_ALL_TYPE, this->getSinkID()))->postDelay(delay);
     }
     
     virtual bool onEvent(const SkEvent& evt) {
@@ -252,7 +187,7 @@ private:
     SkPicture*  fPicture;
     SkPicture*  fSubPicture;
 
-    typedef SkView INHERITED;
+    typedef SampleView INHERITED;
 };
 
 //////////////////////////////////////////////////////////////////////////////

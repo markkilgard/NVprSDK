@@ -1,3 +1,12 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
+
+
 #include "SkPorterDuff.h"
 #include "SkXfermode.h"
 
@@ -29,7 +38,10 @@ static const struct Pair {
     MAKE_PAIR(Lighten),
     MAKE_PAIR(Multiply),
     MAKE_PAIR(Screen),
-    { SkPorterDuff::kAdd_Mode, SkXfermode::kPlus_Mode }
+    { SkPorterDuff::kAdd_Mode, SkXfermode::kPlus_Mode },
+#ifdef SK_BUILD_FOR_ANDROID
+    MAKE_PAIR(Overlay),
+#endif
 };
 
 static bool find_pdmode(SkXfermode::Mode src, SkPorterDuff::Mode* dst) {

@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "SkLayer.h"
 #include "SkCanvas.h"
 
@@ -27,7 +34,7 @@ SkLayer::SkLayer() {
 #endif
 }
 
-SkLayer::SkLayer(const SkLayer& src) {
+SkLayer::SkLayer(const SkLayer& src) : INHERITED() {
     fParent = NULL;
     m_opacity = src.m_opacity;
     m_size = src.m_size;

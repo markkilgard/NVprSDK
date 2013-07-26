@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "Forth.h"
 #include "ForthParser.h"
 #include "SkString.h"
@@ -427,7 +434,6 @@ void ForthParser::addStdWords() {
     this->add("f.", 2, new fdot_ForthWord);
     this->add("fabs", 4, new fabs_ForthWord);
     this->add("fmin", 4, new fmin_ForthWord);
-    this->add("fmax", 4, new fmax_ForthWord);
     this->add("fmax", 4, new fmax_ForthWord);
     this->add("floor", 5, new floor_ForthWord);
     this->add("ceil", 4, new ceil_ForthWord);

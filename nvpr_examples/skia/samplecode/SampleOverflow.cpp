@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "SampleCode.h"
 #include "SkView.h"
 #include "SkCanvas.h"
@@ -70,7 +77,7 @@ static void TestOverflowHitTest() {
 #endif
 }
 
-class OverflowView : public SkView {
+class OverflowView : public SampleView {
 public:
 	OverflowView() {}
 
@@ -84,19 +91,13 @@ protected:
         return this->INHERITED::onQuery(evt);
     }
     
-    void drawBG(SkCanvas* canvas) {
-        canvas->drawColor(SK_ColorWHITE);
-    }
-    
-    virtual void onDraw(SkCanvas* canvas) {
-        this->drawBG(canvas);
-
+    virtual void onDrawContent(SkCanvas* canvas) {
         DrawRoundRect();
         TestOverflowHitTest();
     }
     
 private:
-    typedef SkView INHERITED;
+    typedef SampleView INHERITED;
 };
 
 //////////////////////////////////////////////////////////////////////////////

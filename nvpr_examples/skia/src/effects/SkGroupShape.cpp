@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "SkGroupShape.h"
 
 SkGroupShape::SkGroupShape() {}
@@ -76,11 +83,7 @@ void SkGroupShape::onDraw(SkCanvas* canvas) {
     }
 }
 
-SkFlattenable::Factory SkGroupShape::getFactory() {
-    return CreateProc;
-}
-
-void SkGroupShape::flatten(SkFlattenableWriteBuffer& buffer) {
+void SkGroupShape::flatten(SkFlattenableWriteBuffer& buffer) const {
     this->INHERITED::flatten(buffer);
 
     int count = fList.count();
@@ -120,9 +123,5 @@ SkGroupShape::SkGroupShape(SkFlattenableReadBuffer& buffer) : INHERITED(buffer){
     }
 }
 
-SkFlattenable* SkGroupShape::CreateProc(SkFlattenableReadBuffer& buffer) {
-    return SkNEW_ARGS(SkGroupShape, (buffer));
-}
-
-static SkFlattenable::Registrar gReg("SkGroupShape", SkGroupShape::CreateProc);
+SK_DEFINE_FLATTENABLE_REGISTRAR(SkGroupShape)
 

@@ -1,18 +1,11 @@
+
 /*
- * Copyright (C) 2006 The Android Open Source Project
+ * Copyright 2006 The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
  */
+
 
 #ifndef SkMath_DEFINED
 #define SkMath_DEFINED
@@ -77,7 +70,6 @@ static inline int SkClampPos(int value) {
 
 /** Given an integer and a positive (max) integer, return the value
     pinned against 0 and max, inclusive.
-    Note: only works as long as max - value doesn't wrap around
     @param value    The value we want returned pinned between [0...max]
     @param max      The positive max value
     @return 0 if value < 0, max if value > max, else value
@@ -85,10 +77,6 @@ static inline int SkClampPos(int value) {
 static inline int SkClampMax(int value, int max) {
     // ensure that max is positive
     SkASSERT(max >= 0);
-    // ensure that if value is negative, max - value doesn't wrap around
-    SkASSERT(value >= 0 || max - value > 0);
-
-#ifdef SK_CPU_HAS_CONDITIONAL_INSTR
     if (value < 0) {
         value = 0;
     }
@@ -96,15 +84,6 @@ static inline int SkClampMax(int value, int max) {
         value = max;
     }
     return value;
-#else
-
-    int diff = max - value;
-    // clear diff if diff is positive
-    diff &= diff >> 31;
-
-    // clear the result if value < 0
-    return (value + diff) & ~(value >> 31);
-#endif
 }
 
 /** Given a positive value and a positive max, return the value
@@ -129,7 +108,7 @@ static inline unsigned SkClampUMax(unsigned value, unsigned max) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#if defined(__arm__) && !defined(__thumb__)
+#if defined(__arm__)
     #define SkCLZ(x)    __builtin_clz(x)
 #endif
 
@@ -159,6 +138,13 @@ static inline int SkNextPow2(int value) {
 static inline int SkNextLog2(uint32_t value) {
     SkASSERT(value != 0);
     return 32 - SkCLZ(value - 1);
+}
+
+/** Returns true if value is a power of 2. Does not explicitly check for
+    value <= 0.
+ */
+static inline bool SkIsPow2(int value) {
+    return (value & (value - 1)) == 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -210,6 +196,16 @@ static inline U8CPU SkMulDiv255Round(U8CPU a, U8CPU b) {
     SkASSERT((uint8_t)a == a);
     SkASSERT((uint8_t)b == b);
     unsigned prod = SkMulS16(a, b) + 128;
+    return (prod + (prod >> 8)) >> 8;
+}
+
+/** Return (a*b)/255, taking the ceiling of any fractional bits. Only valid if
+    both a and b are 0..255. The expected result equals (a * b + 254) / 255.
+ */
+static inline U8CPU SkMulDiv255Ceiling(U8CPU a, U8CPU b) {
+    SkASSERT((uint8_t)a == a);
+    SkASSERT((uint8_t)b == b);
+    unsigned prod = SkMulS16(a, b) + 255;
     return (prod + (prod >> 8)) >> 8;
 }
 

@@ -1,0 +1,243 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{AF856AAE-D5FE-5F74-FC73-5ED5B1DF40EB}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>effects</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="PropertySheets">
+    <Import Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <ExecutablePath>$(ExecutablePath);$(MSBuildProjectDirectory)\..\..\gyp\bin\;$(MSBuildProjectDirectory)\..\..\gyp\bin\</ExecutablePath>
+    <IntDir>$(Platform)__2012$(Configuration)\$(ProjectName)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
+    <OutDir>$(Platform)__2012$(Configuration)\</OutDir>
+    <TargetName>$(ProjectName)</TargetName>
+    <TargetPath>$(OutDir)\lib\$(ProjectName).lib</TargetPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\..\include\config;..\..\include\core;..\..\include\effects;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>false</ExceptionHandling>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_DEBUG;SK_SCALAR_IS_FLOAT;SK_CAN_USE_FLOAT;SK_BUILD_FOR_WIN32;SK_IGNORE_STDINT_DOT_H;_CRT_SECURE_NO_WARNINGS;SK_DEBUG;GR_DEBUG=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ProgramDataBaseFileName>$(OutDir)$(ProjectName).pdb</ProgramDataBaseFileName>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <WarningLevel>Level3</WarningLevel>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(OutDir)lib\$(ProjectName).lib</OutputFile>
+    </Lib>
+    <Link>
+      <AdditionalDependencies>OpenGL32.lib;usp10.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\include\config;..\..\include\core;..\..\include\effects;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>SK_SCALAR_IS_FLOAT;SK_CAN_USE_FLOAT;SK_BUILD_FOR_WIN32;SK_IGNORE_STDINT_DOT_H;_CRT_SECURE_NO_WARNINGS;SK_DEBUG;GR_DEBUG=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\..\include\config;..\..\include\core;..\..\include\effects;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>false</ExceptionHandling>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_DEBUG;SK_SCALAR_IS_FLOAT;SK_CAN_USE_FLOAT;SK_BUILD_FOR_WIN32;SK_IGNORE_STDINT_DOT_H;_CRT_SECURE_NO_WARNINGS;SK_DEBUG;GR_DEBUG=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ProgramDataBaseFileName>$(OutDir)$(ProjectName).pdb</ProgramDataBaseFileName>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <WarningLevel>Level3</WarningLevel>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(OutDir)lib\$(ProjectName).lib</OutputFile>
+    </Lib>
+    <Link>
+      <AdditionalDependencies>OpenGL32.lib;usp10.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\include\config;..\..\include\core;..\..\include\effects;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>SK_SCALAR_IS_FLOAT;SK_CAN_USE_FLOAT;SK_BUILD_FOR_WIN32;SK_IGNORE_STDINT_DOT_H;_CRT_SECURE_NO_WARNINGS;SK_DEBUG;GR_DEBUG=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\..\include\config;..\..\include\core;..\..\include\effects;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>false</ExceptionHandling>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <Optimization>Full</Optimization>
+      <PreprocessorDefinitions>NDEBUG;SK_SCALAR_IS_FLOAT;SK_CAN_USE_FLOAT;SK_BUILD_FOR_WIN32;SK_IGNORE_STDINT_DOT_H;_CRT_SECURE_NO_WARNINGS;SK_RELEASE;GR_RELEASE=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ProgramDataBaseFileName>$(OutDir)$(ProjectName).pdb</ProgramDataBaseFileName>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <WarningLevel>Level3</WarningLevel>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+    </ClCompile>
+    <Lib>
+      <LinkTimeCodeGeneration>true</LinkTimeCodeGeneration>
+      <OutputFile>$(OutDir)lib\$(ProjectName).lib</OutputFile>
+    </Lib>
+    <Link>
+      <AdditionalDependencies>OpenGL32.lib;usp10.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+    </Link>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\include\config;..\..\include\core;..\..\include\effects;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>SK_SCALAR_IS_FLOAT;SK_CAN_USE_FLOAT;SK_BUILD_FOR_WIN32;SK_IGNORE_STDINT_DOT_H;_CRT_SECURE_NO_WARNINGS;SK_RELEASE;GR_RELEASE=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\..\include\config;..\..\include\core;..\..\include\effects;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>false</ExceptionHandling>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <Optimization>Full</Optimization>
+      <PreprocessorDefinitions>NDEBUG;SK_SCALAR_IS_FLOAT;SK_CAN_USE_FLOAT;SK_BUILD_FOR_WIN32;SK_IGNORE_STDINT_DOT_H;_CRT_SECURE_NO_WARNINGS;SK_RELEASE;GR_RELEASE=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ProgramDataBaseFileName>$(OutDir)$(ProjectName).pdb</ProgramDataBaseFileName>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <WarningLevel>Level3</WarningLevel>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+    </ClCompile>
+    <Lib>
+      <LinkTimeCodeGeneration>true</LinkTimeCodeGeneration>
+      <OutputFile>$(OutDir)lib\$(ProjectName).lib</OutputFile>
+    </Lib>
+    <Link>
+      <AdditionalDependencies>OpenGL32.lib;usp10.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+    </Link>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\include\config;..\..\include\core;..\..\include\effects;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>SK_SCALAR_IS_FLOAT;SK_CAN_USE_FLOAT;SK_BUILD_FOR_WIN32;SK_IGNORE_STDINT_DOT_H;_CRT_SECURE_NO_WARNINGS;SK_RELEASE;GR_RELEASE=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <None Include="..\..\gyp\effects.gyp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\effects\SkEmbossMask_Table.h" />
+    <ClInclude Include="..\..\src\effects\SkClampRange.h" />
+    <ClInclude Include="..\..\src\effects\SkBitmapCache.h" />
+    <ClInclude Include="..\..\src\effects\SkEmbossMask.h" />
+    <ClInclude Include="..\..\src\effects\SkRadialGradient_Table.h" />
+    <ClInclude Include="..\..\src\effects\SkBlurMask.h" />
+    <ClInclude Include="..\..\include\effects\SkBlurDrawLooper.h" />
+    <ClInclude Include="..\..\include\effects\SkTransparentShader.h" />
+    <ClInclude Include="..\..\include\effects\Sk1DPathEffect.h" />
+    <ClInclude Include="..\..\include\effects\SkTableMaskFilter.h" />
+    <ClInclude Include="..\..\include\effects\SkAvoidXfermode.h" />
+    <ClInclude Include="..\..\include\effects\SkGroupShape.h" />
+    <ClInclude Include="..\..\include\effects\SkColorMatrixFilter.h" />
+    <ClInclude Include="..\..\include\effects\SkCornerPathEffect.h" />
+    <ClInclude Include="..\..\include\effects\SkLayerDrawLooper.h" />
+    <ClInclude Include="..\..\include\effects\SkEmbossMaskFilter.h" />
+    <ClInclude Include="..\..\include\effects\SkRectShape.h" />
+    <ClInclude Include="..\..\include\effects\SkPorterDuff.h" />
+    <ClInclude Include="..\..\include\effects\SkColorMatrix.h" />
+    <ClInclude Include="..\..\include\effects\SkLayerRasterizer.h" />
+    <ClInclude Include="..\..\include\effects\SkBlurImageFilter.h" />
+    <ClInclude Include="..\..\include\effects\SkKernel33MaskFilter.h" />
+    <ClInclude Include="..\..\include\effects\SkBlurMaskFilter.h" />
+    <ClInclude Include="..\..\include\effects\SkMorphologyImageFilter.h" />
+    <ClInclude Include="..\..\include\effects\SkDrawExtraPathEffect.h" />
+    <ClInclude Include="..\..\include\effects\SkTableColorFilter.h" />
+    <ClInclude Include="..\..\include\effects\SkPaintFlagsDrawFilter.h" />
+    <ClInclude Include="..\..\include\effects\SkPixelXorXfermode.h" />
+    <ClInclude Include="..\..\include\effects\SkDiscretePathEffect.h" />
+    <ClInclude Include="..\..\include\effects\Sk2DPathEffect.h" />
+    <ClInclude Include="..\..\include\effects\SkDashPathEffect.h" />
+    <ClInclude Include="..\..\include\effects\SkArithmeticMode.h" />
+    <ClInclude Include="..\..\include\effects\SkGradientShader.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\effects\SkGroupShape.cpp" />
+    <ClCompile Include="..\..\src\effects\SkBlurMaskFilter.cpp" />
+    <ClCompile Include="..\..\src\effects\SkBlurMask.cpp" />
+    <ClCompile Include="..\..\src\effects\SkPaintFlagsDrawFilter.cpp" />
+    <ClCompile Include="..\..\src\effects\Sk2DPathEffect.cpp" />
+    <ClCompile Include="..\..\src\effects\SkLayerRasterizer.cpp" />
+    <ClCompile Include="..\..\src\effects\SkCornerPathEffect.cpp" />
+    <ClCompile Include="..\..\src\effects\SkTransparentShader.cpp" />
+    <ClCompile Include="..\..\src\effects\SkMorphologyImageFilter.cpp" />
+    <ClCompile Include="..\..\src\effects\SkBlurImageFilter.cpp" />
+    <ClCompile Include="..\..\src\effects\SkDashPathEffect.cpp" />
+    <ClCompile Include="..\..\src\effects\SkBlurDrawLooper.cpp" />
+    <ClCompile Include="..\..\src\effects\SkColorMatrixFilter.cpp" />
+    <ClCompile Include="..\..\src\effects\SkTableColorFilter.cpp" />
+    <ClCompile Include="..\..\src\effects\SkClampRange.cpp" />
+    <ClCompile Include="..\..\src\effects\SkBitmapCache.cpp" />
+    <ClCompile Include="..\..\src\effects\SkEmbossMask.cpp" />
+    <ClCompile Include="..\..\src\effects\SkDiscretePathEffect.cpp" />
+    <ClCompile Include="..\..\src\effects\SkRectShape.cpp" />
+    <ClCompile Include="..\..\src\effects\SkAvoidXfermode.cpp" />
+    <ClCompile Include="..\..\src\effects\SkPorterDuff.cpp" />
+    <ClCompile Include="..\..\src\effects\SkEmbossMaskFilter.cpp" />
+    <ClCompile Include="..\..\src\effects\SkGradientShader.cpp" />
+    <ClCompile Include="..\..\src\effects\SkTestImageFilters.cpp" />
+    <ClCompile Include="..\..\src\effects\SkKernel33MaskFilter.cpp" />
+    <ClCompile Include="..\..\src\effects\SkPixelXorXfermode.cpp" />
+    <ClCompile Include="..\..\src\effects\Sk1DPathEffect.cpp" />
+    <ClCompile Include="..\..\src\effects\SkArithmeticMode.cpp" />
+    <ClCompile Include="..\..\src\effects\SkLayerDrawLooper.cpp" />
+    <ClCompile Include="..\..\src\effects\SkColorFilters.cpp" />
+    <ClCompile Include="..\..\src\effects\SkColorMatrix.cpp" />
+    <ClCompile Include="..\..\src\effects\SkTableMaskFilter.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets" />
+</Project>

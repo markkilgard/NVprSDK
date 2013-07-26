@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "SkBitmapProcShader.h"
 #include "SkColorPriv.h"
 #include "SkPixelRef.h"
@@ -44,8 +51,10 @@ void SkBitmapProcShader::endSession() {
     this->INHERITED::endSession();
 }
 
-bool SkBitmapProcShader::asABitmap(SkBitmap* texture, SkMatrix* texM,
-                                   TileMode xy[]) {
+SkShader::BitmapType SkBitmapProcShader::asABitmap(SkBitmap* texture,
+                                                   SkMatrix* texM,
+                                                   TileMode xy[],
+                                       SkScalar* twoPointRadialParams) const {
     if (texture) {
         *texture = fRawBitmap;
     }
@@ -56,10 +65,10 @@ bool SkBitmapProcShader::asABitmap(SkBitmap* texture, SkMatrix* texM,
         xy[0] = (TileMode)fState.fTileModeX;
         xy[1] = (TileMode)fState.fTileModeY;
     }
-    return true;
+    return kDefault_BitmapType;
 }
 
-void SkBitmapProcShader::flatten(SkFlattenableWriteBuffer& buffer) {
+void SkBitmapProcShader::flatten(SkFlattenableWriteBuffer& buffer) const {
     this->INHERITED::flatten(buffer);
 
     fRawBitmap.flatten(buffer);
@@ -72,6 +81,10 @@ static bool only_scale_and_translate(const SkMatrix& matrix) {
     return (matrix.getType() & ~mask) == 0;
 }
 
+bool SkBitmapProcShader::isOpaque() const {
+    return fRawBitmap.isOpaque();
+}
+
 bool SkBitmapProcShader::setContext(const SkBitmap& device,
                                     const SkPaint& paint,
                                     const SkMatrix& matrix) {
@@ -82,7 +95,7 @@ bool SkBitmapProcShader::setContext(const SkBitmap& device,
 
     fState.fOrigBitmap = fRawBitmap;
     fState.fOrigBitmap.lockPixels();
-    if (fState.fOrigBitmap.getPixels() == NULL) {
+    if (!fState.fOrigBitmap.getTexture() && !fState.fOrigBitmap.readyToDraw()) {
         fState.fOrigBitmap.unlockPixels();
         return false;
     }
@@ -93,7 +106,7 @@ bool SkBitmapProcShader::setContext(const SkBitmap& device,
 
     const SkBitmap& bitmap = *fState.fBitmap;
     bool bitmapIsOpaque = bitmap.isOpaque();
-    
+
     // update fFlags
     uint32_t flags = 0;
     if (bitmapIsOpaque && (255 == this->getPaintAlpha())) {
@@ -148,14 +161,14 @@ bool SkBitmapProcShader::setContext(const SkBitmap& device,
 
 void SkBitmapProcShader::shadeSpan(int x, int y, SkPMColor dstC[], int count) {
     const SkBitmapProcState& state = fState;
-    if (state.fShaderProc32) {
-        state.fShaderProc32(state, x, y, dstC, count);
+    if (state.getShaderProc32()) {
+        state.getShaderProc32()(state, x, y, dstC, count);
         return;
     }
 
     uint32_t buffer[BUF_MAX + TEST_BUFFER_EXTRA];
-    SkBitmapProcState::MatrixProc   mproc = state.fMatrixProc;
-    SkBitmapProcState::SampleProc32 sproc = state.fSampleProc32;
+    SkBitmapProcState::MatrixProc   mproc = state.getMatrixProc();
+    SkBitmapProcState::SampleProc32 sproc = state.getSampleProc32();
     int max = fState.maxCountForBufferSize(sizeof(buffer[0]) * BUF_MAX);
 
     SkASSERT(state.fBitmap->getPixels());
@@ -180,7 +193,7 @@ void SkBitmapProcShader::shadeSpan(int x, int y, SkPMColor dstC[], int count) {
         }
 #endif
         sproc(state, buffer, n, dstC);
-        
+
         if ((count -= n) == 0) {
             break;
         }
@@ -192,14 +205,14 @@ void SkBitmapProcShader::shadeSpan(int x, int y, SkPMColor dstC[], int count) {
 
 void SkBitmapProcShader::shadeSpan16(int x, int y, uint16_t dstC[], int count) {
     const SkBitmapProcState& state = fState;
-    if (state.fShaderProc16) {
-        state.fShaderProc16(state, x, y, dstC, count);
+    if (state.getShaderProc16()) {
+        state.getShaderProc16()(state, x, y, dstC, count);
         return;
     }
-    
+
     uint32_t buffer[BUF_MAX];
-    SkBitmapProcState::MatrixProc   mproc = state.fMatrixProc;
-    SkBitmapProcState::SampleProc16 sproc = state.fSampleProc16;
+    SkBitmapProcState::MatrixProc   mproc = state.getMatrixProc();
+    SkBitmapProcState::SampleProc16 sproc = state.getSampleProc16();
     int max = fState.maxCountForBufferSize(sizeof(buffer));
 
     SkASSERT(state.fBitmap->getPixels());
@@ -213,7 +226,7 @@ void SkBitmapProcShader::shadeSpan16(int x, int y, uint16_t dstC[], int count) {
         }
         mproc(state, buffer, n, x, y);
         sproc(state, buffer, n, dstC);
-        
+
         if ((count -= n) == 0) {
             break;
         }
@@ -226,6 +239,7 @@ void SkBitmapProcShader::shadeSpan16(int x, int y, uint16_t dstC[], int count) {
 
 #include "SkUnPreMultiply.h"
 #include "SkColorShader.h"
+#include "SkEmptyShader.h"
 
 // returns true and set color if the bitmap can be drawn as a single color
 // (for efficiency)
@@ -262,7 +276,10 @@ SkShader* SkShader::CreateBitmapShader(const SkBitmap& src,
                                        void* storage, size_t storageSize) {
     SkShader* shader;
     SkColor color;
-    if (canUseColorShader(src, &color)) {
+    if (src.isNull()) {
+        SK_PLACEMENT_NEW(shader, SkEmptyShader, storage, storageSize);
+    }
+    else if (canUseColorShader(src, &color)) {
         SK_PLACEMENT_NEW_ARGS(shader, SkColorShader, storage, storageSize,
                               (color));
     } else {
@@ -272,8 +289,7 @@ SkShader* SkShader::CreateBitmapShader(const SkBitmap& src,
     return shader;
 }
 
-static SkFlattenable::Registrar gBitmapProcShaderReg("SkBitmapProcShader",
-                                               SkBitmapProcShader::CreateProc);
+SK_DEFINE_FLATTENABLE_REGISTRAR(SkBitmapProcShader)
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -285,7 +301,7 @@ bool SkBitmapProcShader::toDumpString(SkString* str) const {
     str->printf("BitmapShader: [%d %d %d",
                 fRawBitmap.width(), fRawBitmap.height(),
                 fRawBitmap.bytesPerPixel());
-    
+
     // add the pixelref
     SkPixelRef* pr = fRawBitmap.pixelRef();
     if (pr) {
@@ -294,7 +310,7 @@ bool SkBitmapProcShader::toDumpString(SkString* str) const {
             str->appendf(" \"%s\"", uri);
         }
     }
-    
+
     // add the (optional) matrix
     {
         SkMatrix m;
@@ -304,7 +320,7 @@ bool SkBitmapProcShader::toDumpString(SkString* str) const {
             str->appendf(" %s", info.c_str());
         }
     }
-    
+
     str->appendf(" [%s %s]]",
                  gTileModeName[fState.fTileModeX],
                  gTileModeName[fState.fTileModeY]);

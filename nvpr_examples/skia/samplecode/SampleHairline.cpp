@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "SampleCode.h"
 #include "SkView.h"
 #include "SkCanvas.h"
@@ -180,12 +187,13 @@ static int cycle_hairproc_index(int index) {
     return (index + 1) % SK_ARRAY_COUNT(gProcs);
 }
 
-class HairlineView : public SkView {
+class HairlineView : public SampleView {
     SkMSec fNow;
     int fProcIndex;
     bool fDoAA;
 public:
 	HairlineView() {
+        fCounter = 0;
         fProcIndex = 0;
         fDoAA = true;
         fNow = 0;
@@ -209,17 +217,9 @@ protected:
         canvas->drawBitmap(b1, SkIntToScalar(b0.width()), 0, NULL);
     }
 
-    void drawBG(SkCanvas* canvas) {
-//        canvas->drawColor(0xFFDDDDDD);
-        canvas->drawColor(SK_ColorWHITE);
-   //     canvas->drawColor(SK_ColorBLACK);
-    }
-
     int fCounter;
 
-    virtual void onDraw(SkCanvas* canvas) {
-        this->drawBG(canvas);
-        
+    virtual void onDrawContent(SkCanvas* canvas) {
         gRand.setSeed(fNow);
         
         if (false) {
@@ -269,7 +269,7 @@ protected:
     
 
 private:
-    typedef SkView INHERITED;
+    typedef SampleView INHERITED;
 };
 
 //////////////////////////////////////////////////////////////////////////////

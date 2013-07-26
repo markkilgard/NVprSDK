@@ -1,7 +1,97 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "Test.h"
 #include "SkFloatingPoint.h"
+#include "SkMath.h"
 #include "SkPoint.h"
 #include "SkRandom.h"
+#include "SkColorPriv.h"
+
+static float float_blend(int src, int dst, float unit) {
+    return dst + (src - dst) * unit;
+}
+
+static int blend31(int src, int dst, int a31) {
+    return dst + ((src - dst) * a31 * 2114 >> 16);
+    //    return dst + ((src - dst) * a31 * 33 >> 10);
+}
+
+static int blend31_slow(int src, int dst, int a31) {
+    int prod = src * a31 + (31 - a31) * dst + 16;
+    prod = (prod + (prod >> 5)) >> 5;
+    return prod;
+}
+
+static int blend31_round(int src, int dst, int a31) {
+    int prod = (src - dst) * a31 + 16;
+    prod = (prod + (prod >> 5)) >> 5;
+    return dst + prod;
+}
+
+static int blend31_old(int src, int dst, int a31) {
+    a31 += a31 >> 4;
+    return dst + ((src - dst) * a31 >> 5);
+}
+
+static void test_blend31() {
+    int failed = 0;
+    int death = 0;
+    for (int src = 0; src <= 255; src++) {
+        for (int dst = 0; dst <= 255; dst++) {
+            for (int a = 0; a <= 31; a++) {
+//                int r0 = blend31(src, dst, a);
+//                int r0 = blend31_round(src, dst, a);
+//                int r0 = blend31_old(src, dst, a);
+                int r0 = blend31_slow(src, dst, a);
+
+                float f = float_blend(src, dst, a / 31.f);
+                int r1 = (int)f;
+                int r2 = SkScalarRoundToInt(SkFloatToScalar(f));
+
+                if (r0 != r1 && r0 != r2) {
+                    printf("src:%d dst:%d a:%d result:%d float:%g\n",
+                                 src, dst, a, r0, f);
+                    failed += 1;
+                }
+                if (r0 > 255) {
+                    death += 1;
+                    printf("death src:%d dst:%d a:%d result:%d float:%g\n",
+                           src, dst, a, r0, f);
+                }
+            }
+        }
+    }
+    SkDebugf("---- failed %d death %d\n", failed, death);
+}
+
+static void test_blend(skiatest::Reporter* reporter) {
+    for (int src = 0; src <= 255; src++) {
+        for (int dst = 0; dst <= 255; dst++) {
+            for (int a = 0; a <= 255; a++) {
+                int r0 = SkAlphaBlend255(src, dst, a);
+                float f1 = float_blend(src, dst, a / 255.f);
+                int r1 = SkScalarRoundToInt(SkFloatToScalar(f1));
+
+                if (r0 != r1) {
+                    float diff = sk_float_abs(f1 - r1);
+                    diff = sk_float_abs(diff - 0.5f);
+                    if (diff > (1 / 255.f)) {
+#ifdef SK_DEBUG
+                        SkDebugf("src:%d dst:%d a:%d result:%d float:%g\n",
+                                 src, dst, a, r0, f1);
+#endif
+                        REPORTER_ASSERT(reporter, false);
+                    }
+                }
+            }
+        }
+    }
+}
 
 #if defined(SkLONGLONG)
 static int symmetric_fixmul(int a, int b) {
@@ -146,6 +236,38 @@ static void unittest_fastfloat(skiatest::Reporter* reporter) {
     }
 }
 
+#ifdef SK_SCALAR_IS_FLOAT
+static float make_zero() {
+    return sk_float_sin(0);
+}
+#endif
+
+static void unittest_isfinite(skiatest::Reporter* reporter) {
+#ifdef SK_SCALAR_IS_FLOAT
+    float nan = sk_float_asin(2);
+    float inf = 1.0 / make_zero();
+    float big = 3.40282e+038;
+
+    REPORTER_ASSERT(reporter, !SkScalarIsNaN(inf));
+    REPORTER_ASSERT(reporter, !SkScalarIsNaN(-inf));
+    REPORTER_ASSERT(reporter, !SkScalarIsFinite(inf));
+    REPORTER_ASSERT(reporter, !SkScalarIsFinite(-inf));
+#else
+    SkFixed nan = SK_FixedNaN;
+    SkFixed big = SK_FixedMax;
+#endif
+
+    REPORTER_ASSERT(reporter,  SkScalarIsNaN(nan));
+    REPORTER_ASSERT(reporter, !SkScalarIsNaN(big));
+    REPORTER_ASSERT(reporter, !SkScalarIsNaN(-big));
+    REPORTER_ASSERT(reporter, !SkScalarIsNaN(0));
+    
+    REPORTER_ASSERT(reporter, !SkScalarIsFinite(nan));
+    REPORTER_ASSERT(reporter,  SkScalarIsFinite(big));
+    REPORTER_ASSERT(reporter,  SkScalarIsFinite(-big));
+    REPORTER_ASSERT(reporter,  SkScalarIsFinite(0));
+}
+
 #endif
 
 static void test_muldiv255(skiatest::Reporter* reporter) {
@@ -169,6 +291,19 @@ static void test_muldiv255(skiatest::Reporter* reporter) {
         }
     }
 #endif
+}
+
+static void test_muldiv255ceiling(skiatest::Reporter* reporter) {
+    for (int c = 0; c <= 255; c++) {
+        for (int a = 0; a <= 255; a++) {
+            int product = (c * a + 255);
+            int expected_ceiling = (product + (product >> 8)) >> 8;
+            int webkit_ceiling = (c * a + 254) / 255;
+            REPORTER_ASSERT(reporter, expected_ceiling == webkit_ceiling);
+            int skia_ceiling = SkMulDiv255Ceiling(c, a);
+            REPORTER_ASSERT(reporter, skia_ceiling == webkit_ceiling);
+        }
+    }
 }
 
 static void test_copysign(skiatest::Reporter* reporter) {
@@ -237,6 +372,7 @@ static void TestMath(skiatest::Reporter* reporter) {
 #endif
 
     test_muldiv255(reporter);
+    test_muldiv255ceiling(reporter);
     test_copysign(reporter);
 
     {
@@ -295,6 +431,7 @@ static void TestMath(skiatest::Reporter* reporter) {
 
 #ifdef SK_CAN_USE_FLOAT
     unittest_fastfloat(reporter);
+    unittest_isfinite(reporter);
 #endif
 
 #ifdef SkLONGLONG
@@ -411,6 +548,13 @@ static void TestMath(skiatest::Reporter* reporter) {
     }
     SkDebugf("SinCos: maximum error = %d\n", maxDiff);
 #endif
+
+#ifdef SK_SCALAR_IS_FLOAT
+    test_blend(reporter);
+#endif
+
+    // disable for now
+//    test_blend31();
 }
 
 #include "TestClassDef.h"

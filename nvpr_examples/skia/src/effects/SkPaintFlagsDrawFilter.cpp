@@ -1,22 +1,22 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
+
+
 #include "SkPaintFlagsDrawFilter.h"
 #include "SkPaint.h"
 
 SkPaintFlagsDrawFilter::SkPaintFlagsDrawFilter(uint32_t clearFlags,
-                                               uint32_t setFlags)
-{
+                                               uint32_t setFlags) {
     fClearFlags = SkToU16(clearFlags & SkPaint::kAllFlags);
     fSetFlags = SkToU16(setFlags & SkPaint::kAllFlags);
 }
 
-bool SkPaintFlagsDrawFilter::filter(SkCanvas*, SkPaint* paint, Type)
-{
-    fPrevFlags = paint->getFlags();
-    paint->setFlags((fPrevFlags & ~fClearFlags) | fSetFlags);
-    return true;
+void SkPaintFlagsDrawFilter::filter(SkPaint* paint, Type) {
+    paint->setFlags((paint->getFlags() & ~fClearFlags) | fSetFlags);
 }
 
-void SkPaintFlagsDrawFilter::restore(SkCanvas*, SkPaint* paint, Type)
-{
-    paint->setFlags(fPrevFlags);
-}
-    

@@ -1,5 +1,13 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "SkImageRef_ashmem.h"
 #include "SkImageDecoder.h"
+#include "SkFlattenable.h"
 #include "SkThread.h"
 
 #include <sys/mman.h>
@@ -36,7 +44,7 @@ SkImageRef_ashmem::SkImageRef_ashmem(SkStream* stream,
 }
 
 SkImageRef_ashmem::~SkImageRef_ashmem() {
-    fCT->safeUnref();
+    SkSafeUnref(fCT);
     this->closeFD();
 }
 
@@ -83,15 +91,17 @@ public:
             
             int err = ashmem_set_prot_region(fd, PROT_READ | PROT_WRITE);
             if (err) {
-                SkDebugf("------ ashmem_set_prot_region(%d) failed %d %d\n",
-                         fd, err, errno);
+                SkDebugf("------ ashmem_set_prot_region(%d) failed %d\n",
+                         fd, err);
+                close(fd);
                 return false;
             }
             
             addr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
             if (-1 == (long)addr) {
-                SkDebugf("---------- mmap failed for imageref_ashmem size=%d err=%d\n",
-                         size, errno);
+                SkDebugf("---------- mmap failed for imageref_ashmem size=%d\n",
+                         size);
+                close(fd);
                 return false;
             }
             
@@ -170,8 +180,7 @@ void* SkImageRef_ashmem::onLockPixels(SkColorTable** ct) {
             SkDebugf("===== ashmem purged %d\n", fBitmap.getSize());
 #endif
         } else {
-            SkDebugf("===== ashmem pin_region(%d) returned %d, treating as error %d\n",
-                     fRec.fFD, pin, errno);
+            SkDebugf("===== ashmem pin_region(%d) returned %d\n", fRec.fFD, pin);
             // return null result for failure
             if (ct) {
                 *ct = NULL;
@@ -201,3 +210,35 @@ void SkImageRef_ashmem::onUnlockPixels() {
     fBitmap.setPixels(NULL, NULL);
 }
 
+void SkImageRef_ashmem::flatten(SkFlattenableWriteBuffer& buffer) const {
+    this->INHERITED::flatten(buffer);
+    const char* uri = getURI();
+    if (uri) {
+        size_t len = strlen(uri);
+        buffer.write32(len);
+        buffer.writePad(uri, len);
+    } else {
+        buffer.write32(0);
+    }
+}
+
+SkImageRef_ashmem::SkImageRef_ashmem(SkFlattenableReadBuffer& buffer)
+        : INHERITED(buffer) {
+    fRec.fFD = -1;
+    fRec.fAddr = NULL;
+    fRec.fSize = 0;
+    fRec.fPinned = false;
+    fCT = NULL;
+    size_t length = buffer.readU32();
+    if (length) {
+        char* buf = (char*) malloc(length);
+        buffer.read(buf, length);
+        setURI(buf, length);
+    }
+}
+
+SkPixelRef* SkImageRef_ashmem::Create(SkFlattenableReadBuffer& buffer) {
+    return SkNEW_ARGS(SkImageRef_ashmem, (buffer));
+}
+
+SK_DEFINE_FLATTENABLE_REGISTRAR(SkImageRef_ashmem)

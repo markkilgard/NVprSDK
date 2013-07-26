@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "SampleCode.h"
 #include "SkView.h"
 #include "SkCanvas.h"
@@ -28,13 +35,23 @@ static SkBitmap createBitmap(int n) {
     return bitmap;
 }
 
-class MipMapView : public SkView {
+class MipMapView : public SampleView {
     SkBitmap fBitmap;
     enum {
-        N = 90
+        N = 64
     };
+    bool fOnce;
 public:
     MipMapView() {
+        fOnce = false;
+    }
+    
+    void init() {
+        if (fOnce) {
+            return;
+        }
+        fOnce = true;
+
         fBitmap = createBitmap(N);
         
         fWidth = N;
@@ -44,7 +61,7 @@ protected:
     // overrides from SkEventSink
     virtual bool onQuery(SkEvent* evt) {
         if (SampleCode::TitleQ(*evt)) {
-            SampleCode::TitleR(evt, "MapMaps");
+            SampleCode::TitleR(evt, "MipMaps");
             return true;
         }
         return this->INHERITED::onQuery(evt);
@@ -79,16 +96,11 @@ protected:
         }
     }
     
-    void drawBG(SkCanvas* canvas) {
-        canvas->drawColor(SK_ColorWHITE);
-    }
-    
-    virtual void onDraw(SkCanvas* canvas) {
-        this->drawBG(canvas);
-        
+    virtual void onDrawContent(SkCanvas* canvas) {
+        this->init();
         canvas->translate(SkIntToScalar(10), SkIntToScalar(10));
         
-        canvas->scale(1.00000001, 0.9999999);
+        canvas->scale(1.00000001f, 0.9999999f);
 
         drawN2(canvas, fBitmap);
 
@@ -139,7 +151,7 @@ protected:
 private:
     int fWidth;
 
-    typedef SkView INHERITED;
+    typedef SampleView INHERITED;
 };
 
 //////////////////////////////////////////////////////////////////////////////

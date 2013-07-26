@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #ifndef SkDumpCanvas_DEFINED
 #define SkDumpCanvas_DEFINED
 
@@ -5,7 +12,7 @@
 
 /** This class overrides all the draw methods on SkCanvas, and formats them
     as text, and then sends that to a Dumper helper object.
- 
+
     Typical use might be to dump a display list to a log file to see what is
     being drawn.
  */
@@ -15,17 +22,17 @@ public:
 
     explicit SkDumpCanvas(Dumper* = 0);
     virtual ~SkDumpCanvas();
-    
+
     enum Verb {
         kNULL_Verb,
 
         kSave_Verb,
         kRestore_Verb,
-        
+
         kMatrix_Verb,
-        
+
         kClip_Verb,
-        
+
         kDrawPaint_Verb,
         kDrawPoints_Verb,
         kDrawRect_Verb,
@@ -33,11 +40,10 @@ public:
         kDrawBitmap_Verb,
         kDrawText_Verb,
         kDrawPicture_Verb,
-        kDrawShape_Verb,
         kDrawVertices_Verb,
         kDrawData_Verb
     };
-    
+
     /** Subclasses of this are installed on the DumpCanvas, and then called for
         each drawing command.
      */
@@ -46,69 +52,64 @@ public:
         virtual void dump(SkDumpCanvas*, SkDumpCanvas::Verb, const char str[],
                           const SkPaint*) = 0;
     };
-        
+
     Dumper* getDumper() const { return fDumper; }
     void    setDumper(Dumper*);
-    
+
     int getNestLevel() const { return fNestLevel; }
-    
-    // overrides from SkCanvas
 
-    virtual int save(SaveFlags flags = kMatrixClip_SaveFlag);
+    virtual int save(SaveFlags) SK_OVERRIDE;
     virtual int saveLayer(const SkRect* bounds, const SkPaint* paint,
-                          SaveFlags flags = kARGB_ClipLayer_SaveFlag);
-    virtual void restore();
+                          SaveFlags) SK_OVERRIDE;
+    virtual void restore() SK_OVERRIDE;
 
-    virtual bool translate(SkScalar dx, SkScalar dy);
-    virtual bool scale(SkScalar sx, SkScalar sy);
-    virtual bool rotate(SkScalar degrees);
-    virtual bool skew(SkScalar sx, SkScalar sy);
-    virtual bool concat(const SkMatrix& matrix);
-    virtual void setMatrix(const SkMatrix& matrix);
-    
-    virtual bool clipRect(const SkRect& rect,
-                          SkRegion::Op op = SkRegion::kIntersect_Op);
-    virtual bool clipPath(const SkPath& path,
-                          SkRegion::Op op = SkRegion::kIntersect_Op);
+    virtual bool translate(SkScalar dx, SkScalar dy) SK_OVERRIDE;
+    virtual bool scale(SkScalar sx, SkScalar sy) SK_OVERRIDE;
+    virtual bool rotate(SkScalar degrees) SK_OVERRIDE;
+    virtual bool skew(SkScalar sx, SkScalar sy) SK_OVERRIDE;
+    virtual bool concat(const SkMatrix& matrix) SK_OVERRIDE;
+    virtual void setMatrix(const SkMatrix& matrix) SK_OVERRIDE;
+
+    virtual bool clipRect(const SkRect&, SkRegion::Op, bool) SK_OVERRIDE;
+    virtual bool clipPath(const SkPath&, SkRegion::Op, bool) SK_OVERRIDE;
     virtual bool clipRegion(const SkRegion& deviceRgn,
-                            SkRegion::Op op = SkRegion::kIntersect_Op);
+                            SkRegion::Op) SK_OVERRIDE;
 
-    virtual void drawPaint(const SkPaint& paint);
+    virtual void drawPaint(const SkPaint& paint) SK_OVERRIDE;
     virtual void drawPoints(PointMode mode, size_t count, const SkPoint pts[],
-                            const SkPaint& paint);
-    virtual void drawRect(const SkRect& rect, const SkPaint& paint);
-    virtual void drawPath(const SkPath& path, const SkPaint& paint);
+                            const SkPaint& paint) SK_OVERRIDE;
+    virtual void drawRect(const SkRect& rect, const SkPaint& paint) SK_OVERRIDE;
+    virtual void drawPath(const SkPath& path, const SkPaint& paint) SK_OVERRIDE;
     virtual void drawBitmap(const SkBitmap& bitmap, SkScalar left, SkScalar top,
-                            const SkPaint* paint = NULL);
+                            const SkPaint* paint) SK_OVERRIDE;
     virtual void drawBitmapRect(const SkBitmap& bitmap, const SkIRect* src,
-                                const SkRect& dst, const SkPaint* paint = NULL);
+                                const SkRect& dst, const SkPaint* paint) SK_OVERRIDE;
     virtual void drawBitmapMatrix(const SkBitmap& bitmap, const SkMatrix& m,
-                                  const SkPaint* paint = NULL);
+                                  const SkPaint* paint) SK_OVERRIDE;
     virtual void drawSprite(const SkBitmap& bitmap, int left, int top,
-                            const SkPaint* paint = NULL);
+                            const SkPaint* paint) SK_OVERRIDE;
     virtual void drawText(const void* text, size_t byteLength, SkScalar x,
-                          SkScalar y, const SkPaint& paint);
+                          SkScalar y, const SkPaint& paint) SK_OVERRIDE;
     virtual void drawPosText(const void* text, size_t byteLength,
-                             const SkPoint pos[], const SkPaint& paint);
+                             const SkPoint pos[], const SkPaint& paint) SK_OVERRIDE;
     virtual void drawPosTextH(const void* text, size_t byteLength,
                               const SkScalar xpos[], SkScalar constY,
-                              const SkPaint& paint);
+                              const SkPaint& paint) SK_OVERRIDE;
     virtual void drawTextOnPath(const void* text, size_t byteLength,
                                 const SkPath& path, const SkMatrix* matrix,
-                                const SkPaint& paint);
-    virtual void drawPicture(SkPicture&);
-    virtual void drawShape(SkShape*);
+                                const SkPaint& paint) SK_OVERRIDE;
+    virtual void drawPicture(SkPicture&) SK_OVERRIDE;
     virtual void drawVertices(VertexMode vmode, int vertexCount,
                               const SkPoint vertices[], const SkPoint texs[],
                               const SkColor colors[], SkXfermode* xmode,
                               const uint16_t indices[], int indexCount,
-                              const SkPaint& paint);
-    virtual void drawData(const void*, size_t);
+                              const SkPaint& paint) SK_OVERRIDE;
+    virtual void drawData(const void*, size_t) SK_OVERRIDE;
 
 private:
     Dumper* fDumper;
     int     fNestLevel; // for nesting recursive elements like pictures
-    
+
     void dump(Verb, const SkPaint*, const char format[], ...);
 
     typedef SkCanvas INHERITED;
@@ -120,16 +121,16 @@ private:
 class SkFormatDumper : public SkDumpCanvas::Dumper {
 public:
     SkFormatDumper(void (*)(const char text[], void* refcon), void* refcon);
-    
+
     // override from baseclass that does the formatting, and in turn calls
     // the function pointer that was passed to the constructor
     virtual void dump(SkDumpCanvas*, SkDumpCanvas::Verb, const char str[],
-                      const SkPaint*);
-    
+                      const SkPaint*) SK_OVERRIDE;
+
 private:
     void (*fProc)(const char*, void*);
     void* fRefcon;
-    
+
     typedef SkDumpCanvas::Dumper INHERITED;
 };
 

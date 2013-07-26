@@ -1,18 +1,11 @@
+
 /*
- * Copyright (C) 2006 The Android Open Source Project
+ * Copyright 2006 The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
  */
+
 
 #ifndef SkPathEffect_DEFINED
 #define SkPathEffect_DEFINED
@@ -29,9 +22,8 @@ class SkPath;
 
     Dashing is implemented as a subclass of SkPathEffect.
 */
-class SkPathEffect : public SkFlattenable {
+class SK_API SkPathEffect : public SkFlattenable {
 public:
-    //  This method is not exported to java.
     SkPathEffect() {}
 
     /** Given a src path and a width value, return true if the patheffect
@@ -42,10 +34,15 @@ public:
     */
     virtual bool filterPath(SkPath* dst, const SkPath& src, SkScalar* width) = 0;
 
+protected:
+    SkPathEffect(SkFlattenableReadBuffer& buffer) : INHERITED(buffer) {}
+
 private:
     // illegal
     SkPathEffect(const SkPathEffect&);
     SkPathEffect& operator=(const SkPathEffect&);
+
+    typedef SkFlattenable INHERITED;
 };
 
 /** \class SkPairPathEffect
@@ -61,7 +58,8 @@ public:
 
 protected:
     SkPairPathEffect(SkFlattenableReadBuffer&);
-    virtual void flatten(SkFlattenableWriteBuffer&);
+    virtual void flatten(SkFlattenableWriteBuffer&) const SK_OVERRIDE;
+
     // these are visible to our subclasses
     SkPathEffect* fPE0, *fPE1;
     
@@ -86,18 +84,14 @@ public:
 
     // overrides
     
-    //  This method is not exported to java.
     virtual bool filterPath(SkPath* dst, const SkPath& src, SkScalar* width);
 
-protected:
-    virtual Factory getFactory() { return CreateProc; }
+    SK_DECLARE_PUBLIC_FLATTENABLE_DESERIALIZATION_PROCS(SkComposePathEffect)
 
-private:
-    static SkFlattenable* CreateProc(SkFlattenableReadBuffer& buffer) {
-        return SkNEW_ARGS(SkComposePathEffect, (buffer));
-    }
+protected:
     SkComposePathEffect(SkFlattenableReadBuffer& buffer) : INHERITED(buffer) {}
 
+private:
     // illegal
     SkComposePathEffect(const SkComposePathEffect&);
     SkComposePathEffect& operator=(const SkComposePathEffect&);
@@ -121,18 +115,14 @@ public:
         : INHERITED(first, second) {}
 
     // overrides
-    //  This method is not exported to java.
     virtual bool filterPath(SkPath* dst, const SkPath& src, SkScalar* width);
 
-protected:
-    virtual Factory getFactory() { return CreateProc; }
+    SK_DECLARE_PUBLIC_FLATTENABLE_DESERIALIZATION_PROCS(SkSumPathEffect)
 
-private:
-    static SkFlattenable* CreateProc(SkFlattenableReadBuffer& buffer)  {
-        return SkNEW_ARGS(SkSumPathEffect, (buffer));
-    }
+protected:
     SkSumPathEffect(SkFlattenableReadBuffer& buffer) : INHERITED(buffer) {}
 
+private:
     // illegal
     SkSumPathEffect(const SkSumPathEffect&);
     SkSumPathEffect& operator=(const SkSumPathEffect&);

@@ -1,19 +1,11 @@
-/* libs/graphics/animator/SkDisplayXMLParser.cpp
-**
-** Copyright 2006, The Android Open Source Project
-**
-** Licensed under the Apache License, Version 2.0 (the "License"); 
-** you may not use this file except in compliance with the License. 
-** You may obtain a copy of the License at 
-**
-**     http://www.apache.org/licenses/LICENSE-2.0 
-**
-** Unless required by applicable law or agreed to in writing, software 
-** distributed under the License is distributed on an "AS IS" BASIS, 
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-** See the License for the specific language governing permissions and 
-** limitations under the License.
-*/
+
+/*
+ * Copyright 2006 The Android Open Source Project
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
+
 
 #include "SkDisplayXMLParser.h"
 #include "SkAnimateMaker.h"
@@ -164,6 +156,14 @@ bool SkDisplayXMLParser::onAddAttributeLen(const char attrName[], const char att
     return false;
 }
 
+#if defined(SK_BUILD_FOR_WIN32)
+    #define SK_strcasecmp   _stricmp
+    #define SK_strncasecmp  _strnicmp
+#else
+    #define SK_strcasecmp   strcasecmp
+    #define SK_strncasecmp  strncasecmp
+#endif
+
 bool SkDisplayXMLParser::onEndElement(const char elem[])
 {
     int parentIndex = fParents.count() - 1;
@@ -199,7 +199,7 @@ bool SkDisplayXMLParser::onEndElement(const char elem[])
         fParents.remove(parentIndex);
     }
     fCurrDisplayable = NULL;
-    if (fInInclude == false && strcasecmp(elem, "screenplay") == 0) {
+    if (fInInclude == false && SK_strcasecmp(elem, "screenplay") == 0) {
         if (fMaker.fInMovie == false) {
             fMaker.fEnableTime = fMaker.getAppTime();
 #if defined SK_DEBUG && defined SK_DEBUG_ANIMATION_TIMING
@@ -231,7 +231,7 @@ bool SkDisplayXMLParser::onStartElement(const char name[])
 bool SkDisplayXMLParser::onStartElementLen(const char name[], size_t len) {
     fCurrDisplayable = NULL; // init so we'll ignore attributes if we exit early
 
-    if (strncasecmp(name, "screenplay", len) == 0) {
+    if (SK_strncasecmp(name, "screenplay", len) == 0) {
         fInSkia = true;
         if (fInInclude == false)
             fMaker.idsSet(name, len, &fMaker.fScreenplay);
@@ -296,8 +296,8 @@ const SkMemberInfo* SkDisplayXMLParser::searchContainer(const SkMemberInfo* info
         }
         return info;
 next:
-        if (type == SkType_Drawable || type == SkType_Displayable && 
-            container->fDisplayable->isDrawable()) {
+        if (type == SkType_Drawable || (type == SkType_Displayable && 
+            container->fDisplayable->isDrawable())) {
 rectNext:
             if (fParents.count() > 1) {
                 Parent* parent = fParents.end() - 2;

@@ -1,22 +1,16 @@
-/* libs/graphics/sgl/SkShader.cpp
-**
-** Copyright 2006, The Android Open Source Project
-**
-** Licensed under the Apache License, Version 2.0 (the "License"); 
-** you may not use this file except in compliance with the License. 
-** You may obtain a copy of the License at 
-**
-**     http://www.apache.org/licenses/LICENSE-2.0 
-**
-** Unless required by applicable law or agreed to in writing, software 
-** distributed under the License is distributed on an "AS IS" BASIS, 
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-** See the License for the specific language governing permissions and 
-** limitations under the License.
-*/
 
+/*
+ * Copyright 2006 The Android Open Source Project
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
+
+
+#include "SkScalar.h"
 #include "SkShader.h"
 #include "SkPaint.h"
+#include "SkMallocPixelRef.h"
 
 SkShader::SkShader() : fLocalMatrix(NULL) {
     SkDEBUGCODE(fInSession = false;)
@@ -26,7 +20,7 @@ SkShader::SkShader(SkFlattenableReadBuffer& buffer)
         : INHERITED(buffer), fLocalMatrix(NULL) {
     if (buffer.readBool()) {
         SkMatrix matrix;
-        buffer.read(&matrix, sizeof(matrix));
+        SkReadMatrix(&buffer, &matrix);
         setLocalMatrix(matrix);
     }
     SkDEBUGCODE(fInSession = false;)
@@ -47,11 +41,11 @@ void SkShader::endSession() {
     SkDEBUGCODE(fInSession = false;)
 }
 
-void SkShader::flatten(SkFlattenableWriteBuffer& buffer) {
+void SkShader::flatten(SkFlattenableWriteBuffer& buffer) const {
     this->INHERITED::flatten(buffer);
     buffer.writeBool(fLocalMatrix != NULL);
     if (fLocalMatrix) {
-        buffer.writeMul4(fLocalMatrix, sizeof(SkMatrix));
+        SkWriteMatrix(&buffer, *fLocalMatrix);
     }
 }
 
@@ -114,11 +108,11 @@ void SkShader::shadeSpan16(int x, int y, uint16_t span16[], int count) {
     SkASSERT(this->canCallShadeSpan16());
 
     // basically, if we get here, the subclass screwed up
-    SkASSERT(!"kHasSpan16 flag is set, but shadeSpan16() not implemented");
+    SkDEBUGFAIL("kHasSpan16 flag is set, but shadeSpan16() not implemented");
 }
 
 #define kTempColorQuadCount 6   // balance between speed (larger) and saving stack-space
-#define kTempColorCount     (kTempColorQuadCount << 2)  
+#define kTempColorCount     (kTempColorQuadCount << 2)
 
 #ifdef SK_CPU_BENDIAN
     #define SkU32BitShiftToByteOffset(shift)    (3 - ((shift) >> 3))
@@ -183,7 +177,7 @@ void SkShader::shadeSpanAlpha(int x, int y, uint8_t alpha[], int count) {
 SkShader::MatrixClass SkShader::ComputeMatrixClass(const SkMatrix& mat) {
     MatrixClass mc = kLinear_MatrixClass;
 
-    if (mat.getType() & SkMatrix::kPerspective_Mask) {
+    if (mat.hasPerspective()) {
         if (mat.fixedStepInX(0, NULL, NULL)) {
             mc = kFixedStepInX_MatrixClass;
         } else {
@@ -195,8 +189,13 @@ SkShader::MatrixClass SkShader::ComputeMatrixClass(const SkMatrix& mat) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-bool SkShader::asABitmap(SkBitmap*, SkMatrix*, TileMode*) {
-    return false;
+SkShader::BitmapType SkShader::asABitmap(SkBitmap*, SkMatrix*,
+                                         TileMode*, SkScalar*) const {
+    return kNone_BitmapType;
+}
+
+SkShader::GradientType SkShader::asAGradient(GradientInfo* info) const {
+    return kNone_GradientType;
 }
 
 SkShader* SkShader::CreateBitmapShader(const SkBitmap& src,
@@ -209,22 +208,47 @@ SkShader* SkShader::CreateBitmapShader(const SkBitmap& src,
 #include "SkColorShader.h"
 #include "SkUtils.h"
 
+SkColorShader::SkColorShader() {
+    fFlags = 0;
+    fInheritColor = true;
+}
+
+SkColorShader::SkColorShader(SkColor c) {
+    fFlags = 0;
+    fColor = c;
+    fInheritColor = false;
+}
+
+SkColorShader::~SkColorShader() {}
+
+bool SkColorShader::isOpaque() const {
+    if (fInheritColor) {
+        return true; // using paint's alpha
+    }
+    return SkColorGetA(fColor) == 255;
+}
+
 SkColorShader::SkColorShader(SkFlattenableReadBuffer& b) : INHERITED(b) {
     fFlags = 0; // computed in setContext
-    fInheritColor = b.readU8(); 
+
+    fInheritColor = b.readU8();
     if (fInheritColor) {
         return;
     }
     fColor = b.readU32();
 }
 
-void SkColorShader::flatten(SkFlattenableWriteBuffer& buffer) {
+void SkColorShader::flatten(SkFlattenableWriteBuffer& buffer) const {
     this->INHERITED::flatten(buffer);
     buffer.write8(fInheritColor);
     if (fInheritColor) {
         return;
     }
     buffer.write32(fColor);
+}
+
+uint32_t SkColorShader::getFlags() {
+    return fFlags;
 }
 
 uint8_t SkColorShader::getSpan16Alpha() const {
@@ -237,20 +261,18 @@ bool SkColorShader::setContext(const SkBitmap& device, const SkPaint& paint,
         return false;
     }
 
-    SkColor c;
     unsigned a;
-    
+
     if (fInheritColor) {
-        c = paint.getColor();
-        a = SkColorGetA(c);
+        fColor = paint.getColor();
+        a = SkColorGetA(fColor);
     } else {
-        c = fColor;
-        a = SkAlphaMul(SkColorGetA(c), SkAlpha255To256(paint.getAlpha()));
+        a = SkAlphaMul(SkColorGetA(fColor), SkAlpha255To256(paint.getAlpha()));
     }
 
-    unsigned r = SkColorGetR(c);
-    unsigned g = SkColorGetG(c);
-    unsigned b = SkColorGetB(c);
+    unsigned r = SkColorGetR(fColor);
+    unsigned g = SkColorGetG(fColor);
+    unsigned b = SkColorGetB(fColor);
 
     // we want this before we apply any alpha
     fColor16 = SkPack888ToRGB16(r, g, b);
@@ -285,3 +307,46 @@ void SkColorShader::shadeSpanAlpha(int x, int y, uint8_t alpha[], int count) {
     memset(alpha, SkGetPackedA32(fPMColor), count);
 }
 
+// if we had a asAColor method, that would be more efficient...
+SkShader::BitmapType SkColorShader::asABitmap(SkBitmap* bitmap, SkMatrix* matrix,
+                                              TileMode modes[],
+                                      SkScalar* twoPointRadialParams) const {
+    return kNone_BitmapType;
+}
+
+SkShader::GradientType SkColorShader::asAGradient(GradientInfo* info) const {
+    if (info) {
+        if (info->fColors && info->fColorCount >= 1) {
+            info->fColors[0] = fColor;
+        }
+        info->fColorCount = 1;
+        info->fTileMode = SkShader::kRepeat_TileMode;
+    }
+    return kColor_GradientType;
+}
+
+SK_DEFINE_FLATTENABLE_REGISTRAR(SkColorShader)
+
+///////////////////////////////////////////////////////////////////////////////
+
+#include "SkEmptyShader.h"
+
+uint32_t SkEmptyShader::getFlags() { return 0; }
+uint8_t SkEmptyShader::getSpan16Alpha() const { return 0; }
+
+bool SkEmptyShader::setContext(const SkBitmap&, const SkPaint&,
+                               const SkMatrix&) { return false; }
+
+void SkEmptyShader::shadeSpan(int x, int y, SkPMColor span[], int count) {
+    SkDEBUGFAIL("should never get called, since setContext() returned false");
+}
+
+void SkEmptyShader::shadeSpan16(int x, int y, uint16_t span[], int count) {
+    SkDEBUGFAIL("should never get called, since setContext() returned false");
+}
+
+void SkEmptyShader::shadeSpanAlpha(int x, int y, uint8_t alpha[], int count) {
+    SkDEBUGFAIL("should never get called, since setContext() returned false");
+}
+
+SK_DEFINE_FLATTENABLE_REGISTRAR(SkEmptyShader)

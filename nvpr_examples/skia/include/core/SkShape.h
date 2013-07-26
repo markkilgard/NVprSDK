@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #ifndef SkShape_DEFINED
 #define SkShape_DEFINED
 
@@ -24,12 +31,7 @@ public:
      */
     void drawMatrix(SkCanvas*, const SkMatrix&);
 
-    // overrides
-    virtual Factory getFactory();
-    virtual void flatten(SkFlattenableWriteBuffer&);
-
-    // public for Registrar
-    static SkFlattenable* CreateProc(SkFlattenableReadBuffer&);
+    SK_DECLARE_PUBLIC_FLATTENABLE_DESERIALIZATION_PROCS(SkShape)
 
 protected:
     virtual void onDraw(SkCanvas*);

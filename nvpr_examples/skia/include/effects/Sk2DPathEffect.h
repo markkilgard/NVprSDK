@@ -1,40 +1,27 @@
+
 /*
- * Copyright (C) 2006 The Android Open Source Project
+ * Copyright 2006 The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
  */
+
 
 #ifndef Sk2DPathEffect_DEFINED
 #define Sk2DPathEffect_DEFINED
 
+#include "SkPath.h"
 #include "SkPathEffect.h"
 #include "SkMatrix.h"
 
-//  This class is not exported to java.
 class Sk2DPathEffect : public SkPathEffect {
 public:
     Sk2DPathEffect(const SkMatrix& mat);
 
     // overrides
-    //  This method is not exported to java.
-    virtual bool    filterPath(SkPath* dst, const SkPath& src, SkScalar* width);
+    virtual bool filterPath(SkPath*, const SkPath&, SkScalar* width) SK_OVERRIDE;
 
-    // overrides from SkFlattenable
-    //  This method is not exported to java.
-    virtual void    flatten(SkFlattenableWriteBuffer&);
-    
-    //  This method is not exported to java.
-       virtual Factory getFactory();
+    SK_DECLARE_PUBLIC_FLATTENABLE_DESERIALIZATION_PROCS(Sk2DPathEffect)
 
 protected:
     /** New virtual, to be overridden by subclasses.
@@ -57,6 +44,7 @@ protected:
 
     // protected so that subclasses can call this during unflattening
     Sk2DPathEffect(SkFlattenableReadBuffer&);
+    virtual void flatten(SkFlattenableWriteBuffer&) const SK_OVERRIDE;
 
 private:
     SkMatrix    fMatrix, fInverse;
@@ -64,10 +52,31 @@ private:
     Sk2DPathEffect(const Sk2DPathEffect&);
     Sk2DPathEffect& operator=(const Sk2DPathEffect&);
 
-    static SkFlattenable* CreateProc(SkFlattenableReadBuffer&);
-
     friend class Sk2DPathEffectBlitter;
     typedef SkPathEffect INHERITED;
 };
+
+class SkPath2DPathEffect : public Sk2DPathEffect {
+public:
+    /**
+     *  Stamp the specified path to fill the shape, using the matrix to define
+     *  the latice.
+     */
+    SkPath2DPathEffect(const SkMatrix&, const SkPath&);
+    
+    SK_DECLARE_PUBLIC_FLATTENABLE_DESERIALIZATION_PROCS(SkPath2DPathEffect)
+
+protected:
+    SkPath2DPathEffect(SkFlattenableReadBuffer& buffer);
+    virtual void flatten(SkFlattenableWriteBuffer&) const SK_OVERRIDE;
+
+    virtual void next(const SkPoint&, int u, int v, SkPath* dst) SK_OVERRIDE;
+
+private:
+    SkPath  fPath;
+
+    typedef Sk2DPathEffect INHERITED;
+};
+
 
 #endif

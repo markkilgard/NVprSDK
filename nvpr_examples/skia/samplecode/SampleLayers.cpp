@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "SampleCode.h"
 #include "SkView.h"
 #include "SkCanvas.h"
@@ -22,7 +29,7 @@
 
 static void make_paint(SkPaint* paint) {
     SkColor colors[] = { 0, SK_ColorWHITE };
-    SkPoint pts[] = { 0, 0, 0, SK_Scalar1*20 };
+    SkPoint pts[] = { { 0, 0 }, { 0, SK_Scalar1*20 } };
     SkShader* s = SkGradientShader::CreateLinear(pts, colors, NULL, 2, SkShader::kClamp_TileMode);
     
     paint->setShader(s)->unref();
@@ -161,7 +168,7 @@ protected:
             SkPaint p;
             canvas->saveLayer(&r, &p);
             canvas->drawColor(0xFFFF0000);
-            p.setAlpha(1);  // or 0
+            p.setAlpha(0);  // or 0
             p.setXfermodeMode(SkXfermode::kSrc_Mode);
             canvas->drawOval(r, p);
             canvas->restore();

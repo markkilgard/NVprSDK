@@ -1,3 +1,13 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
+
+
+
 #define SCALE_FILTER_NAME       MAKENAME(_filter_DX_shaderproc)
 
 static void SCALE_FILTER_NAME(const SkBitmapProcState& s, int x, int y,

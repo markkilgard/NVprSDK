@@ -1,19 +1,11 @@
-/* libs/corecg/SkChunkAlloc.cpp
-**
-** Copyright 2006, The Android Open Source Project
-**
-** Licensed under the Apache License, Version 2.0 (the "License"); 
-** you may not use this file except in compliance with the License. 
-** You may obtain a copy of the License at 
-**
-**     http://www.apache.org/licenses/LICENSE-2.0 
-**
-** Unless required by applicable law or agreed to in writing, software 
-** distributed under the License is distributed on an "AS IS" BASIS, 
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-** See the License for the specific language governing permissions and 
-** limitations under the License.
-*/
+
+/*
+ * Copyright 2006 The Android Open Source Project
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
+
 
 #include "SkChunkAlloc.h"
 
@@ -48,6 +40,11 @@ struct SkChunkAlloc::Block {
             }
         }
         return block;
+    }
+
+    bool contains(const void* addr) const {
+        const char* ptr = reinterpret_cast<const char*>(addr);
+        return ptr >= (const char*)(this + 1) && ptr < fFreePtr;
     }
 };
 
@@ -85,7 +82,9 @@ SkChunkAlloc::Block* SkChunkAlloc::newBlock(size_t bytes, AllocFailType ftype) {
         return block;
     }
 
-    size_t  size = SkMax32((int32_t)bytes, (int32_t)fMinSize);
+    size_t size = bytes;
+    if (size < fMinSize)
+        size = fMinSize;
 
     block = (Block*)sk_malloc_flags(sizeof(Block) + size,
                         ftype == kThrow_AllocFailType ? SK_MALLOC_THROW : 0);
@@ -135,5 +134,16 @@ size_t SkChunkAlloc::unalloc(void* ptr) {
         }
     }
     return bytes;
+}
+
+bool SkChunkAlloc::contains(const void* addr) const {
+    const Block* block = fBlock;
+    while (block) {
+        if (block->contains(addr)) {
+            return true;
+        }
+        block = block->fNext;
+    }
+    return false;
 }
 

@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "SampleCode.h"
 #include "SkColorPriv.h"
 #include "SkGradientShader.h"
@@ -16,7 +23,7 @@ static void draw_rect(SkCanvas* canvas, const SkRect& r, const SkPaint& p) {
 
 static void draw_gradient(SkCanvas* canvas) {
     SkRect r = { 0, 0, SkIntToScalar(256), SkIntToScalar(32) };
-    SkPoint pts[] = { r.fLeft, r.fTop, r.fRight, r.fTop };
+    SkPoint pts[] = { { r.fLeft, r.fTop }, { r.fRight, r.fTop } };
     SkColor colors[] = { 0xFF000000, 0xFFFF0000 };
     SkShader* s = SkGradientShader::CreateLinear(pts, colors, NULL, 2,
                                                  SkShader::kClamp_TileMode);
@@ -70,7 +77,7 @@ static SkBitmap make_bitmap() {
     return bm;
 }
 
-class DitherBitmapView : public SkView {
+class DitherBitmapView : public SampleView {
     SkBitmap    fBM8;
     SkBitmap    fBM32;
 public:
@@ -78,6 +85,8 @@ public:
         test_pathregion();
         fBM8 = make_bitmap();
         fBM8.copyTo(&fBM32, SkBitmap::kARGB_8888_Config);
+        
+        this->setBGColor(0xFFDDDDDD);
     }
     
 protected:
@@ -88,10 +97,6 @@ protected:
             return true;
         }
         return this->INHERITED::onQuery(evt);
-    }
-    
-    void drawBG(SkCanvas* canvas) {
-        canvas->drawColor(0xFFDDDDDD);
     }
     
     static void setBitmapOpaque(SkBitmap* bm, bool isOpaque) {
@@ -121,9 +126,7 @@ protected:
         canvas->drawBitmap(bitmap, x, SkIntToScalar(bm.height() + 10), &paint);
     }
     
-    virtual void onDraw(SkCanvas* canvas) {
-        drawBG(canvas);
-        
+    virtual void onDrawContent(SkCanvas* canvas) {
         canvas->translate(SkIntToScalar(20), SkIntToScalar(20));
 
         draw2(canvas, fBM8);
@@ -135,7 +138,7 @@ protected:
     }
     
 private:
-    typedef SkView INHERITED;
+    typedef SampleView INHERITED;
 };
 
 //////////////////////////////////////////////////////////////////////////////

@@ -1,3 +1,12 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
+
+
 #include "SkRectShape.h"
 #include "SkCanvas.h"
 
@@ -51,11 +60,7 @@ void SkRectShape::onDraw(SkCanvas* canvas) {
     }
 }
 
-SkFlattenable::Factory SkRectShape::getFactory() {
-    return CreateProc;
-}
-
-void SkRectShape::flatten(SkFlattenableWriteBuffer& buffer) {
+void SkRectShape::flatten(SkFlattenableWriteBuffer& buffer) const {
     this->INHERITED::flatten(buffer);
 
     buffer.writeRect(fBounds);
@@ -67,13 +72,9 @@ SkRectShape::SkRectShape(SkFlattenableReadBuffer& buffer) : INHERITED(buffer) {
     buffer.read(&fRadii, sizeof(fRadii));
 }
 
-SkFlattenable* SkRectShape::CreateProc(SkFlattenableReadBuffer& buffer) {
-    return SkNEW_ARGS(SkRectShape, (buffer));
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
-void SkPaintShape::flatten(SkFlattenableWriteBuffer& buffer) {
+void SkPaintShape::flatten(SkFlattenableWriteBuffer& buffer) const {
     this->INHERITED::flatten(buffer);
     
     fPaint.flatten(buffer);
@@ -83,5 +84,5 @@ SkPaintShape::SkPaintShape(SkFlattenableReadBuffer& buffer) : INHERITED(buffer) 
     fPaint.unflatten(buffer);
 }
 
-static SkFlattenable::Registrar gReg("SkRectShape", SkRectShape::CreateProc);
+SK_DEFINE_FLATTENABLE_REGISTRAR(SkRectShape)
 

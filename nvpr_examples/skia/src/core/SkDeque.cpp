@@ -1,19 +1,11 @@
-/* libs/graphics/sgl/SkDeque.cpp
-**
-** Copyright 2006, The Android Open Source Project
-**
-** Licensed under the Apache License, Version 2.0 (the "License"); 
-** you may not use this file except in compliance with the License. 
-** You may obtain a copy of the License at 
-**
-**     http://www.apache.org/licenses/LICENSE-2.0 
-**
-** Unless required by applicable law or agreed to in writing, software 
-** distributed under the License is distributed on an "AS IS" BASIS, 
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-** See the License for the specific language governing permissions and 
-** limitations under the License.
-*/
+
+/*
+ * Copyright 2006 The Android Open Source Project
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
+
 
 #include "SkDeque.h"
 
@@ -25,10 +17,10 @@ struct SkDeque::Head {
     char*   fBegin; // start of used section in this chunk
     char*   fEnd;   // end of used section in this chunk
     char*   fStop;  // end of the allocated chunk
-    
+
     char*       start() { return (char*)(this + 1); }
     const char* start() const { return (const char*)(this + 1); }
-    
+
     void init(size_t size) {
         fNext   = fPrev = NULL;
         fBegin  = fEnd = NULL;
@@ -44,7 +36,7 @@ SkDeque::SkDeque(size_t elemSize)
 SkDeque::SkDeque(size_t elemSize, void* storage, size_t storageSize)
         : fElemSize(elemSize), fInitialStorage(storage), fCount(0) {
     SkASSERT(storageSize == 0 || storage != NULL);
-    
+
     if (storageSize >= sizeof(Head) + elemSize) {
         fFront = (Head*)storage;
         fFront->init(storageSize);
@@ -69,7 +61,7 @@ SkDeque::~SkDeque() {
 
 const void* SkDeque::front() const {
     Head* front = fFront;
-    
+
     if (NULL == front) {
         return NULL;
     }
@@ -108,7 +100,7 @@ void* SkDeque::push_front() {
         fFront->init(sizeof(Head) + INIT_ELEM_COUNT * fElemSize);
         fBack = fFront;     // update our linklist
     }
-    
+
     Head*   first = fFront;
     char*   begin;
 
@@ -144,7 +136,7 @@ void* SkDeque::push_back() {
         fBack->init(sizeof(Head) + INIT_ELEM_COUNT * fElemSize);
         fFront = fBack; // update our linklist
     }
-    
+
     Head*   last = fBack;
     char*   end;
 
@@ -178,7 +170,7 @@ void SkDeque::pop_front() {
     Head*   first = fFront;
 
     SkASSERT(first != NULL);
-    
+
     if (first->fBegin == NULL) {  // we were marked empty from before
         first = first->fNext;
         first->fPrev = NULL;
@@ -202,9 +194,9 @@ void SkDeque::pop_back() {
     fCount -= 1;
 
     Head* last = fBack;
-    
+
     SkASSERT(last != NULL);
-    
+
     if (last->fEnd == NULL) {  // we were marked empty from before
         last = last->fPrev;
         last->fNext = NULL;
@@ -212,7 +204,7 @@ void SkDeque::pop_back() {
         fBack = last;
         SkASSERT(last != NULL);  // else we popped too far
     }
-    
+
     char* end = last->fEnd - fElemSize;
     SkASSERT(end >= last->fBegin);
 
@@ -225,17 +217,15 @@ void SkDeque::pop_back() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-SkDeque::Iter::Iter(const SkDeque& d) : fElemSize(d.fElemSize) {
-    fHead = d.fFront;
-    while (fHead != NULL && fHead->fBegin == NULL) {
-        fHead = fHead->fNext;
-    }
-    fPos = fHead ? fHead->fBegin : NULL;
+SkDeque::F2BIter::F2BIter() : fHead(NULL), fPos(NULL), fElemSize(0) {}
+
+SkDeque::F2BIter::F2BIter(const SkDeque& d) {
+    this->reset(d);
 }
 
-void* SkDeque::Iter::next() {
+void* SkDeque::F2BIter::next() {
     char* pos = fPos;
-    
+
     if (pos) {   // if we were valid, try to move to the next setting
         char* next = pos + fElemSize;
         SkASSERT(next <= fHead->fEnd);
@@ -250,3 +240,11 @@ void* SkDeque::Iter::next() {
     return pos;
 }
 
+void SkDeque::F2BIter::reset(const SkDeque& d) {
+    fElemSize = d.fElemSize;
+    fHead = d.fFront;
+    while (fHead != NULL && fHead->fBegin == NULL) {
+        fHead = fHead->fNext;
+    }
+    fPos = fHead ? fHead->fBegin : NULL;
+}

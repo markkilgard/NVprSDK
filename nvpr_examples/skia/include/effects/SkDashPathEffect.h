@@ -1,18 +1,11 @@
+
 /*
- * Copyright (C) 2006 The Android Open Source Project
+ * Copyright 2006 The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
  */
+
 
 #ifndef SkDashPathEffect_DEFINED
 #define SkDashPathEffect_DEFINED
@@ -23,7 +16,7 @@
 
     SkDashPathEffect is a subclass of SkPathEffect that implements dashing
 */
-class SkDashPathEffect : public SkPathEffect {
+class SK_API SkDashPathEffect : public SkPathEffect {
 public:
     /** The intervals array must contain an even number of entries (>=2), with the even
         indices specifying the "on" intervals, and the odd indices specifying the "off"
@@ -41,11 +34,11 @@ public:
     // overrides for SkFlattenable
     //  This method is not exported to java.
     virtual Factory getFactory();
-    //  This method is not exported to java.
-    virtual void flatten(SkFlattenableWriteBuffer&);
+    static SkFlattenable* CreateProc(SkFlattenableReadBuffer&);
 
 protected:
     SkDashPathEffect(SkFlattenableReadBuffer&);
+    virtual void flatten(SkFlattenableWriteBuffer&) const SK_OVERRIDE;
     
 private:
     SkScalar*   fIntervals;
@@ -55,8 +48,6 @@ private:
     int32_t     fInitialDashIndex;
     SkScalar    fIntervalLength;
     bool        fScaleToFit;
-
-    static SkFlattenable* CreateProc(SkFlattenableReadBuffer&);
 
     typedef SkPathEffect INHERITED;
 };

@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #ifndef SkPictureFlat_DEFINED
 #define SkPictureFlat_DEFINED
 
@@ -17,17 +24,19 @@ enum DrawType {
     CONCAT,
     DRAW_BITMAP,
     DRAW_BITMAP_MATRIX,
+    DRAW_BITMAP_NINE,
     DRAW_BITMAP_RECT,
+    DRAW_CLEAR,
     DRAW_DATA,
     DRAW_PAINT,
     DRAW_PATH,
     DRAW_PICTURE,
     DRAW_POINTS,
     DRAW_POS_TEXT,
+    DRAW_POS_TEXT_TOP_BOTTOM, // fast variant of DRAW_POS_TEXT
     DRAW_POS_TEXT_H,
     DRAW_POS_TEXT_H_TOP_BOTTOM, // fast variant of DRAW_POS_TEXT_H
     DRAW_RECT,
-    DRAW_SHAPE,
     DRAW_SPRITE,
     DRAW_TEXT,
     DRAW_TEXT_ON_PATH,
@@ -49,6 +58,25 @@ enum DrawVertexFlags {
     DRAW_VERTICES_HAS_INDICES = 0x04
 };
 
+///////////////////////////////////////////////////////////////////////////////
+// clipparams are packed in 5 bits
+//  doAA:1 | regionOp:4
+
+static inline uint32_t ClipParams_pack(SkRegion::Op op, bool doAA) {
+    unsigned doAABit = doAA ? 1 : 0;
+    return (doAABit << 4) | op;
+}
+
+static inline SkRegion::Op ClipParams_unpackRegionOp(uint32_t packed) {
+    return (SkRegion::Op)(packed & 0xF);
+}
+
+static inline bool ClipParams_unpackDoAA(uint32_t packed) {
+    return SkToBool((packed >> 4) & 1);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 class SkRefCntPlayback {
 public:
     SkRefCntPlayback();
@@ -56,7 +84,7 @@ public:
     
     int count() const { return fCount; }
     
-    void reset(const SkRefCntRecorder*);
+    void reset(const SkRefCntSet*);
 
     void setCount(int count);
     SkRefCnt* set(int index, SkRefCnt*);
@@ -120,7 +148,7 @@ protected:
 class SkFlatBitmap : public SkFlatData {
 public:
     static SkFlatBitmap* Flatten(SkChunkAlloc*, const SkBitmap&, int index,
-                                 SkRefCntRecorder*);
+                                 SkRefCntSet*);
 
     void unflatten(SkBitmap* bitmap, SkRefCntPlayback* rcp) const {
         SkFlattenableReadBuffer buffer(fBitmapData);
@@ -146,7 +174,7 @@ public:
     static SkFlatMatrix* Flatten(SkChunkAlloc* heap, const SkMatrix& matrix, int index);
 
     void unflatten(SkMatrix* result) const {
-        memcpy(result, fMatrixData, sizeof(SkMatrix));
+        result->unflatten(fMatrixData);
     }
 
 #ifdef SK_DEBUG_DUMP
@@ -167,8 +195,8 @@ private:
 class SkFlatPaint : public SkFlatData {
 public:
     static SkFlatPaint* Flatten(SkChunkAlloc* heap, const SkPaint& paint,
-                                int index, SkRefCntRecorder*,
-                                SkRefCntRecorder* faceRecorder);
+                                int index, SkRefCntSet*,
+                                SkRefCntSet* faceRecorder);
     
     void unflatten(SkPaint* result, SkRefCntPlayback* rcp,
                    SkTypefacePlayback* facePlayback) const {

@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "SampleCode.h"
 #include "SkView.h"
 #include "SkCanvas.h"
@@ -106,7 +113,7 @@ static void make_name(SkString* name, int config, int ext) {
 
 #include <sys/stat.h>
 
-class EncodeView : public SkView {
+class EncodeView : public SampleView {
 public:
     SkBitmap*   fBitmaps;
     size_t      fBitmapCount;
@@ -140,6 +147,7 @@ public:
         fBitmaps = NULL;
         fBitmapCount = 0;
     #endif
+        this->setBGColor(0xFFDDDDDD);
     }
     
     virtual ~EncodeView() {
@@ -156,38 +164,12 @@ protected:
         return this->INHERITED::onQuery(evt);
     }
     
-    void drawBG(SkCanvas* canvas) {
-        canvas->drawColor(0xFFDDDDDD);
-//        canvas->drawColor(SK_ColorWHITE);
-    }
-    
-    virtual void onDraw(SkCanvas* canvas) {
-        this->drawBG(canvas);
-        
+    virtual void onDrawContent(SkCanvas* canvas) {
         if (fBitmapCount == 0) {
             return;
         }
         
         SkPaint paint;
-        if (false) {
-//            SkColor colors[] = { 0xFE000000, SK_ColorWHITE };
-            SkColor colors[] = { SK_ColorRED, SK_ColorBLUE };
-            SkShader* shader = SkGradientShader::CreateSweep(SkIntToScalar(50), SkIntToScalar(50),
-                                                             colors, NULL, 2);
-            paint.setShader(shader)->unref();
-
-            SkRect r;
-            r.set(0, 0, SkIntToScalar(100), SkIntToScalar(100));
-            canvas->drawRect(r, paint);
-            
-            canvas->translate(SkIntToScalar(200), SkIntToScalar(200));
-            paint.setAntiAlias(true);
-            paint.setStyle(SkPaint::kStroke_Style);
-            paint.setStrokeWidth(SkIntToScalar(10));
-            canvas->drawOval(r, paint);
-            return;
-        }
-        
         paint.setAntiAlias(true);
         paint.setTextAlign(SkPaint::kCenter_Align);
         
@@ -238,12 +220,8 @@ protected:
         return this->INHERITED::onFindClickHandler(x, y);
     }
     
-    virtual bool onClick(Click* click) {
-        return this->INHERITED::onClick(click);
-    }
-    
 private:
-    typedef SkView INHERITED;
+    typedef SampleView INHERITED;
 };
 
 //////////////////////////////////////////////////////////////////////////////

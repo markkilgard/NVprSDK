@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "SkPictureFlat.h"
 
 #include "SkColorFilter.h"
@@ -16,7 +23,7 @@ SkFlatData* SkFlatData::Alloc(SkChunkAlloc* heap, int32_t size, int index) {
 }
 
 SkFlatBitmap* SkFlatBitmap::Flatten(SkChunkAlloc* heap, const SkBitmap& bitmap,
-                                    int index, SkRefCntRecorder* rec) {
+                                    int index, SkRefCntSet* rec) {
     SkFlattenableWriteBuffer buffer(1024);
     buffer.setRefCntRecorder(rec);
     
@@ -28,9 +35,9 @@ SkFlatBitmap* SkFlatBitmap::Flatten(SkChunkAlloc* heap, const SkBitmap& bitmap,
 }
 
 SkFlatMatrix* SkFlatMatrix::Flatten(SkChunkAlloc* heap, const SkMatrix& matrix, int index) {
-    int32_t size = sizeof(SkMatrix);
+    size_t size = matrix.flatten(NULL);
     SkFlatMatrix* result = (SkFlatMatrix*) INHERITED::Alloc(heap, size, index);
-    memcpy(&result->fMatrixData, &matrix, sizeof(SkMatrix));
+    matrix.flatten(&result->fMatrixData);
     return result;
 }
 
@@ -82,8 +89,8 @@ void SkFlatMatrix::dump() const {
 ///////////////////////////////////////////////////////////////////////////////
 
 SkFlatPaint* SkFlatPaint::Flatten(SkChunkAlloc* heap, const SkPaint& paint,
-                                  int index, SkRefCntRecorder* rec,
-                                  SkRefCntRecorder* faceRecorder) {
+                                  int index, SkRefCntSet* rec,
+                                  SkRefCntSet* faceRecorder) {
     SkFlattenableWriteBuffer buffer(2*sizeof(SkPaint));
     buffer.setRefCntRecorder(rec);
     buffer.setTypefaceRecorder(faceRecorder);
@@ -221,7 +228,7 @@ SkRefCntPlayback::~SkRefCntPlayback() {
     this->reset(NULL);
 }
 
-void SkRefCntPlayback::reset(const SkRefCntRecorder* rec) {
+void SkRefCntPlayback::reset(const SkRefCntSet* rec) {
     for (int i = 0; i < fCount; i++) {
         SkASSERT(fArray[i]);
         fArray[i]->unref();
@@ -231,7 +238,7 @@ void SkRefCntPlayback::reset(const SkRefCntRecorder* rec) {
     if (rec) {
         fCount = rec->count();
         fArray = SkNEW_ARRAY(SkRefCnt*, fCount);
-        rec->get(fArray);
+        rec->copyToArray(fArray);
         for (int i = 0; i < fCount; i++) {
             fArray[i]->ref();
         }

@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "gm.h"
 #include "SkBitmap.h"
 #include "SkShader.h"
@@ -5,7 +12,7 @@
 
 namespace skiagm {
 
-static void make_bitmaps(int w, int h, SkBitmap* src, SkBitmap* dst) {    
+static void make_bitmaps(int w, int h, SkBitmap* src, SkBitmap* dst) {
     src->setConfig(SkBitmap::kARGB_8888_Config, w, h);
     src->allocPixels();
     src->eraseColor(0);
@@ -17,10 +24,10 @@ static void make_bitmaps(int w, int h, SkBitmap* src, SkBitmap* dst) {
     SkScalar hh = SkIntToScalar(h);
 
     p.setAntiAlias(true);
-    p.setColor(0xFFFFCC44);    
+    p.setColor(0xFFFFCC44);
     r.set(0, 0, ww*3/4, hh*3/4);
     c.drawOval(r, p);
-    
+
     dst->setConfig(SkBitmap::kARGB_8888_Config, w, h);
     dst->allocPixels();
     dst->eraseColor(0);
@@ -31,66 +38,57 @@ static void make_bitmaps(int w, int h, SkBitmap* src, SkBitmap* dst) {
     c.drawRect(r, p);
 }
 
-static uint16_t gBG[] = { 0xFFFF, 0xCCCF, 0xCCCF, 0xFFFF };
-
 class XfermodesGM : public GM {
-    SkBitmap    fBitmap;
     SkBitmap    fBG;
     SkBitmap    fSrcB, fDstB;
+    bool        fOnce;
 
-    void draw_mode(SkCanvas* canvas, SkXfermode* mode, int alpha) {
+    void draw_mode(SkCanvas* canvas, SkXfermode* mode, int alpha,
+                   SkScalar x, SkScalar y) {
         SkPaint p;
-        
-        canvas->drawBitmap(fSrcB, 0, 0, &p);        
+
+        canvas->drawBitmap(fSrcB, x, y, &p);
         p.setAlpha(alpha);
         p.setXfermode(mode);
-        canvas->drawBitmap(fDstB, 0, 0, &p);
+        canvas->drawBitmap(fDstB, x, y, &p);
     }
-    
+
+    void init() {
+        if (!fOnce) {
+            // Do all this work in a temporary so we get a deep copy
+            uint16_t localData[] = { 0xFFFF, 0xCCCF, 0xCCCF, 0xFFFF };
+            SkBitmap scratchBitmap;
+            scratchBitmap.setConfig(SkBitmap::kARGB_4444_Config, 2, 2, 4);
+            scratchBitmap.setPixels(localData);
+            scratchBitmap.setIsOpaque(true);
+            scratchBitmap.copyTo(&fBG, SkBitmap::kARGB_4444_Config);
+            
+            make_bitmaps(W, H, &fSrcB, &fDstB);
+            fOnce = true;
+        }
+    }
+
 public:
-	XfermodesGM() {
-        const int W = 64;
-        const int H = 64;
-        
-        fBitmap.setConfig(SkBitmap::kARGB_8888_Config, W, H);
-        fBitmap.allocPixels();
-        
-        fBG.setConfig(SkBitmap::kARGB_4444_Config, 2, 2, 4);
-        fBG.setPixels(gBG);
-        fBG.setIsOpaque(true);
-        
-        make_bitmaps(W, H, &fSrcB, &fDstB);
-    }
-    
+    const static int W = 64;
+    const static int H = 64;
+    XfermodesGM() : fOnce(false) {}
+
 protected:
     virtual SkString onShortName() {
         return SkString("xfermodes");
     }
 
-	virtual SkISize onISize() {
-        return make_isize(790, 480);
+    virtual SkISize onISize() {
+        return make_isize(790, 640);
     }
 
-    void drawBG(SkCanvas* canvas) {
-        canvas->drawColor(SK_ColorWHITE);
-        return;
-        SkShader* s = SkShader::CreateBitmapShader(fBG,
-                                                   SkShader::kRepeat_TileMode,
-                                                   SkShader::kRepeat_TileMode);
-        SkPaint p;
-        SkMatrix m;
-        
-        p.setShader(s)->unref();
-        m.setScale(SkIntToScalar(8), SkIntToScalar(8));
-        s->setLocalMatrix(m);
-        canvas->drawPaint(p);
-    }
-    
     virtual void onDraw(SkCanvas* canvas) {
-        this->drawBG(canvas);
-        
+        this->init();
+
+        canvas->translate(SkIntToScalar(10), SkIntToScalar(20));
+
         const struct {
-            SkXfermode::Mode    fMode;
+            SkXfermode::Mode  fMode;
             const char*         fLabel;
         } gModes[] = {
             { SkXfermode::kClear_Mode,    "Clear"     },
@@ -105,7 +103,7 @@ protected:
             { SkXfermode::kSrcATop_Mode,  "SrcATop"   },
             { SkXfermode::kDstATop_Mode,  "DstATop"   },
             { SkXfermode::kXor_Mode,      "Xor"       },
-            
+
             { SkXfermode::kPlus_Mode,         "Plus"          },
             { SkXfermode::kMultiply_Mode,     "Multiply"      },
             { SkXfermode::kScreen_Mode,       "Screen"        },
@@ -119,51 +117,49 @@ protected:
             { SkXfermode::kDifference_Mode,   "Difference"    },
             { SkXfermode::kExclusion_Mode,    "Exclusion"     },
         };
-        
-        canvas->translate(SkIntToScalar(10), SkIntToScalar(20));
-        
-        SkCanvas c(fBitmap);
-        const SkScalar w = SkIntToScalar(fBitmap.width());
-        const SkScalar h = SkIntToScalar(fBitmap.height());
+
+        const SkScalar w = SkIntToScalar(W);
+        const SkScalar h = SkIntToScalar(H);
         SkShader* s = SkShader::CreateBitmapShader(fBG,
                                                    SkShader::kRepeat_TileMode,
                                                    SkShader::kRepeat_TileMode);
         SkMatrix m;
         m.setScale(SkIntToScalar(6), SkIntToScalar(6));
         s->setLocalMatrix(m);
-        
+
         SkPaint labelP;
         labelP.setAntiAlias(true);
         labelP.setTextAlign(SkPaint::kCenter_Align);
 
         const int W = 5;
-        
+
         SkScalar x0 = 0;
         for (int twice = 0; twice < 2; twice++) {
             SkScalar x = x0, y = 0;
             for (size_t i = 0; i < SK_ARRAY_COUNT(gModes); i++) {
                 SkXfermode* mode = SkXfermode::Create(gModes[i].fMode);
-                
-                fBitmap.eraseColor(0);
-                draw_mode(&c, mode, twice ? 0x88 : 0xFF);
-                SkSafeUnref(mode);
-                
-                SkPaint p;
+                SkAutoUnref aur(mode);
                 SkRect r;
                 r.set(x, y, x+w, y+h);
-                r.inset(-SK_ScalarHalf, -SK_ScalarHalf);
-                p.setStyle(SkPaint::kStroke_Style);
-                canvas->drawRect(r, p);
+
+                SkPaint p;
                 p.setStyle(SkPaint::kFill_Style);
                 p.setShader(s);
-                r.inset(SK_ScalarHalf, SK_ScalarHalf);
                 canvas->drawRect(r, p);
-                
-                canvas->drawBitmap(fBitmap, x, y, NULL);
-                
+
+                canvas->saveLayer(&r, NULL, SkCanvas::kARGB_ClipLayer_SaveFlag);
+                draw_mode(canvas, mode, twice ? 0x88 : 0xFF, r.fLeft, r.fTop);
+                canvas->restore();
+
+                r.inset(-SK_ScalarHalf, -SK_ScalarHalf);
+                p.setStyle(SkPaint::kStroke_Style);
+                p.setShader(NULL);
+                canvas->drawRect(r, p);
+
+#if 1
                 canvas->drawText(gModes[i].fLabel, strlen(gModes[i].fLabel),
                                  x + w/2, y - labelP.getTextSize()/2, labelP);
-                
+#endif
                 x += w + SkIntToScalar(10);
                 if ((i % W) == W - 1) {
                     x = x0;
@@ -185,4 +181,3 @@ static GM* MyFactory(void*) { return new XfermodesGM; }
 static GMRegistry reg(MyFactory);
 
 }
-

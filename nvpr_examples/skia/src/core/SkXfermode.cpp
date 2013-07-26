@@ -1,34 +1,16 @@
+
 /*
- * Copyright (C) 2006 The Android Open Source Project
+ * Copyright 2006 The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
  */
+
 
 #include "SkXfermode.h"
 #include "SkColorPriv.h"
 
 #define SkAlphaMulAlpha(a, b)   SkMulDiv255Round(a, b)
-
-static SkPMColor SkFourByteInterp(SkPMColor src, SkPMColor dst, U8CPU alpha) {
-    unsigned scale = SkAlpha255To256(alpha);
-
-    unsigned a = SkAlphaBlend(SkGetPackedA32(src), SkGetPackedA32(dst), scale);
-    unsigned r = SkAlphaBlend(SkGetPackedR32(src), SkGetPackedR32(dst), scale);
-    unsigned g = SkAlphaBlend(SkGetPackedG32(src), SkGetPackedG32(dst), scale);
-    unsigned b = SkAlphaBlend(SkGetPackedB32(src), SkGetPackedB32(dst), scale);
-
-    return SkPackARGB32(a, r, g, b);
-}
 
 #if 0
 // idea for higher precision blends in xfer procs (and slightly faster)
@@ -83,288 +65,6 @@ static inline int clamp_max(int value, int max) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool SkXfermode::asCoeff(Coeff* src, Coeff* dst) {
-    return false;
-}
-
-SkPMColor SkXfermode::xferColor(SkPMColor src, SkPMColor dst) {
-    // no-op. subclasses should override this
-    return dst;
-}
-
-void SkXfermode::xfer32(SK_RESTRICT SkPMColor dst[],
-                        const SK_RESTRICT SkPMColor src[], int count,
-                        const SK_RESTRICT SkAlpha aa[]) {
-    SkASSERT(dst && src && count >= 0);
-
-    if (NULL == aa) {
-        for (int i = count - 1; i >= 0; --i) {
-            dst[i] = this->xferColor(src[i], dst[i]);
-        }
-    } else {
-        for (int i = count - 1; i >= 0; --i) {
-            unsigned a = aa[i];
-            if (0 != a) {
-                SkPMColor dstC = dst[i];
-                SkPMColor C = this->xferColor(src[i], dstC);
-                if (0xFF != a) {
-                    C = SkFourByteInterp(C, dstC, a);
-                }
-                dst[i] = C;
-            }
-        }
-    }
-}
-
-void SkXfermode::xfer16(SK_RESTRICT uint16_t dst[],
-                        const SK_RESTRICT SkPMColor src[], int count,
-                        const SK_RESTRICT SkAlpha aa[]) {
-    SkASSERT(dst && src && count >= 0);
-
-    if (NULL == aa) {
-        for (int i = count - 1; i >= 0; --i) {
-            SkPMColor dstC = SkPixel16ToPixel32(dst[i]);
-            dst[i] = SkPixel32ToPixel16_ToU16(this->xferColor(src[i], dstC));
-        }
-    } else {
-        for (int i = count - 1; i >= 0; --i) {
-            unsigned a = aa[i];
-            if (0 != a) {
-                SkPMColor dstC = SkPixel16ToPixel32(dst[i]);
-                SkPMColor C = this->xferColor(src[i], dstC);
-                if (0xFF != a) {
-                    C = SkFourByteInterp(C, dstC, a);
-                }
-                dst[i] = SkPixel32ToPixel16_ToU16(C);
-            }
-        }
-    }
-}
-
-void SkXfermode::xfer4444(SK_RESTRICT SkPMColor16 dst[],
-                          const SK_RESTRICT SkPMColor src[], int count,
-                          const SK_RESTRICT SkAlpha aa[])
-{
-    SkASSERT(dst && src && count >= 0);
-    
-    if (NULL == aa) {
-        for (int i = count - 1; i >= 0; --i) {
-            SkPMColor dstC = SkPixel4444ToPixel32(dst[i]);
-            dst[i] = SkPixel32ToPixel4444(this->xferColor(src[i], dstC));
-        }
-    } else {
-        for (int i = count - 1; i >= 0; --i) {
-            unsigned a = aa[i];
-            if (0 != a) {
-                SkPMColor dstC = SkPixel4444ToPixel32(dst[i]);
-                SkPMColor C = this->xferColor(src[i], dstC);
-                if (0xFF != a) {
-                    C = SkFourByteInterp(C, dstC, a);
-                }
-                dst[i] = SkPixel32ToPixel4444(C);
-            }
-        }
-    }
-}
-
-void SkXfermode::xferA8(SK_RESTRICT SkAlpha dst[],
-                        const SkPMColor src[], int count,
-                        const SK_RESTRICT SkAlpha aa[])
-{
-    SkASSERT(dst && src && count >= 0);
-
-    if (NULL == aa) {
-        for (int i = count - 1; i >= 0; --i) {
-            SkPMColor res = this->xferColor(src[i], (dst[i] << SK_A32_SHIFT));
-            dst[i] = SkToU8(SkGetPackedA32(res));
-        }
-    } else {
-        for (int i = count - 1; i >= 0; --i) {
-            unsigned a = aa[i];
-            if (0 != a) {
-                SkAlpha dstA = dst[i];
-                unsigned A = SkGetPackedA32(this->xferColor(src[i],
-                                            (SkPMColor)(dstA << SK_A32_SHIFT)));
-                if (0xFF != a) {
-                    A = SkAlphaBlend(A, dstA, SkAlpha255To256(a));
-                }
-                dst[i] = SkToU8(A);
-            }
-        }
-    }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void SkProcXfermode::xfer32(SK_RESTRICT SkPMColor dst[],
-                            const SK_RESTRICT SkPMColor src[], int count,
-                            const SK_RESTRICT SkAlpha aa[]) {
-    SkASSERT(dst && src && count >= 0);
-
-    SkXfermodeProc proc = fProc;
-
-    if (NULL != proc) {
-        if (NULL == aa) {
-            for (int i = count - 1; i >= 0; --i) {
-                dst[i] = proc(src[i], dst[i]);
-            }
-        } else {
-            for (int i = count - 1; i >= 0; --i) {
-                unsigned a = aa[i];
-                if (0 != a) {
-                    SkPMColor dstC = dst[i];
-                    SkPMColor C = proc(src[i], dstC);
-                    if (a != 0xFF) {
-                        C = SkFourByteInterp(C, dstC, a);
-                    }
-                    dst[i] = C;
-                }
-            }
-        }
-    }
-}
-
-void SkProcXfermode::xfer16(SK_RESTRICT uint16_t dst[],
-                            const SK_RESTRICT SkPMColor src[], int count,
-                            const SK_RESTRICT SkAlpha aa[]) {
-    SkASSERT(dst && src && count >= 0);
-
-    SkXfermodeProc proc = fProc;
-
-    if (NULL != proc) {
-        if (NULL == aa) {
-            for (int i = count - 1; i >= 0; --i) {
-                SkPMColor dstC = SkPixel16ToPixel32(dst[i]);
-                dst[i] = SkPixel32ToPixel16_ToU16(proc(src[i], dstC));
-            }
-        } else {
-            for (int i = count - 1; i >= 0; --i) {
-                unsigned a = aa[i];
-                if (0 != a) {
-                    SkPMColor dstC = SkPixel16ToPixel32(dst[i]);
-                    SkPMColor C = proc(src[i], dstC);
-                    if (0xFF != a) {
-                        C = SkFourByteInterp(C, dstC, a);
-                    }
-                    dst[i] = SkPixel32ToPixel16_ToU16(C);
-                }
-            }
-        }
-    }
-}
-
-void SkProcXfermode::xfer4444(SK_RESTRICT SkPMColor16 dst[],
-                              const SK_RESTRICT SkPMColor src[], int count,
-                              const SK_RESTRICT SkAlpha aa[]) {
-    SkASSERT(dst && src && count >= 0);
-    
-    SkXfermodeProc proc = fProc;
-
-    if (NULL != proc) {
-        if (NULL == aa) {
-            for (int i = count - 1; i >= 0; --i) {
-                SkPMColor dstC = SkPixel4444ToPixel32(dst[i]);
-                dst[i] = SkPixel32ToPixel4444(proc(src[i], dstC));
-            }
-        } else {
-            for (int i = count - 1; i >= 0; --i) {
-                unsigned a = aa[i];
-                if (0 != a) {
-                    SkPMColor dstC = SkPixel4444ToPixel32(dst[i]);
-                    SkPMColor C = proc(src[i], dstC);
-                    if (0xFF != a) {
-                        C = SkFourByteInterp(C, dstC, a);
-                    }
-                    dst[i] = SkPixel32ToPixel4444(C);
-                }
-            }
-        }
-    }
-}
-
-void SkProcXfermode::xferA8(SK_RESTRICT SkAlpha dst[],
-                            const SK_RESTRICT SkPMColor src[], int count,
-                            const SK_RESTRICT SkAlpha aa[]) {
-    SkASSERT(dst && src && count >= 0);
-
-    SkXfermodeProc proc = fProc;
-
-    if (NULL != proc) {
-        if (NULL == aa) {
-            for (int i = count - 1; i >= 0; --i) {
-                SkPMColor res = proc(src[i], dst[i] << SK_A32_SHIFT);
-                dst[i] = SkToU8(SkGetPackedA32(res));
-            }
-        } else {
-            for (int i = count - 1; i >= 0; --i) {
-                unsigned a = aa[i];
-                if (0 != a) {
-                    SkAlpha dstA = dst[i];
-                    SkPMColor res = proc(src[i], dstA << SK_A32_SHIFT);
-                    unsigned A = SkGetPackedA32(res);
-                    if (0xFF != a) {
-                        A = SkAlphaBlend(A, dstA, SkAlpha255To256(a));
-                    }
-                    dst[i] = SkToU8(A);
-                }
-            }
-        }
-    }
-}
-
-SkProcXfermode::SkProcXfermode(SkFlattenableReadBuffer& buffer)
-        : SkXfermode(buffer) {
-    fProc = (SkXfermodeProc)buffer.readFunctionPtr();
-}
-
-void SkProcXfermode::flatten(SkFlattenableWriteBuffer& buffer) {
-    buffer.writeFunctionPtr((void*)fProc);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-
-class SkProcCoeffXfermode : public SkProcXfermode {
-public:
-    SkProcCoeffXfermode(SkXfermodeProc proc, Coeff sc, Coeff dc)
-            : INHERITED(proc), fSrcCoeff(sc), fDstCoeff(dc) {
-    }
-    
-    virtual bool asCoeff(Coeff* sc, Coeff* dc) {
-        if (sc) {
-            *sc = fSrcCoeff;
-        }
-        if (dc) {
-            *dc = fDstCoeff;
-        }
-        return true;
-    }
-    
-    virtual Factory getFactory() { return CreateProc; }
-    virtual void flatten(SkFlattenableWriteBuffer& buffer) {
-        this->INHERITED::flatten(buffer);
-        buffer.write32(fSrcCoeff);
-        buffer.write32(fDstCoeff);
-    }
-
-protected:
-    SkProcCoeffXfermode(SkFlattenableReadBuffer& buffer)
-            : INHERITED(buffer) {
-        fSrcCoeff = (Coeff)buffer.readU32();
-        fDstCoeff = (Coeff)buffer.readU32();
-    }
-    
-private:
-    Coeff   fSrcCoeff, fDstCoeff;
-    
-    static SkFlattenable* CreateProc(SkFlattenableReadBuffer& buffer) {
-    return SkNEW_ARGS(SkProcCoeffXfermode, (buffer)); }
-
-    typedef SkProcXfermode INHERITED;
-};
-
-///////////////////////////////////////////////////////////////////////////////
-
 //  kClear_Mode,    //!< [0, 0]
 static SkPMColor clear_modeproc(SkPMColor src, SkPMColor dst) {
     return 0;
@@ -380,7 +80,7 @@ static SkPMColor dst_modeproc(SkPMColor src, SkPMColor dst) {
     return dst;
 }
 
-//  kSrcOver_Mode,  //!< [Sa + Da - Sa*Da, Sc + (1 - Sa)*Dc] 
+//  kSrcOver_Mode,  //!< [Sa + Da - Sa*Da, Sc + (1 - Sa)*Dc]
 static SkPMColor srcover_modeproc(SkPMColor src, SkPMColor dst) {
 #if 0
     // this is the old, more-correct way, but it doesn't guarantee that dst==255
@@ -617,7 +317,7 @@ static SkPMColor colorburn_modeproc(SkPMColor src, SkPMColor dst) {
     if (0 == dst) {
         return src;
     }
-    
+
     int sa = SkGetPackedA32(src);
     int da = SkGetPackedA32(dst);
     int a = srcover_byte(sa, da);
@@ -708,199 +408,6 @@ static SkPMColor exclusion_modeproc(SkPMColor src, SkPMColor dst) {
     return SkPackARGB32(a, r, g, b);
 }
 
-///////////////////////////////////////////////////////////////////////////////
-
-class SkClearXfermode : public SkProcCoeffXfermode {
-public:
-    SkClearXfermode() : SkProcCoeffXfermode(clear_modeproc,
-                                            kZero_Coeff, kZero_Coeff) {}
-
-    virtual void xfer32(SK_RESTRICT SkPMColor dst[],
-                        const SK_RESTRICT SkPMColor[], int count,
-                        const SK_RESTRICT SkAlpha aa[]) {
-        SkASSERT(dst && count >= 0);
-
-        if (NULL == aa) {
-            memset(dst, 0, count << 2);
-        } else {
-            for (int i = count - 1; i >= 0; --i) {
-                unsigned a = aa[i];
-                if (0xFF == a) {
-                    dst[i] = 0;
-                } else if (a != 0) {
-                    dst[i] = SkAlphaMulQ(dst[i], SkAlpha255To256(255 - a));
-                }
-            }
-        }
-    }
-    virtual void xferA8(SK_RESTRICT SkAlpha dst[],
-                        const SK_RESTRICT SkPMColor[], int count,
-                        const SK_RESTRICT SkAlpha aa[]) {
-        SkASSERT(dst && count >= 0);
-
-        if (NULL == aa) {
-            memset(dst, 0, count);
-        } else {
-            for (int i = count - 1; i >= 0; --i) {
-                unsigned a = aa[i];
-                if (0xFF == a) {
-                    dst[i] = 0;
-                } else if (0 != a) {
-                    dst[i] = SkAlphaMulAlpha(dst[i], 255 - a);
-                }
-            }
-        }
-    }
-    
-    virtual Factory getFactory() { return CreateProc; }
-
-private:
-    SkClearXfermode(SkFlattenableReadBuffer& buffer)
-        : SkProcCoeffXfermode(buffer) {}
-    
-    static SkFlattenable* CreateProc(SkFlattenableReadBuffer& buffer) {
-        return SkNEW_ARGS(SkClearXfermode, (buffer));
-    }
-};
-
-///////////////////////////////////////////////////////////////////////////////
-
-class SkSrcXfermode : public SkProcCoeffXfermode {
-public:
-    SkSrcXfermode() : SkProcCoeffXfermode(src_modeproc,
-                                          kOne_Coeff, kZero_Coeff) {}
-
-    virtual void xfer32(SK_RESTRICT SkPMColor dst[],
-                        const SK_RESTRICT SkPMColor src[], int count,
-                        const SK_RESTRICT SkAlpha aa[]) {
-        SkASSERT(dst && src && count >= 0);
-
-        if (NULL == aa) {
-            memcpy(dst, src, count << 2);
-        } else {
-            for (int i = count - 1; i >= 0; --i) {
-                unsigned a = aa[i];
-                if (a == 0xFF) {
-                    dst[i] = src[i];
-                } else if (a != 0) {
-                    dst[i] = SkFourByteInterp(src[i], dst[i], a);
-                }
-            }
-        }
-    }
-
-    virtual void xferA8(SK_RESTRICT SkAlpha dst[],
-                        const SK_RESTRICT SkPMColor src[], int count,
-                        const SK_RESTRICT SkAlpha aa[]) {
-        SkASSERT(dst && src && count >= 0);
-
-        if (NULL == aa) {
-            for (int i = count - 1; i >= 0; --i) {
-                dst[i] = SkToU8(SkGetPackedA32(src[i]));
-            }
-        } else {
-            for (int i = count - 1; i >= 0; --i) {
-                unsigned a = aa[i];
-                if (0 != a) {
-                    unsigned srcA = SkGetPackedA32(src[i]);
-                    if (a == 0xFF) {
-                        dst[i] = SkToU8(srcA);
-                    } else {
-                        dst[i] = SkToU8(SkAlphaBlend(srcA, dst[i], a));
-                    }
-                }
-            }
-        }
-    }
-    
-    virtual Factory getFactory() { return CreateProc; }
-
-private:
-    SkSrcXfermode(SkFlattenableReadBuffer& buffer)
-        : SkProcCoeffXfermode(buffer) {}
-    
-    static SkFlattenable* CreateProc(SkFlattenableReadBuffer& buffer) {
-        return SkNEW_ARGS(SkSrcXfermode, (buffer));
-    }
-};
-
-class SkDstInXfermode : public SkProcCoeffXfermode {
-public:
-    SkDstInXfermode() : SkProcCoeffXfermode(dstin_modeproc,
-                                            kZero_Coeff, kSA_Coeff) {}
-    
-    virtual void xfer32(SK_RESTRICT SkPMColor dst[],
-                        const SK_RESTRICT SkPMColor src[], int count,
-                        const SK_RESTRICT SkAlpha aa[]) {
-        SkASSERT(dst && src);
-        
-        if (count <= 0) {
-            return;
-        }
-        if (NULL != aa) {
-            return this->INHERITED::xfer32(dst, src, count, aa);
-        }
-        
-        do {
-            unsigned a = SkGetPackedA32(*src);
-            *dst = SkAlphaMulQ(*dst, SkAlpha255To256(a));
-            dst++;
-            src++;
-        } while (--count != 0);
-    }
-    
-    virtual Factory getFactory() { return CreateProc; }
-    
-private:
-    SkDstInXfermode(SkFlattenableReadBuffer& buffer) : INHERITED(buffer) {}
-    
-    static SkFlattenable* CreateProc(SkFlattenableReadBuffer& buffer) {
-        return SkNEW_ARGS(SkDstInXfermode, (buffer));
-    }
-    
-    typedef SkProcCoeffXfermode INHERITED;
-};
-
-class SkDstOutXfermode : public SkProcCoeffXfermode {
-public:
-    SkDstOutXfermode() : SkProcCoeffXfermode(dstout_modeproc,
-                                             kZero_Coeff, kISA_Coeff) {}
-    
-    virtual void xfer32(SK_RESTRICT SkPMColor dst[],
-                        const SK_RESTRICT SkPMColor src[], int count,
-                        const SK_RESTRICT SkAlpha aa[]) {
-        SkASSERT(dst && src);
-        
-        if (count <= 0) {
-            return;
-        }
-        if (NULL != aa) {
-            return this->INHERITED::xfer32(dst, src, count, aa);
-        }
-        
-        do {
-            unsigned a = SkGetPackedA32(*src);
-            *dst = SkAlphaMulQ(*dst, SkAlpha255To256(255 - a));
-            dst++;
-            src++;
-        } while (--count != 0);
-    }
-    
-    virtual Factory getFactory() { return CreateProc; }
-    
-private:
-    SkDstOutXfermode(SkFlattenableReadBuffer& buffer)
-        : INHERITED(buffer) {}
-    
-    static SkFlattenable* CreateProc(SkFlattenableReadBuffer& buffer) {
-        return SkNEW_ARGS(SkDstOutXfermode, (buffer));
-    }
-    
-    typedef SkProcCoeffXfermode INHERITED;
-};
-
-///////////////////////////////////////////////////////////////////////////////
-
 struct ProcCoeff {
     SkXfermodeProc      fProc;
     SkXfermode::Coeff   fSC;
@@ -923,8 +430,8 @@ static const ProcCoeff gProcCoeffs[] = {
     { dstatop_modeproc, SkXfermode::kIDA_Coeff,     SkXfermode::kSA_Coeff },
     { xor_modeproc,     SkXfermode::kIDA_Coeff,     SkXfermode::kISA_Coeff },
 
-    { plus_modeproc,        CANNOT_USE_COEFF,       CANNOT_USE_COEFF },
-    { multiply_modeproc,    CANNOT_USE_COEFF,       CANNOT_USE_COEFF },
+    { plus_modeproc,    SkXfermode::kOne_Coeff,     SkXfermode::kOne_Coeff },
+    { multiply_modeproc,SkXfermode::kZero_Coeff,    SkXfermode::kSC_Coeff },
     { screen_modeproc,      CANNOT_USE_COEFF,       CANNOT_USE_COEFF },
     { overlay_modeproc,     CANNOT_USE_COEFF,       CANNOT_USE_COEFF },
     { darken_modeproc,      CANNOT_USE_COEFF,       CANNOT_USE_COEFF },
@@ -937,62 +444,528 @@ static const ProcCoeff gProcCoeffs[] = {
     { exclusion_modeproc,   CANNOT_USE_COEFF,       CANNOT_USE_COEFF },
 };
 
-SkXfermode* SkXfermode::Create(Mode mode) {
-    SkASSERT(SK_ARRAY_COUNT(gProcCoeffs) == kModeCount);
-    SkASSERT((unsigned)mode < kModeCount);
+///////////////////////////////////////////////////////////////////////////////
 
-    switch (mode) {
-        case kClear_Mode:
-            return SkNEW(SkClearXfermode);
-        case kSrc_Mode:
-            return SkNEW(SkSrcXfermode);
-        case kSrcOver_Mode:
-            return NULL;
-        case kDstIn_Mode:
-            return SkNEW(SkDstInXfermode);
-        case kDstOut_Mode:
-            return SkNEW(SkDstOutXfermode);
-        // use the table 
-        default: {
-            const ProcCoeff& rec = gProcCoeffs[mode];
-            if ((unsigned)rec.fSC < SkXfermode::kCoeffCount &&
-                    (unsigned)rec.fDC < SkXfermode::kCoeffCount) {
-                return SkNEW_ARGS(SkProcCoeffXfermode, (rec.fProc,
-                                                        rec.fSC,
-                                                        rec.fDC));
-            } else {
-                return SkNEW_ARGS(SkProcXfermode, (rec.fProc));
+bool SkXfermode::asCoeff(Coeff* src, Coeff* dst) {
+    return false;
+}
+
+bool SkXfermode::asMode(Mode* mode) {
+    return false;
+}
+
+SkPMColor SkXfermode::xferColor(SkPMColor src, SkPMColor dst) {
+    // no-op. subclasses should override this
+    return dst;
+}
+
+void SkXfermode::xfer32(SkPMColor* SK_RESTRICT dst,
+                        const SkPMColor* SK_RESTRICT src, int count,
+                        const SkAlpha* SK_RESTRICT aa) {
+    SkASSERT(dst && src && count >= 0);
+
+    if (NULL == aa) {
+        for (int i = count - 1; i >= 0; --i) {
+            dst[i] = this->xferColor(src[i], dst[i]);
+        }
+    } else {
+        for (int i = count - 1; i >= 0; --i) {
+            unsigned a = aa[i];
+            if (0 != a) {
+                SkPMColor dstC = dst[i];
+                SkPMColor C = this->xferColor(src[i], dstC);
+                if (0xFF != a) {
+                    C = SkFourByteInterp(C, dstC, a);
+                }
+                dst[i] = C;
             }
         }
     }
 }
 
-bool SkXfermode::IsMode(SkXfermode* xfer, Mode* mode) {
-    if (NULL == xfer) {
+void SkXfermode::xfer16(uint16_t* dst,
+                        const SkPMColor* SK_RESTRICT src, int count,
+                        const SkAlpha* SK_RESTRICT aa) {
+    SkASSERT(dst && src && count >= 0);
+
+    if (NULL == aa) {
+        for (int i = count - 1; i >= 0; --i) {
+            SkPMColor dstC = SkPixel16ToPixel32(dst[i]);
+            dst[i] = SkPixel32ToPixel16_ToU16(this->xferColor(src[i], dstC));
+        }
+    } else {
+        for (int i = count - 1; i >= 0; --i) {
+            unsigned a = aa[i];
+            if (0 != a) {
+                SkPMColor dstC = SkPixel16ToPixel32(dst[i]);
+                SkPMColor C = this->xferColor(src[i], dstC);
+                if (0xFF != a) {
+                    C = SkFourByteInterp(C, dstC, a);
+                }
+                dst[i] = SkPixel32ToPixel16_ToU16(C);
+            }
+        }
+    }
+}
+
+void SkXfermode::xfer4444(SkPMColor16* SK_RESTRICT dst,
+                          const SkPMColor* SK_RESTRICT src, int count,
+                          const SkAlpha* SK_RESTRICT aa)
+{
+    SkASSERT(dst && src && count >= 0);
+
+    if (NULL == aa) {
+        for (int i = count - 1; i >= 0; --i) {
+            SkPMColor dstC = SkPixel4444ToPixel32(dst[i]);
+            dst[i] = SkPixel32ToPixel4444(this->xferColor(src[i], dstC));
+        }
+    } else {
+        for (int i = count - 1; i >= 0; --i) {
+            unsigned a = aa[i];
+            if (0 != a) {
+                SkPMColor dstC = SkPixel4444ToPixel32(dst[i]);
+                SkPMColor C = this->xferColor(src[i], dstC);
+                if (0xFF != a) {
+                    C = SkFourByteInterp(C, dstC, a);
+                }
+                dst[i] = SkPixel32ToPixel4444(C);
+            }
+        }
+    }
+}
+
+void SkXfermode::xferA8(SkAlpha* SK_RESTRICT dst,
+                        const SkPMColor src[], int count,
+                        const SkAlpha* SK_RESTRICT aa)
+{
+    SkASSERT(dst && src && count >= 0);
+
+    if (NULL == aa) {
+        for (int i = count - 1; i >= 0; --i) {
+            SkPMColor res = this->xferColor(src[i], (dst[i] << SK_A32_SHIFT));
+            dst[i] = SkToU8(SkGetPackedA32(res));
+        }
+    } else {
+        for (int i = count - 1; i >= 0; --i) {
+            unsigned a = aa[i];
+            if (0 != a) {
+                SkAlpha dstA = dst[i];
+                unsigned A = SkGetPackedA32(this->xferColor(src[i],
+                                            (SkPMColor)(dstA << SK_A32_SHIFT)));
+                if (0xFF != a) {
+                    A = SkAlphaBlend(A, dstA, SkAlpha255To256(a));
+                }
+                dst[i] = SkToU8(A);
+            }
+        }
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void SkProcXfermode::xfer32(SkPMColor* SK_RESTRICT dst,
+                            const SkPMColor* SK_RESTRICT src, int count,
+                            const SkAlpha* SK_RESTRICT aa) {
+    SkASSERT(dst && src && count >= 0);
+
+    SkXfermodeProc proc = fProc;
+
+    if (NULL != proc) {
+        if (NULL == aa) {
+            for (int i = count - 1; i >= 0; --i) {
+                dst[i] = proc(src[i], dst[i]);
+            }
+        } else {
+            for (int i = count - 1; i >= 0; --i) {
+                unsigned a = aa[i];
+                if (0 != a) {
+                    SkPMColor dstC = dst[i];
+                    SkPMColor C = proc(src[i], dstC);
+                    if (a != 0xFF) {
+                        C = SkFourByteInterp(C, dstC, a);
+                    }
+                    dst[i] = C;
+                }
+            }
+        }
+    }
+}
+
+void SkProcXfermode::xfer16(uint16_t* SK_RESTRICT dst,
+                            const SkPMColor* SK_RESTRICT src, int count,
+                            const SkAlpha* SK_RESTRICT aa) {
+    SkASSERT(dst && src && count >= 0);
+
+    SkXfermodeProc proc = fProc;
+
+    if (NULL != proc) {
+        if (NULL == aa) {
+            for (int i = count - 1; i >= 0; --i) {
+                SkPMColor dstC = SkPixel16ToPixel32(dst[i]);
+                dst[i] = SkPixel32ToPixel16_ToU16(proc(src[i], dstC));
+            }
+        } else {
+            for (int i = count - 1; i >= 0; --i) {
+                unsigned a = aa[i];
+                if (0 != a) {
+                    SkPMColor dstC = SkPixel16ToPixel32(dst[i]);
+                    SkPMColor C = proc(src[i], dstC);
+                    if (0xFF != a) {
+                        C = SkFourByteInterp(C, dstC, a);
+                    }
+                    dst[i] = SkPixel32ToPixel16_ToU16(C);
+                }
+            }
+        }
+    }
+}
+
+void SkProcXfermode::xfer4444(SkPMColor16* SK_RESTRICT dst,
+                              const SkPMColor* SK_RESTRICT src, int count,
+                              const SkAlpha* SK_RESTRICT aa) {
+    SkASSERT(dst && src && count >= 0);
+
+    SkXfermodeProc proc = fProc;
+
+    if (NULL != proc) {
+        if (NULL == aa) {
+            for (int i = count - 1; i >= 0; --i) {
+                SkPMColor dstC = SkPixel4444ToPixel32(dst[i]);
+                dst[i] = SkPixel32ToPixel4444(proc(src[i], dstC));
+            }
+        } else {
+            for (int i = count - 1; i >= 0; --i) {
+                unsigned a = aa[i];
+                if (0 != a) {
+                    SkPMColor dstC = SkPixel4444ToPixel32(dst[i]);
+                    SkPMColor C = proc(src[i], dstC);
+                    if (0xFF != a) {
+                        C = SkFourByteInterp(C, dstC, a);
+                    }
+                    dst[i] = SkPixel32ToPixel4444(C);
+                }
+            }
+        }
+    }
+}
+
+void SkProcXfermode::xferA8(SkAlpha* SK_RESTRICT dst,
+                            const SkPMColor* SK_RESTRICT src, int count,
+                            const SkAlpha* SK_RESTRICT aa) {
+    SkASSERT(dst && src && count >= 0);
+
+    SkXfermodeProc proc = fProc;
+
+    if (NULL != proc) {
+        if (NULL == aa) {
+            for (int i = count - 1; i >= 0; --i) {
+                SkPMColor res = proc(src[i], dst[i] << SK_A32_SHIFT);
+                dst[i] = SkToU8(SkGetPackedA32(res));
+            }
+        } else {
+            for (int i = count - 1; i >= 0; --i) {
+                unsigned a = aa[i];
+                if (0 != a) {
+                    SkAlpha dstA = dst[i];
+                    SkPMColor res = proc(src[i], dstA << SK_A32_SHIFT);
+                    unsigned A = SkGetPackedA32(res);
+                    if (0xFF != a) {
+                        A = SkAlphaBlend(A, dstA, SkAlpha255To256(a));
+                    }
+                    dst[i] = SkToU8(A);
+                }
+            }
+        }
+    }
+}
+
+SkProcXfermode::SkProcXfermode(SkFlattenableReadBuffer& buffer)
+        : SkXfermode(buffer) {
+    // Might be a NULL if the Xfermode is recorded using the CrossProcess flag
+    fProc = (SkXfermodeProc)buffer.readFunctionPtr();
+}
+
+void SkProcXfermode::flatten(SkFlattenableWriteBuffer& buffer) const {
+    this->INHERITED::flatten(buffer);
+    if (buffer.isCrossProcess()) {
+        // function pointer is only valid in the current process. Write a NULL
+        // so it can't be accidentally used
+        buffer.writeFunctionPtr(NULL);
+    } else {
+        buffer.writeFunctionPtr((void*)fProc);
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+class SkProcCoeffXfermode : public SkProcXfermode {
+public:
+    SkProcCoeffXfermode(const ProcCoeff& rec, Mode mode)
+            : INHERITED(rec.fProc) {
+        fMode = mode;
+        // these may be valid, or may be CANNOT_USE_COEFF
+        fSrcCoeff = rec.fSC;
+        fDstCoeff = rec.fDC;
+    }
+
+    virtual bool asMode(Mode* mode) {
         if (mode) {
-            *mode = kSrcOver_Mode;
+            *mode = fMode;
         }
         return true;
     }
 
-    SkXfermode::Coeff sc, dc;
-    if (xfer->asCoeff(&sc, &dc)) {
-        SkASSERT((unsigned)sc < (unsigned)SkXfermode::kCoeffCount);
-        SkASSERT((unsigned)dc < (unsigned)SkXfermode::kCoeffCount);
-        
-        const ProcCoeff* rec = gProcCoeffs;
-        for (size_t i = 0; i < SK_ARRAY_COUNT(gProcCoeffs); i++) {
-            if (rec[i].fSC == sc && rec[i].fDC == dc) {
-                if (mode) {
-                    *mode = static_cast<Mode>(i);
-                }
-                return true;
+    virtual bool asCoeff(Coeff* sc, Coeff* dc) {
+        if (CANNOT_USE_COEFF == fSrcCoeff) {
+            return false;
+        }
+
+        if (sc) {
+            *sc = fSrcCoeff;
+        }
+        if (dc) {
+            *dc = fDstCoeff;
+        }
+        return true;
+    }
+
+    SK_DECLARE_PUBLIC_FLATTENABLE_DESERIALIZATION_PROCS(SkProcCoeffXfermode)
+
+protected:
+    SkProcCoeffXfermode(SkFlattenableReadBuffer& buffer) : INHERITED(buffer) {
+        fMode = (SkXfermode::Mode)buffer.readU32();
+
+        const ProcCoeff& rec = gProcCoeffs[fMode];
+        // these may be valid, or may be CANNOT_USE_COEFF
+        fSrcCoeff = rec.fSC;
+        fDstCoeff = rec.fDC;
+        // now update our function-ptr in the super class
+        this->INHERITED::setProc(rec.fProc);
+    }
+
+    virtual void flatten(SkFlattenableWriteBuffer& buffer) const SK_OVERRIDE {
+        this->INHERITED::flatten(buffer);
+        buffer.write32(fMode);
+    }
+
+private:
+    Mode    fMode;
+    Coeff   fSrcCoeff, fDstCoeff;
+
+
+    typedef SkProcXfermode INHERITED;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+class SkClearXfermode : public SkProcCoeffXfermode {
+public:
+    SkClearXfermode(const ProcCoeff& rec) : SkProcCoeffXfermode(rec, kClear_Mode) {}
+
+    virtual void xfer32(SkPMColor*, const SkPMColor*, int, const SkAlpha*) SK_OVERRIDE;
+    virtual void xferA8(SkAlpha*, const SkPMColor*, int, const SkAlpha*) SK_OVERRIDE;
+
+    SK_DECLARE_PUBLIC_FLATTENABLE_DESERIALIZATION_PROCS(SkClearXfermode)
+
+private:
+    SkClearXfermode(SkFlattenableReadBuffer& buffer)
+        : SkProcCoeffXfermode(buffer) {}
+
+};
+
+void SkClearXfermode::xfer32(SkPMColor* SK_RESTRICT dst,
+                             const SkPMColor* SK_RESTRICT, int count,
+                             const SkAlpha* SK_RESTRICT aa) {
+    SkASSERT(dst && count >= 0);
+
+    if (NULL == aa) {
+        memset(dst, 0, count << 2);
+    } else {
+        for (int i = count - 1; i >= 0; --i) {
+            unsigned a = aa[i];
+            if (0xFF == a) {
+                dst[i] = 0;
+            } else if (a != 0) {
+                dst[i] = SkAlphaMulQ(dst[i], SkAlpha255To256(255 - a));
             }
         }
     }
+}
+void SkClearXfermode::xferA8(SkAlpha* SK_RESTRICT dst,
+                             const SkPMColor* SK_RESTRICT, int count,
+                             const SkAlpha* SK_RESTRICT aa) {
+    SkASSERT(dst && count >= 0);
 
-    // no coefficients, or not found in our table
-    return false;
+    if (NULL == aa) {
+        memset(dst, 0, count);
+    } else {
+        for (int i = count - 1; i >= 0; --i) {
+            unsigned a = aa[i];
+            if (0xFF == a) {
+                dst[i] = 0;
+            } else if (0 != a) {
+                dst[i] = SkAlphaMulAlpha(dst[i], 255 - a);
+            }
+        }
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+class SkSrcXfermode : public SkProcCoeffXfermode {
+public:
+    SkSrcXfermode(const ProcCoeff& rec) : SkProcCoeffXfermode(rec, kSrc_Mode) {}
+
+    virtual void xfer32(SkPMColor*, const SkPMColor*, int, const SkAlpha*) SK_OVERRIDE;
+    virtual void xferA8(SkAlpha*, const SkPMColor*, int, const SkAlpha*) SK_OVERRIDE;
+
+    SK_DECLARE_PUBLIC_FLATTENABLE_DESERIALIZATION_PROCS(SkSrcXfermode)
+
+private:
+    SkSrcXfermode(SkFlattenableReadBuffer& buffer)
+        : SkProcCoeffXfermode(buffer) {}
+
+};
+
+void SkSrcXfermode::xfer32(SkPMColor* SK_RESTRICT dst,
+                           const SkPMColor* SK_RESTRICT src, int count,
+                           const SkAlpha* SK_RESTRICT aa) {
+    SkASSERT(dst && src && count >= 0);
+
+    if (NULL == aa) {
+        memcpy(dst, src, count << 2);
+    } else {
+        for (int i = count - 1; i >= 0; --i) {
+            unsigned a = aa[i];
+            if (a == 0xFF) {
+                dst[i] = src[i];
+            } else if (a != 0) {
+                dst[i] = SkFourByteInterp(src[i], dst[i], a);
+            }
+        }
+    }
+}
+
+void SkSrcXfermode::xferA8(SkAlpha* SK_RESTRICT dst,
+                           const SkPMColor* SK_RESTRICT src, int count,
+                           const SkAlpha* SK_RESTRICT aa) {
+    SkASSERT(dst && src && count >= 0);
+
+    if (NULL == aa) {
+        for (int i = count - 1; i >= 0; --i) {
+            dst[i] = SkToU8(SkGetPackedA32(src[i]));
+        }
+    } else {
+        for (int i = count - 1; i >= 0; --i) {
+            unsigned a = aa[i];
+            if (0 != a) {
+                unsigned srcA = SkGetPackedA32(src[i]);
+                if (a == 0xFF) {
+                    dst[i] = SkToU8(srcA);
+                } else {
+                    dst[i] = SkToU8(SkAlphaBlend(srcA, dst[i], a));
+                }
+            }
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////
+
+class SkDstInXfermode : public SkProcCoeffXfermode {
+public:
+    SkDstInXfermode(const ProcCoeff& rec) : SkProcCoeffXfermode(rec, kDstIn_Mode) {}
+
+    virtual void xfer32(SkPMColor*, const SkPMColor*, int, const SkAlpha*) SK_OVERRIDE;
+
+    SK_DECLARE_PUBLIC_FLATTENABLE_DESERIALIZATION_PROCS(SkDstInXfermode)
+
+private:
+    SkDstInXfermode(SkFlattenableReadBuffer& buffer) : INHERITED(buffer) {}
+
+    typedef SkProcCoeffXfermode INHERITED;
+};
+
+void SkDstInXfermode::xfer32(SkPMColor* SK_RESTRICT dst,
+                             const SkPMColor* SK_RESTRICT src, int count,
+                             const SkAlpha* SK_RESTRICT aa) {
+    SkASSERT(dst && src);
+
+    if (count <= 0) {
+        return;
+    }
+    if (NULL != aa) {
+        return this->INHERITED::xfer32(dst, src, count, aa);
+    }
+
+    do {
+        unsigned a = SkGetPackedA32(*src);
+        *dst = SkAlphaMulQ(*dst, SkAlpha255To256(a));
+        dst++;
+        src++;
+    } while (--count != 0);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+
+class SkDstOutXfermode : public SkProcCoeffXfermode {
+public:
+    SkDstOutXfermode(const ProcCoeff& rec) : SkProcCoeffXfermode(rec, kDstOut_Mode) {}
+
+    virtual void xfer32(SkPMColor*, const SkPMColor*, int, const SkAlpha*) SK_OVERRIDE;
+
+    SK_DECLARE_PUBLIC_FLATTENABLE_DESERIALIZATION_PROCS(SkDstOutXfermode)
+
+private:
+    SkDstOutXfermode(SkFlattenableReadBuffer& buffer)
+        : INHERITED(buffer) {}
+
+    typedef SkProcCoeffXfermode INHERITED;
+};
+
+void SkDstOutXfermode::xfer32(SkPMColor* SK_RESTRICT dst,
+                              const SkPMColor* SK_RESTRICT src, int count,
+                              const SkAlpha* SK_RESTRICT aa) {
+    SkASSERT(dst && src);
+
+    if (count <= 0) {
+        return;
+    }
+    if (NULL != aa) {
+        return this->INHERITED::xfer32(dst, src, count, aa);
+    }
+
+    do {
+        unsigned a = SkGetPackedA32(*src);
+        *dst = SkAlphaMulQ(*dst, SkAlpha255To256(255 - a));
+        dst++;
+        src++;
+    } while (--count != 0);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+SkXfermode* SkXfermode::Create(Mode mode) {
+    SkASSERT(SK_ARRAY_COUNT(gProcCoeffs) == kModeCount);
+    SkASSERT((unsigned)mode < kModeCount);
+
+    const ProcCoeff& rec = gProcCoeffs[mode];
+
+    switch (mode) {
+        case kClear_Mode:
+            return SkNEW_ARGS(SkClearXfermode, (rec));
+        case kSrc_Mode:
+            return SkNEW_ARGS(SkSrcXfermode, (rec));
+        case kSrcOver_Mode:
+            return NULL;
+        case kDstIn_Mode:
+            return SkNEW_ARGS(SkDstInXfermode, (rec));
+        case kDstOut_Mode:
+            return SkNEW_ARGS(SkDstOutXfermode, (rec));
+        default:
+            return SkNEW_ARGS(SkProcCoeffXfermode, (rec, mode));
+    }
 }
 
 SkXfermodeProc SkXfermode::GetProc(Mode mode) {
@@ -1001,6 +974,56 @@ SkXfermodeProc SkXfermode::GetProc(Mode mode) {
         proc = gProcCoeffs[mode].fProc;
     }
     return proc;
+}
+
+bool SkXfermode::ModeAsCoeff(Mode mode, Coeff* src, Coeff* dst) {
+    SkASSERT(SK_ARRAY_COUNT(gProcCoeffs) == kModeCount);
+
+    if ((unsigned)mode >= (unsigned)kModeCount) {
+        // illegal mode parameter
+        return false;
+    }
+
+    const ProcCoeff& rec = gProcCoeffs[mode];
+
+    if (CANNOT_USE_COEFF == rec.fSC) {
+        return false;
+    }
+
+    SkASSERT(CANNOT_USE_COEFF != rec.fDC);
+    if (src) {
+        *src = rec.fSC;
+    }
+    if (dst) {
+        *dst = rec.fDC;
+    }
+    return true;
+}
+
+bool SkXfermode::AsMode(SkXfermode* xfer, Mode* mode) {
+    if (NULL == xfer) {
+        if (mode) {
+            *mode = kSrcOver_Mode;
+        }
+        return true;
+    }
+    return xfer->asMode(mode);
+}
+
+bool SkXfermode::AsCoeff(SkXfermode* xfer, Coeff* src, Coeff* dst) {
+    if (NULL == xfer) {
+        return ModeAsCoeff(kSrcOver_Mode, src, dst);
+    }
+    return xfer->asCoeff(src, dst);
+}
+
+bool SkXfermode::IsMode(SkXfermode* xfer, Mode mode) {
+    // if xfer==null then the mode is srcover
+    Mode m = kSrcOver_Mode;
+    if (xfer && !xfer->asMode(&m)) {
+        return false;
+    }
+    return mode == m;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1057,7 +1080,7 @@ static uint16_t dstout_modeproc16_0(SkPMColor src, uint16_t dst) {
 
 static uint16_t srcatop_modeproc16(SkPMColor src, uint16_t dst) {
     unsigned isa = 255 - SkGetPackedA32(src);
-    
+
     return SkPackRGB16(
            SkPacked32ToR16(src) + SkAlphaMulAlpha(SkGetPackedR16(dst), isa),
            SkPacked32ToG16(src) + SkAlphaMulAlpha(SkGetPackedG16(dst), isa),
@@ -1171,3 +1194,10 @@ SkXfermodeProc16 SkXfermode::GetProc16(Mode mode, SkColor srcColor) {
     return proc16;
 }
 
+SK_DEFINE_FLATTENABLE_REGISTRAR_GROUP_START(SkXfermode)
+    SK_DEFINE_FLATTENABLE_REGISTRAR_ENTRY(SkProcCoeffXfermode)
+    SK_DEFINE_FLATTENABLE_REGISTRAR_ENTRY(SkClearXfermode)
+    SK_DEFINE_FLATTENABLE_REGISTRAR_ENTRY(SkSrcXfermode)
+    SK_DEFINE_FLATTENABLE_REGISTRAR_ENTRY(SkDstInXfermode)
+    SK_DEFINE_FLATTENABLE_REGISTRAR_ENTRY(SkDstOutXfermode)
+SK_DEFINE_FLATTENABLE_REGISTRAR_GROUP_END

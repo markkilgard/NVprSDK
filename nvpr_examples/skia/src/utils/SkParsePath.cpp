@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "SkParse.h"
 #include "SkParsePath.h"
 
@@ -184,7 +191,7 @@ static void write_scalar(SkWStream* stream, SkScalar value) {
 #ifdef SK_SCALAR_IS_FLOAT
     char buffer[64];
 #ifdef SK_BUILD_FOR_WIN32
-	int len = sprintf(buffer, "%g", value);
+	int len = _snprintf(buffer, sizeof(buffer), "%g", value);
 #else
     int len = snprintf(buffer, sizeof(buffer), "%g", value);
 #endif

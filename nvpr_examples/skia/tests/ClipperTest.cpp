@@ -1,7 +1,70 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "Test.h"
 #include "SkPath.h"
 #include "SkLineClipper.h"
 #include "SkEdgeClipper.h"
+
+#include "SkCanvas.h"
+static void test_hairclipping(skiatest::Reporter* reporter) {
+    SkBitmap bm;
+    bm.setConfig(SkBitmap::kARGB_8888_Config, 4, 4);
+    bm.allocPixels();
+    bm.eraseColor(SK_ColorWHITE);
+    
+    SkPaint paint;
+    paint.setAntiAlias(true);
+
+    SkCanvas canvas(bm);
+    canvas.clipRect(SkRect::MakeWH(SkIntToScalar(4), SkIntToScalar(2)));
+    canvas.drawLine(SkFloatToScalar(1.5), SkFloatToScalar(1.5),
+                    SkFloatToScalar(3.5), SkFloatToScalar(3.5), paint);
+    
+    /**
+     *  We had a bug where we misinterpreted the bottom of the clip, and
+     *  would draw another pixel (to the right in this case) on the same
+     *  last scanline. i.e. we would draw to [2,1], even though this hairline
+     *  should just draw to [1,1], [2,2], [3,3] modulo the clip.
+     *
+     *  The result of this entire draw should be that we only draw to [1,1]
+     *
+     *  Fixed in rev. 3366
+     */
+    for (int y = 0; y < 4; ++y) {
+        for (int x = 0; x < 4; ++x) {
+            bool nonWhite = (1 == y) && (1 == x);
+            SkPMColor c = *bm.getAddr32(x, y);
+            if (nonWhite) {
+                REPORTER_ASSERT(reporter, 0xFFFFFFFF != c);
+            } else {
+                REPORTER_ASSERT(reporter, 0xFFFFFFFF == c);
+            }
+        }
+    }
+}
+
+static void test_edgeclipper(skiatest::Reporter* reporter) {
+    SkEdgeClipper clipper;
+    
+    const SkPoint pts[] = {
+        { SkFloatToScalar(3.0995476e+010),  SkFloatToScalar(42.929779) },
+        { SkFloatToScalar(-3.0995163e+010), SkFloatToScalar(51.050385) },
+        { SkFloatToScalar(-3.0995157e+010), SkFloatToScalar(51.050392) },
+        { SkFloatToScalar(-3.0995134e+010), SkFloatToScalar(51.050400) },
+    };
+
+    const SkRect clip = { 0, 0, SkIntToScalar(300), SkIntToScalar(200) };
+
+    // this should not assert, even though our choppers do a poor numerical
+    // job when computing their t values.
+    // http://code.google.com/p/skia/issues/detail?id=444
+    clipper.clipCubic(pts, clip);
+}
 
 static void test_intersectline(skiatest::Reporter* reporter) {
     static const SkScalar L = 0;
@@ -83,6 +146,8 @@ static void test_intersectline(skiatest::Reporter* reporter) {
 
 void TestClipper(skiatest::Reporter* reporter) {
     test_intersectline(reporter);
+    test_edgeclipper(reporter);
+    test_hairclipping(reporter);
 }
 
 #include "TestClassDef.h"

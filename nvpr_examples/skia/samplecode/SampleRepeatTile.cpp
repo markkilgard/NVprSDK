@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "SampleCode.h"
 #include "SkView.h"
 #include "SkCanvas.h"
@@ -35,9 +42,11 @@ static void make_paint(SkPaint* paint, SkShader::TileMode tm) {
     paint->setShader(shader)->unref();
 }
 
-class RepeatTileView : public SkView {
+class RepeatTileView : public SampleView {
 public:
-	RepeatTileView() {}
+	RepeatTileView() {
+        this->setBGColor(SK_ColorGRAY);
+    }
 
 protected:
     // overrides from SkEventSink
@@ -49,13 +58,7 @@ protected:
         return this->INHERITED::onQuery(evt);
     }
     
-    void drawBG(SkCanvas* canvas) {
-        canvas->drawColor(SK_ColorGRAY);
-    }
-    
-    virtual void onDraw(SkCanvas* canvas) {
-        this->drawBG(canvas);
-        
+    virtual void onDrawContent(SkCanvas* canvas) {
         SkPaint paint;
         make_paint(&paint, SkShader::kRepeat_TileMode);
         
@@ -80,7 +83,7 @@ protected:
     }
 
 private:
-    typedef SkView INHERITED;
+    typedef SampleView INHERITED;
 };
 
 //////////////////////////////////////////////////////////////////////////////

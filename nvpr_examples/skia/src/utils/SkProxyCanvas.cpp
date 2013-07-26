@@ -1,30 +1,25 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "SkProxyCanvas.h"
 
 SkProxyCanvas::SkProxyCanvas(SkCanvas* proxy) : fProxy(proxy) {
-    fProxy->safeRef();
+    SkSafeRef(fProxy);
 }
 
 SkProxyCanvas::~SkProxyCanvas() {
-    fProxy->safeUnref();
+    SkSafeUnref(fProxy);
 }
-    
+
 void SkProxyCanvas::setProxy(SkCanvas* proxy) {
     SkRefCnt_SafeAssign(fProxy, proxy);
 }
 
 ///////////////////////////////// Overrides ///////////
-
-bool SkProxyCanvas::getViewport(SkIPoint* size) const {
-    return fProxy->getViewport(size);
-}
-
-bool SkProxyCanvas::setViewport(int x, int y) {
-    return fProxy->setViewport(x, y);
-}
-
-SkDevice* SkProxyCanvas::setBitmapDevice(const SkBitmap& bitmap) {
-    return fProxy->setBitmapDevice(bitmap);
-}
 
 int SkProxyCanvas::save(SaveFlags flags) {
     return fProxy->save(flags);
@@ -63,12 +58,12 @@ void SkProxyCanvas::setMatrix(const SkMatrix& matrix) {
     fProxy->setMatrix(matrix);
 }
 
-bool SkProxyCanvas::clipRect(const SkRect& rect, SkRegion::Op op) {
-    return fProxy->clipRect(rect, op);
+bool SkProxyCanvas::clipRect(const SkRect& rect, SkRegion::Op op, bool doAA) {
+    return fProxy->clipRect(rect, op, doAA);
 }
 
-bool SkProxyCanvas::clipPath(const SkPath& path, SkRegion::Op op) {
-    return fProxy->clipPath(path, op);
+bool SkProxyCanvas::clipPath(const SkPath& path, SkRegion::Op op, bool doAA) {
+    return fProxy->clipPath(path, op, doAA);
 }
 
 bool SkProxyCanvas::clipRegion(const SkRegion& deviceRgn, SkRegion::Op op) {
@@ -138,10 +133,6 @@ void SkProxyCanvas::drawPicture(SkPicture& picture) {
     fProxy->drawPicture(picture);
 }
 
-void SkProxyCanvas::drawShape(SkShape* shape) {
-    fProxy->drawShape(shape);
-}
-
 void SkProxyCanvas::drawVertices(VertexMode vmode, int vertexCount,
                                  const SkPoint vertices[], const SkPoint texs[],
                                  const SkColor colors[], SkXfermode* xmode,
@@ -161,10 +152,5 @@ SkBounder* SkProxyCanvas::setBounder(SkBounder* bounder) {
 
 SkDrawFilter* SkProxyCanvas::setDrawFilter(SkDrawFilter* filter) {
     return fProxy->setDrawFilter(filter);
-}
-
-SkDevice* SkProxyCanvas::createDevice(SkBitmap::Config config, int width,
-                                int height, bool isOpaque, bool isForLayer) {
-    return fProxy->createDevice(config, width, height, isOpaque, isForLayer);
 }
 

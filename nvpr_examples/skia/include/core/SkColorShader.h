@@ -1,18 +1,11 @@
+
 /*
- * Copyright (C) 2007 The Android Open Source Project
+ * Copyright 2007 The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
  */
+
 
 #ifndef SkColorShader_DEFINED
 #define SkColorShader_DEFINED
@@ -24,35 +17,46 @@
     accomplished by just using the color field on the paint, but if an
     actual shader object is needed, this provides that feature.
 */
-class SkColorShader : public SkShader {
+class SK_API SkColorShader : public SkShader {
 public:
     /** Create a ColorShader that will inherit its color from the Paint
         at draw time.
     */
-    SkColorShader() : fFlags(0), fInheritColor(true) {}
+    SkColorShader();
 
     /** Create a ColorShader that ignores the color in the paint, and uses the
         specified color. Note: like all shaders, at draw time the paint's alpha
         will be respected, and is applied to the specified color.
     */
-    SkColorShader(SkColor c) : fColor(c), fFlags(0), fInheritColor(false) {}
-    
-    virtual uint32_t getFlags() { return fFlags; }
-    virtual uint8_t getSpan16Alpha() const;
+    SkColorShader(SkColor c);
+
+    virtual ~SkColorShader();
+
+    virtual uint32_t getFlags() SK_OVERRIDE;
+    virtual uint8_t getSpan16Alpha() const SK_OVERRIDE;
+    virtual bool isOpaque() const SK_OVERRIDE;
     virtual bool setContext(const SkBitmap& device, const SkPaint& paint,
-                            const SkMatrix& matrix);
-    virtual void shadeSpan(int x, int y, SkPMColor span[], int count);
-    virtual void shadeSpan16(int x, int y, uint16_t span[], int count);
-    virtual void shadeSpanAlpha(int x, int y, uint8_t alpha[], int count);
+                            const SkMatrix& matrix) SK_OVERRIDE;
+    virtual void shadeSpan(int x, int y, SkPMColor span[], int count) SK_OVERRIDE;
+    virtual void shadeSpan16(int x, int y, uint16_t span[], int count) SK_OVERRIDE;
+    virtual void shadeSpanAlpha(int x, int y, uint8_t alpha[], int count) SK_OVERRIDE;
+
+    // we return false for this, use asAGradient
+    virtual BitmapType asABitmap(SkBitmap* outTexture,
+                                 SkMatrix* outMatrix,
+                                 TileMode xy[2],
+                                 SkScalar* twoPointRadialParams) const SK_OVERRIDE;
+
+    virtual GradientType asAGradient(GradientInfo* info) const SK_OVERRIDE;
+
+    SK_DECLARE_PUBLIC_FLATTENABLE_DESERIALIZATION_PROCS(SkColorShader)
 
 protected:
-    SkColorShader(SkFlattenableReadBuffer& );
-    virtual void flatten(SkFlattenableWriteBuffer& );
-    virtual Factory getFactory() { return CreateProc; }
+    SkColorShader(SkFlattenableReadBuffer&);
+    virtual void flatten(SkFlattenableWriteBuffer&) const SK_OVERRIDE;
+
 private:
-    static SkFlattenable* CreateProc(SkFlattenableReadBuffer& buffer) { 
-        return SkNEW_ARGS(SkColorShader, (buffer)); 
-    }
+
     SkColor     fColor;         // ignored if fInheritColor is true
     SkPMColor   fPMColor;       // cached after setContext()
     uint32_t    fFlags;         // cached after setContext()

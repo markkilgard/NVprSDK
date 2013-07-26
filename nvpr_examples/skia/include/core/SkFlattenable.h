@@ -1,18 +1,11 @@
+
 /*
- * Copyright (C) 2006 The Android Open Source Project
+ * Copyright 2006 The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
  */
+
 
 #ifndef SkFlattenable_DEFINED
 #define SkFlattenable_DEFINED
@@ -27,13 +20,51 @@ class SkFlattenableReadBuffer;
 class SkFlattenableWriteBuffer;
 class SkString;
 
+#if SK_ALLOW_STATIC_GLOBAL_INITIALIZERS
+
+#define SK_DEFINE_FLATTENABLE_REGISTRAR(flattenable) \
+    static SkFlattenable::Registrar g##flattenable##Reg(#flattenable, \
+                                                       flattenable::CreateProc);
+#define SK_DEFINE_FLATTENABLE_REGISTRAR_ENTRY(flattenable) \
+    static SkFlattenable::Registrar g##flattenable##Reg(#flattenable, \
+                                                       flattenable::CreateProc);
+
+#define SK_DECLARE_FLATTENABLE_REGISTRAR_GROUP()
+#define SK_DEFINE_FLATTENABLE_REGISTRAR_GROUP_START(flattenable)
+#define SK_DEFINE_FLATTENABLE_REGISTRAR_GROUP_END
+
+#else
+
+#define SK_DEFINE_FLATTENABLE_REGISTRAR(flattenable)
+#define SK_DEFINE_FLATTENABLE_REGISTRAR_ENTRY(flattenable) \
+        SkFlattenable::Registrar(#flattenable, flattenable::CreateProc);
+
+#define SK_DECLARE_FLATTENABLE_REGISTRAR_GROUP() static void InitializeFlattenables();
+
+#define SK_DEFINE_FLATTENABLE_REGISTRAR_GROUP_START(flattenable) \
+    void flattenable::InitializeFlattenables() {
+
+#define SK_DEFINE_FLATTENABLE_REGISTRAR_GROUP_END \
+    }
+
+#endif
+
+#define SK_DECLARE_UNFLATTENABLE_OBJECT() \
+    virtual Factory getFactory() SK_OVERRIDE { return NULL; }; \
+
+#define SK_DECLARE_PUBLIC_FLATTENABLE_DESERIALIZATION_PROCS(flattenable) \
+    virtual Factory getFactory() SK_OVERRIDE { return CreateProc; }; \
+    static SkFlattenable* CreateProc(SkFlattenableReadBuffer& buffer) { \
+        return SkNEW_ARGS(flattenable, (buffer)); \
+    }
+
 /** \class SkFlattenable
  
  SkFlattenable is the base class for objects that need to be flattened
  into a data stream for either transport or as part of the key to the
  font cache.
  */
-class SkFlattenable : public SkRefCnt {
+class SK_API SkFlattenable : public SkRefCnt {
 public:
     typedef SkFlattenable* (*Factory)(SkFlattenableReadBuffer&);
     
@@ -44,31 +75,44 @@ public:
      override of flatten().
      */
     virtual Factory getFactory() = 0;
-    /** Override this to write data specific to your subclass into the buffer,
-     being sure to call your super-class' version first. This data will later
-     be passed to your Factory function, returned by getFactory().
-     */
-    virtual void flatten(SkFlattenableWriteBuffer&);
     
-    /** Set the string to describe the sublass and return true. If this is not
-        overridden, ignore the string param and return false.
-     */
-    virtual bool toDumpString(SkString*) const;
-
     static Factory NameToFactory(const char name[]);
     static const char* FactoryToName(Factory);
     static void Register(const char name[], Factory);
-    
+
     class Registrar {
     public:
         Registrar(const char name[], Factory factory) {
             SkFlattenable::Register(name, factory);
         }
     };
-    
+
 protected:
     SkFlattenable(SkFlattenableReadBuffer&) {}
+    /** Override this to write data specific to your subclass into the buffer,
+     being sure to call your super-class' version first. This data will later
+     be passed to your Factory function, returned by getFactory().
+     */
+    virtual void flatten(SkFlattenableWriteBuffer&) const;
+
+private:
+#if !SK_ALLOW_STATIC_GLOBAL_INITIALIZERS
+    static void InitializeFlattenables();
+#endif
+
+    friend class SkGraphics;
+    friend class SkFlattenableWriteBuffer;
 };
+
+// helpers for matrix and region
+
+class SkMatrix;
+extern void SkReadMatrix(SkReader32*, SkMatrix*);
+extern void SkWriteMatrix(SkWriter32*, const SkMatrix&);
+
+class SkRegion;
+extern void SkReadRegion(SkReader32*, SkRegion*);
+extern void SkWriteRegion(SkWriter32*, const SkRegion&);
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -90,10 +134,26 @@ public:
         fTFArray = array;
         fTFCount = count;
     }
-    
+
+    /**
+     *  Call this with a pre-loaded array of Factories, in the same order as
+     *  were created/written by the writer. SkPicture uses this.
+     */
     void setFactoryPlayback(SkFlattenable::Factory array[], int count) {
+        fFactoryTDArray = NULL;
         fFactoryArray = array;
         fFactoryCount = count;
+    }
+
+    /**
+     *  Call this with an initially empty array, so the reader can cache each
+     *  factory it sees by name. Used by the pipe code in conjunction with
+     *  the writer's kInlineFactoryNames_Flag.
+     */
+    void setFactoryArray(SkTDArray<SkFlattenable::Factory>* array) {
+        fFactoryTDArray = array;
+        fFactoryArray = NULL;
+        fFactoryCount = 0;
     }
     
     SkTypeface* readTypeface();
@@ -108,6 +168,7 @@ private:
     SkTypeface** fTFArray;
     int        fTFCount;
     
+    SkTDArray<SkFlattenable::Factory>* fFactoryTDArray;
     SkFlattenable::Factory* fFactoryArray;
     int                     fFactoryCount;
     
@@ -118,48 +179,22 @@ private:
 
 #include "SkPtrRecorder.h"
 
-class SkRefCntRecorder : public SkPtrRecorder {
+/**
+ *  Subclass of SkTPtrSet specialed to call ref() and unref() when the
+ *  base class's incPtr() and decPtr() are called. This makes it a valid owner
+ *  of each ptr, which is released when the set is reset or destroyed.
+ */
+class SkRefCntSet : public SkTPtrSet<SkRefCnt*> {
 public:
-    virtual ~SkRefCntRecorder();
+    virtual ~SkRefCntSet();
     
-    /** Add a refcnt object to the set and ref it if not already present,
-        or if it is already present, do nothing. Either way, returns 0 if obj
-        is null, or a base-1 index if obj is not null.
-    */
-    uint32_t record(SkRefCnt* ref) {
-        return this->recordPtr(ref);
-    }
-
-    // This does not change the owner counts on the objects
-    void get(SkRefCnt* array[]) const {
-        this->getPtrs((void**)array);
-    }
-
 protected:
     // overrides
     virtual void incPtr(void*);
     virtual void decPtr(void*);
-
-private:
-    typedef SkPtrRecorder INHERITED;
 };
 
-class SkFactoryRecorder : public SkPtrRecorder {
-public:
-    /** Add a factory to the set. If it is null return 0, otherwise return a
-        base-1 index for the factory.
-    */
-    uint32_t record(SkFlattenable::Factory fact) {
-        return this->recordPtr((void*)fact);
-    }
-    
-    void get(SkFlattenable::Factory array[]) const {
-        this->getPtrs((void**)array);
-    }
-    
-private:
-    typedef SkPtrRecorder INHERITED;
-};
+class SkFactorySet : public SkTPtrSet<SkFlattenable::Factory> {};
 
 class SkFlattenableWriteBuffer : public SkWriter32 {
 public:
@@ -171,22 +206,32 @@ public:
     void writeFunctionPtr(void*);
     void writeFlattenable(SkFlattenable* flattenable);
     
-    SkRefCntRecorder* getTypefaceRecorder() const { return fTFRecorder; }
-    SkRefCntRecorder* setTypefaceRecorder(SkRefCntRecorder*);
+    SkRefCntSet* getTypefaceRecorder() const { return fTFSet; }
+    SkRefCntSet* setTypefaceRecorder(SkRefCntSet*);
     
-    SkRefCntRecorder* getRefCntRecorder() const { return fRCRecorder; }
-    SkRefCntRecorder* setRefCntRecorder(SkRefCntRecorder*);
+    SkRefCntSet* getRefCntRecorder() const { return fRCSet; }
+    SkRefCntSet* setRefCntRecorder(SkRefCntSet*);
     
-    SkFactoryRecorder* getFactoryRecorder() const { return fFactoryRecorder; }
-    SkFactoryRecorder* setFactoryRecorder(SkFactoryRecorder*);
+    SkFactorySet* getFactoryRecorder() const { return fFactorySet; }
+    SkFactorySet* setFactoryRecorder(SkFactorySet*);
 
     enum Flags {
-        kCrossProcess_Flag      = 0x01
+        kCrossProcess_Flag       = 0x01,
+        /**
+         *  Instructs the writer to inline Factory names as there are seen the
+         *  first time (after that we store an index). The pipe code uses this.
+         */
+        kInlineFactoryNames_Flag = 0x02,
     };
-    Flags getFlags() const { return fFlags; }
+    Flags getFlags() const { return (Flags)fFlags; }
     void setFlags(Flags flags) { fFlags = flags; }
     
-    bool isCrossProcess() const { return (fFlags & kCrossProcess_Flag) != 0; }
+    bool isCrossProcess() const {
+        return SkToBool(fFlags & kCrossProcess_Flag);
+    }
+    bool inlineFactoryNames() const {
+        return SkToBool(fFlags & kInlineFactoryNames_Flag);
+    }
 
     bool persistBitmapPixels() const {
         return (fFlags & kCrossProcess_Flag) != 0;
@@ -195,10 +240,10 @@ public:
     bool persistTypeface() const { return (fFlags & kCrossProcess_Flag) != 0; }
 
 private:
-    Flags               fFlags;
-    SkRefCntRecorder*   fTFRecorder;
-    SkRefCntRecorder*   fRCRecorder;
-    SkFactoryRecorder*  fFactoryRecorder;
+    uint32_t        fFlags;
+    SkRefCntSet*    fTFSet;
+    SkRefCntSet*    fRCSet;
+    SkFactorySet*   fFactorySet;
     
     typedef SkWriter32 INHERITED;
 };

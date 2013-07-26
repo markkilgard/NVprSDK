@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "SampleCode.h"
 #include "SkView.h"
 #include "SkCanvas.h"
@@ -88,7 +95,7 @@ static void quad_clipper(const SkPoint src[], const SkRect& clip,
     
     SkEdgeClipper clipper;
     if (clipper.clipQuad(src, clip)) {
-        SkPoint pts[3];
+        SkPoint pts[4];
         SkPath::Verb verb;
         while ((verb = clipper.next(pts)) != SkPath::kDone_Verb) {
             switch (verb) {
@@ -146,7 +153,7 @@ enum {
     H = 480/3
 };
 
-class LineClipperView : public SkView {
+class LineClipperView : public SampleView {
     SkMSec      fNow;
     int         fCounter;
     int         fProcIndex;
@@ -155,7 +162,7 @@ class LineClipperView : public SkView {
     SkPoint     fPts[4];
 
     void randPts() {
-        for (int i = 0; i < SK_ARRAY_COUNT(fPts); i++) {
+        for (size_t i = 0; i < SK_ARRAY_COUNT(fPts); i++) {
             fPts[i].set(fRand.nextUScalar1() * 640,
                         fRand.nextUScalar1() * 480);
         }
@@ -166,10 +173,12 @@ public:
 	LineClipperView() {
         fProcIndex = 0;
         fCounter = 0;
+        fNow = 0;
 
         int x = (640 - W)/2;
         int y = (480 - H)/2;
-        fClip.set(x, y, x + W, y + H);
+        fClip.set(SkIntToScalar(x), SkIntToScalar(y),
+                  SkIntToScalar(x + W), SkIntToScalar(y + H));
         this->randPts();
     }
     
@@ -183,10 +192,6 @@ protected:
         return this->INHERITED::onQuery(evt);
     }
     
-    void drawBG(SkCanvas* canvas) {
-        canvas->drawColor(SK_ColorWHITE);
-    }
-    
     static void drawVLine(SkCanvas* canvas, SkScalar x, const SkPaint& paint) {
         canvas->drawLine(x, -999, x, 999, paint);
     }
@@ -195,9 +200,7 @@ protected:
         canvas->drawLine(-999, y, 999, y, paint);
     }
     
-    virtual void onDraw(SkCanvas* canvas) {
-        this->drawBG(canvas);
-
+    virtual void onDrawContent(SkCanvas* canvas) {
         SkMSec now = SampleCode::GetAnimTime();
         if (fNow != now) {
             fNow = now;
@@ -227,6 +230,7 @@ protected:
         paint1.setColor(SK_ColorRED);
         paint1.setStyle(SkPaint::kStroke_Style);
         gProcs[fProcIndex](fPts, fClip, canvas, paint, paint1);
+        this->inval(NULL);
     }
 
     virtual SkView::Click* onFindClickHandler(SkScalar x, SkScalar y) {
@@ -243,7 +247,7 @@ protected:
     }
     
 private:
-    typedef SkView INHERITED;
+    typedef SampleView INHERITED;
 };
 
 //////////////////////////////////////////////////////////////////////////////

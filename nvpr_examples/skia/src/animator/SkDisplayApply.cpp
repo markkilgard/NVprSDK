@@ -1,19 +1,11 @@
-/* libs/graphics/animator/SkDisplayApply.cpp
-**
-** Copyright 2006, The Android Open Source Project
-**
-** Licensed under the Apache License, Version 2.0 (the "License"); 
-** you may not use this file except in compliance with the License. 
-** You may obtain a copy of the License at 
-**
-**     http://www.apache.org/licenses/LICENSE-2.0 
-**
-** Unless required by applicable law or agreed to in writing, software 
-** distributed under the License is distributed on an "AS IS" BASIS, 
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-** See the License for the specific language governing permissions and 
-** limitations under the License.
-*/
+
+/*
+ * Copyright 2006 The Android Open Source Project
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
+
 
 #include "SkDisplayApply.h"
 #include "SkAnimateActive.h"
@@ -146,8 +138,9 @@ void SkApply::applyValues(int animatorIndex, SkOperand* values, int count,
                 animator->packARGB(&values->fScalar, count, &converted);
                 values = converted.begin();
                 count = converted.count();
-            } else
+            } else {
                 SkASSERT(count == 1);
+            }
         }
 //      SkASSERT(type == SkType_ARGB || type == SkType_String ||info->isSettable());
         if (type == SkType_String || type == SkType_DynamicString)
@@ -294,7 +287,7 @@ bool SkApply::enable(SkAnimateMaker& maker) {
     if ((mode == kMode_immediate || mode == kMode_create) && scope == NULL)
         return false;   // !!! error?
     bool enableMe = scope && (scope->hasEnable() || scope->isApply() || scope->isDrawable() == false);
-    if (mode == kMode_immediate && enableMe || mode == kMode_create)
+    if ((mode == kMode_immediate && enableMe) || mode == kMode_create)
         activate(maker);    // for non-drawables like post, prime them here
     if (mode == kMode_immediate && enableMe)
         fActive->enable();
@@ -356,7 +349,7 @@ bool SkApply::enable(SkAnimateMaker& maker) {
     if (old < 0)
         goto append;
     else if (fContainsScope) {
-        if ((*parentList)[old] != this || restore == true) {
+        if ((*parentList)[old] != this || restore) {
 append:
             if (parentGroup)
                 parentGroup->markCopySize(old);
@@ -479,7 +472,7 @@ void SkApply::endSave(int index) {
     } else {
         SkScriptValue scriptValue;
         bool success = target->getProperty(info->propertyIndex(), &scriptValue);
-        SkASSERT(success = true);
+        SkASSERT(success == true);
         last[0] = scriptValue.fOperand;
         scriptValue.fOperand = fActive->fSaveRestore[activeIndex][0];
         target->setProperty(info->propertyIndex(), scriptValue);
@@ -624,8 +617,8 @@ bool SkApply::interpolate(SkAnimateMaker& maker, SkMSec rawTime) {
         SkInterpolatorBase::Result interpResult = fActive->fInterpolators[inner]->timeToValues(
             innerTime, values.get());
         result |= (interpResult != SkInterpolatorBase::kFreezeEnd_Result);
-        if ((transition != SkApply::kTransition_reverse && interpResult == SkInterpolatorBase::kFreezeEnd_Result ||
-                transition == SkApply::kTransition_reverse && fLastTime == 0) && state.fUnpostedEndEvent) {
+        if (((transition != SkApply::kTransition_reverse && interpResult == SkInterpolatorBase::kFreezeEnd_Result) ||
+                (transition == SkApply::kTransition_reverse && fLastTime == 0)) && state.fUnpostedEndEvent) {
 //          SkDEBUGF(("interpolate: post on end\n"));
             state.fUnpostedEndEvent = false;
             maker.postOnEnd(animate, state.fBegin + state.fDuration);

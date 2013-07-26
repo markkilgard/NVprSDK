@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "SampleCode.h"
 #include "SkView.h"
 #include "SkCanvas.h"
@@ -8,7 +15,7 @@
 
 #include <pthread.h>
 
-#define WIDTH   200
+#define WIDTH   160
 #define HEIGHT  200
 
 static bool gDone;
@@ -49,6 +56,9 @@ static void* draw_proc(void* context) {
     SkRect oval;
     oval.setEmpty();
 
+    SkRect clipR = SkRect::MakeWH(SkIntToScalar(bm->width()), SkIntToScalar(bm->height()));
+    clipR.inset(SK_Scalar1/4, SK_Scalar1/4);
+                                  
     while (!gDone) {
         ref->inval(oval, true);
         oval.set(x, y, x + SkIntToScalar(OVALW), y + SkIntToScalar(OVALH));
@@ -60,37 +70,27 @@ static void* draw_proc(void* context) {
             // this must be local to the loop, since it needs to forget the pixels
             // its writing to after each iteration, since we do the swap
             SkCanvas    canvas(update.bitmap());
-
-//            SkDebugf("----- dirty [%d %d %d %d]\n", dirty.getBounds().fLeft, dirty.getBounds().fTop, dirty.getBounds().width(), dirty.getBounds().height());
             canvas.clipRegion(update.dirty());
-            
             canvas.drawColor(0, SkXfermode::kClear_Mode);            
+            canvas.clipRect(clipR, SkRegion::kIntersect_Op, true);
+            
             canvas.drawOval(oval, paint);
         }
         bounce(&x, &dx, WIDTH-OVALW);
         bounce(&y, &dy, HEIGHT-OVALH);
-        
-#if 1
-        for (int i = 0; i < 1000; i++) {
-            for (int j = 0; j < 10000; j++) {
-                SkFixedMul(j, 10);
-            }
-        }
-#endif
     }
     return NULL;
 }
 
 static const SkBitmap::Config gConfigs[] = {
     SkBitmap::kARGB_8888_Config,
-#if 1
     SkBitmap::kRGB_565_Config,
     SkBitmap::kARGB_4444_Config,
     SkBitmap::kA8_Config
-#endif
 };
 
-class PageFlipView : public SkView {
+class PageFlipView : public SampleView {
+    bool fOnce;
 public:
     
     enum { N = SK_ARRAY_COUNT(gConfigs) };
@@ -100,24 +100,37 @@ public:
 
 	PageFlipView() {
         gDone = false;
+        fOnce = false;
+        this->setBGColor(0xFFDDDDDD);
+    }
+    
+    void init() {
+        if (fOnce) {
+            return;
+        }
+        fOnce = true;
+
         for (int i = 0; i < N; i++) {
             int             status;
             pthread_attr_t  attr;
             
             status = pthread_attr_init(&attr);
             SkASSERT(0 == status);
-
+            
             fBitmaps[i].setConfig(gConfigs[i], WIDTH, HEIGHT);
             SkFlipPixelRef* pr = new SkFlipPixelRef(gConfigs[i], WIDTH, HEIGHT);
             fBitmaps[i].setPixelRef(pr)->unref();
             fBitmaps[i].eraseColor(0);
-
+            
             status = pthread_create(&fThreads[i], &attr,  draw_proc, &fBitmaps[i]);
             SkASSERT(0 == status);
         }
     }
     
     virtual ~PageFlipView() {
+        if (!fOnce) {
+            return;
+        }
         gDone = true;
         for (int i = 0; i < N; i++) {
             void* ret;
@@ -135,15 +148,9 @@ protected:
         }
         return this->INHERITED::onQuery(evt);
     }
-    
-    void drawBG(SkCanvas* canvas) {
-        canvas->drawColor(0xFFDDDDDD);
-//        canvas->drawColor(SK_ColorWHITE);
-    }
-    
-    virtual void onDraw(SkCanvas* canvas) {
-        this->drawBG(canvas);
-        
+
+    virtual void onDrawContent(SkCanvas* canvas) {
+        this->init();
         SkScalar x = SkIntToScalar(10);
         SkScalar y = SkIntToScalar(10);
         for (int i = 0; i < N; i++) {
@@ -163,7 +170,7 @@ protected:
     }
     
 private:
-    typedef SkView INHERITED;
+    typedef SampleView INHERITED;
 };
 
 //////////////////////////////////////////////////////////////////////////////

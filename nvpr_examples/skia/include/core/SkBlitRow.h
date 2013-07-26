@@ -1,3 +1,10 @@
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
+
 #ifndef SkBlitRow_DEFINED
 #define SkBlitRow_DEFINED
 
@@ -18,18 +25,17 @@ public:
     /** Function pointer that reads a scanline of src SkPMColors, and writes
         a corresponding scanline of 16bit colors (specific format based on the
         config passed to the Factory.
-     
+
         The x,y params are useful just for dithering
-     
+
         @param alpha A global alpha to be applied to all of the src colors
         @param x The x coordinate of the beginning of the scanline
         @param y THe y coordinate of the scanline
      */
-    typedef void (*Proc)(uint16_t* SK_RESTRICT dst,
-                         const SkPMColor* SK_RESTRICT src,
+    typedef void (*Proc)(uint16_t* dst,
+                         const SkPMColor* src,
                          int count, U8CPU alpha, int x, int y);
 
-    //! Public entry-point to return a blit function ptr
     static Proc Factory(unsigned flags, SkBitmap::Config);
 
     ///////////// D32 version
@@ -45,25 +51,38 @@ public:
         @param count number of colors to blend
         @param alpha global alpha to be applied to all src colors
      */
-    typedef void (*Proc32)(uint32_t* SK_RESTRICT dst,
-                         const SkPMColor* SK_RESTRICT src,
+    typedef void (*Proc32)(uint32_t* dst,
+                         const SkPMColor* src,
                          int count, U8CPU alpha);
 
     static Proc32 Factory32(unsigned flags32);
-    
+
+   /** Function pointer that blends a single color with a row of 32-bit colors
+       onto a 32-bit destination
+   */
+   typedef void (*ColorProc)(SkPMColor* dst, const SkPMColor* src, int count,
+                             SkPMColor color);
+
     /** Blend a single color onto a row of S32 pixels, writing the result
         into a row of D32 pixels. src and dst may be the same memory, but
         if they are not, they may not overlap.
      */
-    static void Color32(SkPMColor dst[], const SkPMColor src[], int count,
-                         SkPMColor color);
+    static void Color32(SkPMColor dst[], const SkPMColor src[],
+                        int count, SkPMColor color);
 
-    /** Blend a single color onto a row of 32bit pixels, writing the result
-        into the same row.
-     */
-    static void Color32(SkPMColor row[], int count, SkPMColor color) {
-        Color32(row, row, count, color);
-    }
+    //! Public entry-point to return a blit function ptr
+    static ColorProc ColorProcFactory();
+
+    /** Function pointer that blends a single color onto a 32-bit rectangle.  */
+    typedef void (*ColorRectProc)(SkPMColor* dst, int width, int height,
+                                  size_t rowBytes, SkPMColor color);
+
+    /** Blend a single color into a rectangle of D32 pixels. */
+    static void ColorRect32(SkPMColor* dst, int width, int height,
+                            size_t rowBytes, SkPMColor color);
+
+    //! Public entry-point to return a blit function ptr
+    static ColorRectProc ColorRectProcFactory();
 
     /** These static functions are called by the Factory and Factory32
         functions, and should return either NULL, or a
@@ -74,6 +93,7 @@ public:
     static Proc32 PlatformProcs32(unsigned flags);
     static Proc PlatformProcs565(unsigned flags);
     static Proc PlatformProcs4444(unsigned flags);
+    static ColorProc PlatformColorProc();
 
 private:
     enum {

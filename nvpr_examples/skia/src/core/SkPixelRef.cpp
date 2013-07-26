@@ -1,11 +1,30 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "SkPixelRef.h"
 #include "SkFlattenable.h"
 #include "SkThread.h"
 
-static SkMutex  gPixelRefMutex;
-static int32_t  gPixelRefGenerationID;
+SK_DECLARE_STATIC_MUTEX(gPixelRefMutex);
 
-SkPixelRef::SkPixelRef(SkMutex* mutex) {
+extern int32_t SkNextPixelRefGenerationID();
+int32_t SkNextPixelRefGenerationID() {
+    static int32_t  gPixelRefGenerationID;
+    // do a loop in case our global wraps around, as we never want to
+    // return a 0
+    int32_t genID;
+    do {
+        genID = sk_atomic_inc(&gPixelRefGenerationID) + 1;
+    } while (0 == genID);
+    return genID;
+}
+
+
+SkPixelRef::SkPixelRef(SkBaseMutex* mutex) {
     if (NULL == mutex) {
         mutex = &gPixelRefMutex;
     }
@@ -17,7 +36,8 @@ SkPixelRef::SkPixelRef(SkMutex* mutex) {
     fIsImmutable = false;
 }
 
-SkPixelRef::SkPixelRef(SkFlattenableReadBuffer& buffer, SkMutex* mutex) {
+SkPixelRef::SkPixelRef(SkFlattenableReadBuffer& buffer, SkBaseMutex* mutex)
+        : INHERITED(buffer) {
     if (NULL == mutex) {
         mutex = &gPixelRefMutex;
     }
@@ -30,12 +50,13 @@ SkPixelRef::SkPixelRef(SkFlattenableReadBuffer& buffer, SkMutex* mutex) {
 }
 
 void SkPixelRef::flatten(SkFlattenableWriteBuffer& buffer) const {
+    this->INHERITED::flatten(buffer);
     buffer.writeBool(fIsImmutable);
 }
 
 void SkPixelRef::lockPixels() {
     SkAutoMutexAcquire  ac(*fMutex);
-    
+
     if (1 == ++fLockCount) {
         fPixels = this->onLockPixels(&fColorTable);
     }
@@ -43,7 +64,7 @@ void SkPixelRef::lockPixels() {
 
 void SkPixelRef::unlockPixels() {
     SkAutoMutexAcquire  ac(*fMutex);
-    
+
     SkASSERT(fLockCount > 0);
     if (0 == --fLockCount) {
         this->onUnlockPixels();
@@ -52,17 +73,19 @@ void SkPixelRef::unlockPixels() {
     }
 }
 
+bool SkPixelRef::lockPixelsAreWritable() const {
+    return this->onLockPixelsAreWritable();
+}
+
+bool SkPixelRef::onLockPixelsAreWritable() const {
+    return true;
+}
+
 uint32_t SkPixelRef::getGenerationID() const {
-    uint32_t genID = fGenerationID;
-    if (0 == genID) {
-        // do a loop in case our global wraps around, as we never want to
-        // return a 0
-        do {
-            genID = sk_atomic_inc(&gPixelRefGenerationID) + 1;
-        } while (0 == genID);
-        fGenerationID = genID;
+    if (0 == fGenerationID) {
+        fGenerationID = SkNextPixelRefGenerationID();
     }
-    return genID;
+    return fGenerationID;
 }
 
 void SkPixelRef::notifyPixelsChanged() {
@@ -79,52 +102,22 @@ void SkPixelRef::setImmutable() {
     fIsImmutable = true;
 }
 
+bool SkPixelRef::readPixels(SkBitmap* dst, const SkIRect* subset) {
+    return this->onReadPixels(dst, subset);
+}
+
+bool SkPixelRef::onReadPixels(SkBitmap* dst, const SkIRect* subset) {
+    return false;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
-#define MAX_PAIR_COUNT  16
-
-struct Pair {
-    const char*          fName;
-    SkPixelRef::Factory  fFactory;
-};
-
-static int gCount;
-static Pair gPairs[MAX_PAIR_COUNT];
-
-void SkPixelRef::Register(const char name[], Factory factory) {
-    SkASSERT(name);
-    SkASSERT(factory);
-    
-    static bool gOnce;
-    if (!gOnce) {
-        gCount = 0;
-        gOnce = true;
-    }
-    
-    SkASSERT(gCount < MAX_PAIR_COUNT);
-    
-    gPairs[gCount].fName = name;
-    gPairs[gCount].fFactory = factory;
-    gCount += 1;
+#ifdef SK_BUILD_FOR_ANDROID
+void SkPixelRef::globalRef(void* data) {
+    this->ref();
 }
 
-SkPixelRef::Factory SkPixelRef::NameToFactory(const char name[]) {
-    const Pair* pairs = gPairs;
-    for (int i = gCount - 1; i >= 0; --i) {
-        if (strcmp(pairs[i].fName, name) == 0) {
-            return pairs[i].fFactory;
-        }
-    }
-    return NULL;
+void SkPixelRef::globalUnref() {
+    this->unref();
 }
-
-const char* SkPixelRef::FactoryToName(Factory fact) {
-    const Pair* pairs = gPairs;
-    for (int i = gCount - 1; i >= 0; --i) {
-        if (pairs[i].fFactory == fact) {
-            return pairs[i].fName;
-        }
-    }
-    return NULL;
-}
-
+#endif

@@ -1,19 +1,11 @@
+
 /*
- **
- ** Copyright 2009, The Android Open Source Project
- **
- ** Licensed under the Apache License, Version 2.0 (the "License"); 
- ** you may not use this file except in compliance with the License. 
- ** You may obtain a copy of the License at 
- **
- **     http://www.apache.org/licenses/LICENSE-2.0 
- **
- ** Unless required by applicable law or agreed to in writing, software 
- ** distributed under the License is distributed on an "AS IS" BASIS, 
- ** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
- ** See the License for the specific language governing permissions and 
- ** limitations under the License.
+ * Copyright 2009 The Android Open Source Project
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
  */
+
 
 #include "SkBitmapProcState.h"
 
@@ -23,3 +15,13 @@ void S32_opaque_D32_filter_DX_SSE2(const SkBitmapProcState& s,
 void S32_alpha_D32_filter_DX_SSE2(const SkBitmapProcState& s,
                                   const uint32_t* xy,
                                   int count, uint32_t* colors);
+void Color32_SSE2(SkPMColor dst[], const SkPMColor src[], int count,
+                  SkPMColor color);
+void ClampX_ClampY_filter_scale_SSE2(const SkBitmapProcState& s, uint32_t xy[],
+                                     int count, int x, int y);
+void ClampX_ClampY_nofilter_scale_SSE2(const SkBitmapProcState& s,
+                                       uint32_t xy[], int count, int x, int y);
+void ClampX_ClampY_filter_affine_SSE2(const SkBitmapProcState& s,
+                                      uint32_t xy[], int count, int x, int y);
+void ClampX_ClampY_nofilter_affine_SSE2(const SkBitmapProcState& s,
+                                       uint32_t xy[], int count, int x, int y);

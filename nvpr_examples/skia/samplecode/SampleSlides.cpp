@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "SampleCode.h"
 #include "SkView.h"
 #include "SkCanvas.h"
@@ -87,23 +94,18 @@ static void discrete_pe(SkPaint* paint) {
     paint->setPathEffect(new SkDiscretePathEffect(10, 4))->unref();
 }
 
-class TilePathEffect : public Sk2DPathEffect {
-    static SkMatrix make_mat() {
-        SkMatrix m;
-        m.setScale(12, 12);
-        return m;
-    }
-public:
-    TilePathEffect() : Sk2DPathEffect(make_mat()) {}
+static SkPathEffect* MakeTileEffect() {
+    SkMatrix m;
+    m.setScale(SkIntToScalar(12), SkIntToScalar(12));
 
-protected:
-    virtual void next(const SkPoint& loc, int u, int v, SkPath* dst) {
-        dst->addCircle(loc.fX, loc.fY, 5);
-    }
-};
+    SkPath path;
+    path.addCircle(0, 0, SkIntToScalar(5));
+    
+    return new SkPath2DPathEffect(m, path);
+}
 
 static void tile_pe(SkPaint* paint) {
-    paint->setPathEffect(new TilePathEffect)->unref();
+    paint->setPathEffect(MakeTileEffect())->unref();
 }
 
 static const PE_Proc gPE2[] = { fill_pe, discrete_pe, tile_pe };
@@ -312,7 +314,6 @@ static void textonpath_slide(SkCanvas* canvas) {
 #include "SkOSFile.h"
 #include "SkRandom.h"
 #include "SkStream.h"
-#include "SkNinePatch.h"
 
 static SkShader* make_shader0(SkIPoint* size) {
     SkBitmap    bm;
@@ -324,13 +325,15 @@ static SkShader* make_shader0(SkIPoint* size) {
 }
 
 static SkShader* make_shader1(const SkIPoint& size) {
-    SkPoint pts[] = { 0, 0, SkIntToScalar(size.fX), SkIntToScalar(size.fY) };
+    SkPoint pts[] = { { 0, 0 },
+                      { SkIntToScalar(size.fX), SkIntToScalar(size.fY) } };
     SkColor colors[] = { SK_ColorRED, SK_ColorGREEN, SK_ColorBLUE, SK_ColorRED };
     return SkGradientShader::CreateLinear(pts, colors, NULL,
                                           SK_ARRAY_COUNT(colors), SkShader::kMirror_TileMode, NULL);
 }
 
-struct Rec {
+class Rec {
+public:
     SkCanvas::VertexMode    fMode;
     int                     fCount;
     SkPoint*                fVerts;
@@ -426,18 +429,19 @@ static void mesh_slide(SkCanvas* canvas) {
     
     SkShader* fShader0 = make_shader0(&size);
     SkShader* fShader1 = make_shader1(size);
-    
+
+    SkAutoUnref aur0(fShader0);
+    SkAutoUnref aur1(fShader1);
+
     make_strip(&fRecs[0], size.fX, size.fY);
     make_fan(&fRecs[1], size.fX, size.fY);
     make_tris(&fRecs[2]);
-
-
 
     SkPaint paint;
     paint.setDither(true);
     paint.setFilterBitmap(true);
     
-    for (int i = 0; i < SK_ARRAY_COUNT(fRecs); i++) {
+    for (size_t i = 0; i < SK_ARRAY_COUNT(fRecs); i++) {
         canvas->save();
         
         paint.setShader(NULL);
@@ -560,46 +564,18 @@ static void r6(SkLayerRasterizer* rast, SkPaint& p)
 
 #include "Sk2DPathEffect.h"
 
-class Dot2DPathEffect : public Sk2DPathEffect {
-public:
-    Dot2DPathEffect(SkScalar radius, const SkMatrix& matrix)
-    : Sk2DPathEffect(matrix), fRadius(radius) {}
-    
-    virtual void flatten(SkFlattenableWriteBuffer& buffer)
-    {
-        this->INHERITED::flatten(buffer);
-        
-        buffer.writeScalar(fRadius);
-    }
-    virtual Factory getFactory() { return CreateProc; }
-    
-protected:
-	virtual void next(const SkPoint& loc, int u, int v, SkPath* dst)
-    {
-        dst->addCircle(loc.fX, loc.fY, fRadius);
-    }
-    
-    Dot2DPathEffect(SkFlattenableReadBuffer& buffer) : Sk2DPathEffect(buffer)
-    {
-        fRadius = buffer.readScalar();
-    }
-private:
-    SkScalar fRadius;
-    
-    static SkFlattenable* CreateProc(SkFlattenableReadBuffer& buffer)
-    {
-        return new Dot2DPathEffect(buffer);
-    }
-    
-    typedef Sk2DPathEffect INHERITED;
-};
+static SkPathEffect* MakeDotEffect(SkScalar radius, const SkMatrix& matrix) {
+    SkPath path;
+    path.addCircle(0, 0, radius);
+    return new SkPath2DPathEffect(matrix, path);
+}
 
 static void r7(SkLayerRasterizer* rast, SkPaint& p)
 {
     SkMatrix    lattice;
     lattice.setScale(SK_Scalar1*6, SK_Scalar1*6, 0, 0);
     lattice.postSkew(SK_Scalar1/3, 0, 0, 0);
-    p.setPathEffect(new Dot2DPathEffect(SK_Scalar1*4, lattice))->unref();
+    p.setPathEffect(MakeDotEffect(SK_Scalar1*4, lattice))->unref();
     rast->addLayer(p);
 }
 
@@ -610,7 +586,7 @@ static void r8(SkLayerRasterizer* rast, SkPaint& p)
     SkMatrix    lattice;
     lattice.setScale(SK_Scalar1*6, SK_Scalar1*6, 0, 0);
     lattice.postSkew(SK_Scalar1/3, 0, 0, 0);
-    p.setPathEffect(new Dot2DPathEffect(SK_Scalar1*2, lattice))->unref();
+    p.setPathEffect(MakeDotEffect(SK_Scalar1*2, lattice))->unref();
     p.setXfermodeMode(SkXfermode::kClear_Mode);
     rast->addLayer(p);
     
@@ -636,12 +612,7 @@ public:
         return false;
     }
     
-    virtual Factory getFactory() { return CreateProc; }
-    virtual void flatten(SkFlattenableWriteBuffer& buffer)
-    {
-        this->INHERITED::flatten(buffer);
-        buffer.writeScalar(fWidth);
-    }
+    SK_DECLARE_PUBLIC_FLATTENABLE_DESERIALIZATION_PROCS(Line2DPathEffect)
 protected:
 	virtual void nextSpan(int u, int v, int ucount, SkPath* dst)
     {
@@ -660,18 +631,18 @@ protected:
         }
     }
     
-    Line2DPathEffect(SkFlattenableReadBuffer& buffer) : Sk2DPathEffect(buffer)
+    Line2DPathEffect(SkFlattenableReadBuffer& buffer) : INHERITED(buffer)
     {
         fWidth = buffer.readScalar();
+    }
+    virtual void flatten(SkFlattenableWriteBuffer& buffer) const SK_OVERRIDE
+    {
+        this->INHERITED::flatten(buffer);
+        buffer.writeScalar(fWidth);
     }
     
 private:
     SkScalar fWidth;
-    
-    static SkFlattenable* CreateProc(SkFlattenableReadBuffer& buffer)
-    {
-        return new Line2DPathEffect(buffer);
-    }
     
     typedef Sk2DPathEffect INHERITED;
 };
@@ -723,7 +694,7 @@ static void texteffect_slide(SkCanvas* canvas) {
     paint.setTextSize(75);
     paint.setAntiAlias(true);
     paint.setColor(SK_ColorBLUE);
-    for (int i = 0; i < SK_ARRAY_COUNT(gRastProcs); i++) {
+    for (size_t i = 0; i < SK_ARRAY_COUNT(gRastProcs); i++) {
         apply_shader(&paint, i);
         canvas->drawText(str, len, x, y, paint);
         y += 80;
@@ -746,10 +717,20 @@ static const SlideProc gProc[] = {
     texteffect_slide
 };
 
-class SlideView : public SkView {
+class SlideView : public SampleView {
     int fIndex;
+    bool fOnce;
 public:
     SlideView() {
+        fOnce = false;
+    }
+    
+    void init() {
+        if (fOnce) {
+            return;
+        }
+        fOnce = true;
+
         fIndex = 0;
         
         SkBitmap bm;
@@ -767,6 +748,7 @@ public:
             str.printf("/skimages/slide_%d.png", i);
             SkImageEncoder::EncodeFile(str.c_str(), bm, SkImageEncoder::kPNG_Type, 100);
         }
+        this->setBGColor(BG_COLOR);
     }
     
 protected:
@@ -779,19 +761,20 @@ protected:
         return this->INHERITED::onQuery(evt);
     }
     
-    virtual void onDraw(SkCanvas* canvas) {
-        canvas->drawColor(BG_COLOR);
+    virtual void onDrawContent(SkCanvas* canvas) {
+        this->init();
         gProc[fIndex](canvas);
     }
 
     virtual SkView::Click* onFindClickHandler(SkScalar x, SkScalar y) {
+        this->init();
         fIndex = (fIndex + 1) % SK_ARRAY_COUNT(gProc);
         this->inval(NULL);
         return NULL;
     }
 
 private:
-    typedef SkView INHERITED;
+    typedef SampleView INHERITED;
 };
 
 //////////////////////////////////////////////////////////////////////////////

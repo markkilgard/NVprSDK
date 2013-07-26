@@ -1,35 +1,28 @@
+
 /*
- * Copyright (C) 2006 The Android Open Source Project
+ * Copyright 2006 The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
  */
+
 
 #ifndef SkUserConfig_DEFINED
 #define SkUserConfig_DEFINED
 
 /*  SkTypes.h, the root of the public header files, does the following trick:
- 
+
     #include "SkPreConfig.h"
     #include "SkUserConfig.h"
     #include "SkPostConfig.h"
- 
+
     SkPreConfig.h runs first, and it is responsible for initializing certain
     skia defines.
- 
+
     SkPostConfig.h runs last, and its job is to just check that the final
     defines are consistent (i.e. that we don't have mutually conflicting
     defines).
- 
+
     SkUserConfig.h (this file) runs in the middle. It gets to change or augment
     the list of flags initially set in preconfig, and then postconfig checks
     that everything still makes sense.
@@ -54,7 +47,7 @@
 
 /*  Somewhat independent of how SkScalar is implemented, Skia also wants to know
     if it can use floats at all. Naturally, if SK_SCALAR_IS_FLOAT is defined,
-    then so muse SK_CAN_USE_FLOAT, but if scalars are fixed, SK_CAN_USE_FLOAT
+    SK_CAN_USE_FLOAT must be too; but if scalars are fixed, SK_CAN_USE_FLOAT
     can go either way.
  */
 //#define SK_CAN_USE_FLOAT
@@ -71,7 +64,7 @@
     parameter checking, but sometimes it can be quite intrusive (e.g. check that
     each 32bit pixel is in premultiplied form). This code can be very useful
     during development, but will slow things down in a shipping product.
- 
+
     By default, these mutually exclusive flags are defined in SkPreConfig.h,
     based on the presence or absence of NDEBUG, but that decision can be changed
     here.
@@ -93,17 +86,20 @@
 //#define SK_CPU_BENDIAN
 //#define SK_CPU_LENDIAN
 
+/*  Most compilers use the same bit endianness for bit flags in a byte as the
+    system byte endianness, and this is the default. If for some reason this
+    needs to be overridden, specify which of the mutually exclusive flags to
+    use. For example, some atom processors in certain configurations have big
+    endian byte order but little endian bit orders.
+*/
+//#define SK_UINT8_BITFIELD_BENDIAN
+//#define SK_UINT8_BITFIELD_LENDIAN
+
 
 /*  Some compilers don't support long long for 64bit integers. If yours does
     not, define this to the appropriate type.
  */
 //#define SkLONGLONG int64_t
-
-
-/*  Some envorinments do not suport writable globals (eek!). If yours does not,
-    define this flag.
- */
-//#define SK_USE_RUNTIME_GLOBALS
 
 
 /*  To write debug messages to a console, skia will call SkDebugf(...) following
@@ -112,10 +108,43 @@
  */
 //#define SkDebugf(...)  MyFunction(__VA_ARGS__)
 
-/*  To enable additional blitters (and fontscaler code) to support separate
-    alpha channels for R G B channels, define SK_SUPPORT_LCDTEXT
+/*
+ *  To specify a different default font cache limit, define this. If this is
+ *  undefined, skia will use a built-in value.
  */
-//#define SK_SUPPORT_LCDTEXT
+//#define SK_DEFAULT_FONT_CACHE_LIMIT   (1024 * 1024)
+
+/* If defined, use CoreText instead of ATSUI on OS X.
+*/
+//#define SK_USE_MAC_CORE_TEXT
+
+
+/*  If zlib is available and you want to support the flate compression
+    algorithm (used in PDF generation), define SK_ZLIB_INCLUDE to be the
+    include path.
+ */
+//#define SK_ZLIB_INCLUDE <zlib.h>
+
+/*  Define this to allow PDF scalars above 32k.  The PDF/A spec doesn't allow
+    them, but modern PDF interpreters should handle them just fine.
+ */
+//#define SK_ALLOW_LARGE_PDF_SCALARS
+
+/*  Define this to provide font subsetter in PDF generation.
+ */
+//#define SK_SFNTLY_SUBSETTER "sfntly/subsetter/font_subsetter.h"
+
+/*  Define this to remove dimension checks on bitmaps. Not all blits will be
+    correct yet, so this is mostly for debugging the implementation.
+ */
+//#define SK_ALLOW_OVER_32K_BITMAPS
+
+/*  Define this to set the upper limit for text to support LCD. Values that
+    are very large increase the cost in the font cache and draw slower, without
+    improving readability. If this is undefined, Skia will use its default
+    value (e.g. 48)
+ */
+//#define SK_MAX_SIZE_FOR_LCDTEXT     48
 
 /*  If SK_DEBUG is defined, then you can optionally define SK_SUPPORT_UNITTEST
     which will run additional self-tests at startup. These can take a long time,
@@ -125,5 +154,25 @@
 //#define SK_SUPPORT_UNITTEST
 #endif
 
+/* If your system embeds skia and has complex event logging, define this
+   symbol to name a file that maps the following macros to your system's
+   equivalents:
+       SK_TRACE_EVENT0(event)
+       SK_TRACE_EVENT1(event, name1, value1)
+       SK_TRACE_EVENT2(event, name1, value1, name2, value2)
+   src/utils/SkDebugTrace.h has a trivial implementation that writes to
+   the debug output stream. If SK_USER_TRACE_INCLUDE_FILE is not defined,
+   SkTrace.h will define the above three macros to do nothing.
+*/
+//#undef SK_USER_TRACE_INCLUDE_FILE
+
+/*  Change the ordering to work in X windows.
+ */
+#ifdef SK_SAMPLES_FOR_X
+        #define SK_R32_SHIFT    16
+        #define SK_G32_SHIFT    8
+        #define SK_B32_SHIFT    0
+        #define SK_A32_SHIFT    24
 #endif
 
+#endif

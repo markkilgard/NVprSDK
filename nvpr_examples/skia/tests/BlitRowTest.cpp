@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "Test.h"
 #include "SkBitmap.h"
 #include "SkCanvas.h"
@@ -207,7 +214,8 @@ static void test_diagonal(skiatest::Reporter* reporter) {
     SkBitmap srcBM;
     srcBM.setConfig(SkBitmap::kARGB_8888_Config, W, H);
     srcBM.allocPixels();
-    SkRect srcR = { 0, 0, srcBM.width(), srcBM.height() };
+    SkRect srcR = {
+        0, 0, SkIntToScalar(srcBM.width()), SkIntToScalar(srcBM.height()) };
 
     // cons up a mesh to draw the bitmap with
     Mesh mesh(srcBM, &paint);

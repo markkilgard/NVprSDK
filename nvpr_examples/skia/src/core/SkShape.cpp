@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "SkCanvas.h"
 #include "SkShape.h"
 #include "SkMatrix.h"
@@ -53,18 +60,6 @@ SkShape::SkShape(SkFlattenableReadBuffer& buffer) : INHERITED(buffer) {
     inc_shape(this);
 }
 
-SkFlattenable* SkShape::CreateProc(SkFlattenableReadBuffer& buffer) {
-    return SkNEW_ARGS(SkShape, (buffer));
-}
-
-SkFlattenable::Factory SkShape::getFactory() {
-    return CreateProc;
-}
-
-void SkShape::flatten(SkFlattenableWriteBuffer& buffer) {
-    this->INHERITED::flatten(buffer);
-}
-
 void SkShape::onDraw(SkCanvas*) {}
 
-static SkFlattenable::Registrar gReg("SkShape", SkShape::CreateProc);
+SK_DEFINE_FLATTENABLE_REGISTRAR(SkShape)

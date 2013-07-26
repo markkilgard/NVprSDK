@@ -1,18 +1,11 @@
+
 /*
-** Copyright 2006, The Android Open Source Project
-**
-** Licensed under the Apache License, Version 2.0 (the "License");
-** you may not use this file except in compliance with the License.
-** You may obtain a copy of the License at
-**
-**     http://www.apache.org/licenses/LICENSE-2.0
-**
-** Unless required by applicable law or agreed to in writing, software
-** distributed under the License is distributed on an "AS IS" BASIS,
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-** See the License for the specific language governing permissions and
-** limitations under the License.
-*/
+ * Copyright 2006 The Android Open Source Project
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
+
 
 #include "SkNinePatch.h"
 #include "SkCanvas.h"
@@ -53,6 +46,31 @@ static int fillIndices(uint16_t indices[], int xCount, int yCount) {
     return indices - startIndices;
 }
 
+// Computes the delta between vertices along a single axis
+static SkScalar computeVertexDelta(bool isStretchyVertex,
+                                   SkScalar currentVertex,
+                                   SkScalar prevVertex,
+                                   SkScalar stretchFactor) {
+    // the standard delta between vertices if no stretching is required
+    SkScalar delta = currentVertex - prevVertex;
+
+    // if the stretch factor is negative or zero we need to shrink the 9-patch
+    // to fit within the target bounds.  This means that we will eliminate all
+    // stretchy areas and scale the fixed areas to fit within the target bounds.
+    if (stretchFactor <= 0) {
+        if (isStretchyVertex)
+            delta = 0; // collapse stretchable areas
+        else
+            delta = SkScalarMul(delta, -stretchFactor); // scale fixed areas
+    // if the stretch factor is positive then we use the standard delta for
+    // fixed and scale the stretchable areas to fill the target bounds.
+    } else if (isStretchyVertex) {
+        delta = SkScalarMul(delta, stretchFactor);
+    }
+
+    return delta;
+}
+
 static void fillRow(SkPoint verts[], SkPoint texs[],
                     const SkScalar vy, const SkScalar ty,
                     const SkRect& bounds, const int32_t xDivs[], int numXDivs,
@@ -60,13 +78,14 @@ static void fillRow(SkPoint verts[], SkPoint texs[],
     SkScalar vx = bounds.fLeft;
     verts->set(vx, vy); verts++;
     texs->set(0, ty); texs++;
+
+    SkScalar prev = 0;
     for (int x = 0; x < numXDivs; x++) {
-        SkScalar tx = SkIntToScalar(xDivs[x]);
-        if (x & 1) {
-            vx += stretchX;
-        } else {
-            vx += tx;
-        }
+
+        const SkScalar tx = SkIntToScalar(xDivs[x]);
+        vx += computeVertexDelta(x & 1, tx, prev, stretchX);
+        prev = tx;
+
         verts->set(vx, vy); verts++;
         texs->set(tx, ty); texs++;
     }
@@ -117,8 +136,6 @@ void SkNinePatch::DrawMesh(SkCanvas* canvas, const SkRect& bounds,
     const int numYStretch = (numYDivs + 1) >> 1;
     
     if (numXStretch < 1 && numYStretch < 1) {
-    BITMAP_RECT:
-//        SkDebugf("------ drawasamesh revert to bitmaprect\n");
         canvas->drawBitmapRect(bitmap, NULL, bounds, paint);
         return;
     }
@@ -140,11 +157,11 @@ void SkNinePatch::DrawMesh(SkCanvas* canvas, const SkRect& bounds,
         for (int i = 1; i < numXDivs; i += 2) {
             stretchSize += xDivs[i] - xDivs[i-1];
         }
-        int fixed = bitmap.width() - stretchSize;
-        stretchX = (bounds.width() - SkIntToScalar(fixed)) / numXStretch;
-        if (stretchX < 0) {
-            goto BITMAP_RECT;
-        }
+        const SkScalar fixed = SkIntToScalar(bitmap.width() - stretchSize);
+        if (bounds.width() >= fixed)
+            stretchX = (bounds.width() - fixed) / stretchSize;
+        else // reuse stretchX, but keep it negative as a signal
+            stretchX = SkScalarDiv(-bounds.width(), fixed);
     }
     
     if (numYStretch > 0) {
@@ -152,11 +169,11 @@ void SkNinePatch::DrawMesh(SkCanvas* canvas, const SkRect& bounds,
         for (int i = 1; i < numYDivs; i += 2) {
             stretchSize += yDivs[i] - yDivs[i-1];
         }
-        int fixed = bitmap.height() - stretchSize;
-        stretchY = (bounds.height() - SkIntToScalar(fixed)) / numYStretch;
-        if (stretchY < 0) {
-            goto BITMAP_RECT;
-        }
+        const SkScalar fixed = SkIntToScalar(bitmap.height() - stretchSize);
+        if (bounds.height() >= fixed)
+            stretchY = (bounds.height() - fixed) / stretchSize;
+        else // reuse stretchX, but keep it negative as a signal
+            stretchY = SkScalarDiv(-bounds.height(), fixed);
     }
     
 #if 0
@@ -198,10 +215,18 @@ void SkNinePatch::DrawMesh(SkCanvas* canvas, const SkRect& bounds,
     texs += numXDivs + 2;
     for (int y = 0; y < numYDivs; y++) {
         const SkScalar ty = SkIntToScalar(yDivs[y]);
-        if (y & 1) {
-            vy += stretchY;
-        } else {
-            vy += ty;
+        if (stretchY >= 0) {
+            if (y & 1) {
+                vy += stretchY;
+            } else {
+                vy += ty;
+            }
+        } else {    // shrink fixed sections, and collaps stretchy sections
+            if (y & 1) {
+                ;// do nothing
+            } else {
+                vy += SkScalarMul(ty, -stretchY);
+            }
         }
         fillRow(verts, texs, vy, ty, bounds, xDivs, numXDivs,
                 stretchX, bitmap.width());
@@ -235,15 +260,27 @@ static void drawNineViaRects(SkCanvas* canvas, const SkRect& dst,
     const int32_t srcY[4] = {
         0, margins.fTop, bitmap.height() - margins.fBottom, bitmap.height()
     };
-    const SkScalar dstX[4] = {
+    SkScalar dstX[4] = {
         dst.fLeft, dst.fLeft + SkIntToScalar(margins.fLeft),
         dst.fRight - SkIntToScalar(margins.fRight), dst.fRight
     };
-    const SkScalar dstY[4] = {
+    SkScalar dstY[4] = {
         dst.fTop, dst.fTop + SkIntToScalar(margins.fTop),
         dst.fBottom - SkIntToScalar(margins.fBottom), dst.fBottom
     };
-    
+
+    if (dstX[1] > dstX[2]) {
+        dstX[1] = dstX[0] + (dstX[3] - dstX[0]) * SkIntToScalar(margins.fLeft) /
+            (SkIntToScalar(margins.fLeft) + SkIntToScalar(margins.fRight));
+        dstX[2] = dstX[1];
+    }
+
+    if (dstY[1] > dstY[2]) {
+        dstY[1] = dstY[0] + (dstY[3] - dstY[0]) * SkIntToScalar(margins.fTop) /
+            (SkIntToScalar(margins.fTop) + SkIntToScalar(margins.fBottom));
+        dstY[2] = dstY[1];
+    }
+
     SkIRect s;
     SkRect  d;
     for (int y = 0; y < 3; y++) {
@@ -270,7 +307,7 @@ void SkNinePatch::DrawNine(SkCanvas* canvas, const SkRect& bounds,
      when not in GL, the vertices impl is slower (more math) than calling
      the viaRects code.
      */
-    if (canvas->getViewport(NULL)) {    // returns true for OpenGL
+    if (false /* is our canvas backed by a gpu?*/) {
         int32_t xDivs[2];
         int32_t yDivs[2];
         
@@ -278,6 +315,17 @@ void SkNinePatch::DrawNine(SkCanvas* canvas, const SkRect& bounds,
         xDivs[1] = bitmap.width() - margins.fRight;
         yDivs[0] = margins.fTop;
         yDivs[1] = bitmap.height() - margins.fBottom;
+
+        if (xDivs[0] > xDivs[1]) {
+            xDivs[0] = bitmap.width() * margins.fLeft /
+                (margins.fLeft + margins.fRight);
+            xDivs[1] = xDivs[0];
+        }
+        if (yDivs[0] > yDivs[1]) {
+            yDivs[0] = bitmap.height() * margins.fTop /
+                (margins.fTop + margins.fBottom);
+            yDivs[1] = yDivs[0];
+        }
         
         SkNinePatch::DrawMesh(canvas, bounds, bitmap,
                               xDivs, 2, yDivs, 2, paint);

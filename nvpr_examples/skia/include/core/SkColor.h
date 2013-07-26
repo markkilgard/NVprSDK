@@ -1,18 +1,11 @@
+
 /*
- * Copyright (C) 2006 The Android Open Source Project
+ * Copyright 2006 The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
  */
+
 
 #ifndef SkColor_DEFINED
 #define SkColor_DEFINED
@@ -36,12 +29,29 @@ typedef uint32_t SkColor;
 
 /** Return a SkColor value from 8 bit component values
 */
-static inline SkColor SkColorSetARGB(U8CPU a, U8CPU r, U8CPU g, U8CPU b)
+static inline SkColor SkColorSetARGBInline(U8CPU a, U8CPU r, U8CPU g, U8CPU b)
 {
     SkASSERT(a <= 255 && r <= 255 && g <= 255 && b <= 255);
 
     return (a << 24) | (r << 16) | (g << 8) | (b << 0);
 }
+
+#define SkColorSetARGBMacro(a, r, g, b) \
+    static_cast<SkColor>( \
+        (static_cast<U8CPU>(a) << 24) | \
+        (static_cast<U8CPU>(r) << 16) | \
+        (static_cast<U8CPU>(g) << 8) | \
+        (static_cast<U8CPU>(b) << 0))
+
+/** gcc will generate static initializers for code of this form:
+ * static const SkColor kMyColor = SkColorSetARGB(0xFF, 0x01, 0x02, 0x03)
+ * if SkColorSetARGB() is a static inline, but not if it's a macro.
+ */
+#if defined(NDEBUG)
+#define SkColorSetARGB(a, r, g, b) SkColorSetARGBMacro(a, r, g, b)
+#else
+#define SkColorSetARGB(a, r, g, b) SkColorSetARGBInline(a, r, g, b)
+#endif
 
 /** Return a SkColor value from 8 bit component values, with an implied value
     of 0xFF for alpha (fully opaque)
@@ -87,7 +97,7 @@ static inline SkColor SkColorSetA(SkColor c, U8CPU a) {
     @param blue  blue component value [0..255]
     @param hsv  3 element array which holds the resulting HSV components.
 */
-void SkRGBToHSV(U8CPU red, U8CPU green, U8CPU blue, SkScalar hsv[3]);
+SK_API void SkRGBToHSV(U8CPU red, U8CPU green, U8CPU blue, SkScalar hsv[3]);
 
 /** Convert the argb color to its HSV components.
         hsv[0] is Hue [0 .. 360)
@@ -110,7 +120,7 @@ static inline void SkColorToHSV(SkColor color, SkScalar hsv[3])
     @param hsv  3 element array which holds the input HSV components.
     @return the resulting argb color
 */
-SkColor SkHSVToColor(U8CPU alpha, const SkScalar hsv[3]);
+SK_API SkColor SkHSVToColor(U8CPU alpha, const SkScalar hsv[3]);
 
 /** Convert HSV components to an ARGB color. The alpha component set to 0xFF.
         hsv[0] is Hue [0 .. 360)
@@ -135,12 +145,12 @@ typedef uint32_t SkPMColor;
 
 /** Return a SkPMColor value from unpremultiplied 8 bit component values
 */
-SkPMColor SkPreMultiplyARGB(U8CPU a, U8CPU r, U8CPU g, U8CPU b);
+SK_API SkPMColor SkPreMultiplyARGB(U8CPU a, U8CPU r, U8CPU g, U8CPU b);
 /** Return a SkPMColor value from a SkColor value. This is done by multiplying the color
     components by the color's alpha, and by arranging the bytes in a configuration
     dependent order, to match the format of kARGB32 bitmaps.
 */
-SkPMColor SkPreMultiplyColor(SkColor c);
+SK_API SkPMColor SkPreMultiplyColor(SkColor c);
 
 /** Define a function pointer type for combining two premultiplied colors
 */

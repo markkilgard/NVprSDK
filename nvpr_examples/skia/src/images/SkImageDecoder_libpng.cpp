@@ -1,19 +1,11 @@
-/* libs/graphics/images/SkImageDecoder_libpng.cpp
-**
-** Copyright 2006, The Android Open Source Project
-**
-** Licensed under the Apache License, Version 2.0 (the "License"); 
-** you may not use this file except in compliance with the License. 
-** You may obtain a copy of the License at 
-**
-**     http://www.apache.org/licenses/LICENSE-2.0 
-**
-** Unless required by applicable law or agreed to in writing, software 
-** distributed under the License is distributed on an "AS IS" BASIS, 
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-** See the License for the specific language governing permissions and 
-** limitations under the License.
-*/
+
+/*
+ * Copyright 2006 The Android Open Source Project
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
+
 
 #include "SkImageDecoder.h"
 #include "SkImageEncoder.h"
@@ -50,7 +42,7 @@ protected:
 struct PNGAutoClean {
     PNGAutoClean(png_structp p, png_infop i): png_ptr(p), info_ptr(i) {}
     ~PNGAutoClean() {
-        png_destroy_read_struct(&png_ptr, &info_ptr, png_infopp_NULL);
+        png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
     }
 private:
     png_structp png_ptr;
@@ -58,7 +50,7 @@ private:
 };
 
 static void sk_read_fn(png_structp png_ptr, png_bytep data, png_size_t length) {
-    SkStream* sk_stream = (SkStream*) png_ptr->io_ptr;
+    SkStream* sk_stream = (SkStream*)png_get_io_ptr(png_ptr);
     size_t bytes = sk_stream->read(data, length);
     if (bytes != length) {
         png_error(png_ptr, "Read Error!");
@@ -83,7 +75,7 @@ static void sk_error_fn(png_structp png_ptr, png_const_charp msg) {
 static void skip_src_rows(png_structp png_ptr, uint8_t storage[], int count) {
     for (int i = 0; i < count; i++) {
         uint8_t* tmp = storage;
-        png_read_rows(png_ptr, &tmp, png_bytepp_NULL, 1);
+        png_read_rows(png_ptr, &tmp, NULL, 1);
     }
 }
 
@@ -154,7 +146,7 @@ bool SkPNGImageDecoder::onDecode(SkStream* sk_stream, SkBitmap* decodedBitmap,
     /* Allocate/initialize the memory for image information. */
     png_infop info_ptr = png_create_info_struct(png_ptr);
     if (info_ptr == NULL) {
-        png_destroy_read_struct(&png_ptr, png_infopp_NULL, png_infopp_NULL);
+        png_destroy_read_struct(&png_ptr, NULL, NULL);
         return false;
     }
 
@@ -188,7 +180,7 @@ bool SkPNGImageDecoder::onDecode(SkStream* sk_stream, SkBitmap* decodedBitmap,
     png_uint_32 origWidth, origHeight;
     int bit_depth, color_type, interlace_type;
     png_get_IHDR(png_ptr, info_ptr, &origWidth, &origHeight, &bit_depth, &color_type,
-        &interlace_type, int_p_NULL, int_p_NULL);
+        &interlace_type, NULL, NULL);
 
     /* tell libpng to strip 16 bit/color files down to 8 bits/color */
     if (bit_depth == 16) {
@@ -201,7 +193,7 @@ bool SkPNGImageDecoder::onDecode(SkStream* sk_stream, SkBitmap* decodedBitmap,
     }
     /* Expand grayscale images to the full 8 bits from 1, 2, or 4 bits/pixel */
     if (color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8) {
-        png_set_gray_1_2_4_to_8(png_ptr);
+        png_set_expand_gray_1_2_4_to_8(png_ptr);
     }
     
     /* Make a grayscale image into RGB. */
@@ -218,15 +210,19 @@ bool SkPNGImageDecoder::onDecode(SkStream* sk_stream, SkBitmap* decodedBitmap,
     // check for sBIT chunk data, in case we should disable dithering because
     // our data is not truely 8bits per component
     if (doDither) {
+        png_color_8p sig_bit = NULL;
+        bool has_sbit = PNG_INFO_sBIT == png_get_sBIT(png_ptr, info_ptr,
+                                                      &sig_bit);
 #if 0
-        SkDebugf("----- sBIT %d %d %d %d\n", info_ptr->sig_bit.red,
-                 info_ptr->sig_bit.green, info_ptr->sig_bit.blue,
-                 info_ptr->sig_bit.alpha);
+        if (has_sbit) {
+            SkDebugf("----- sBIT %d %d %d %d\n", sig_bit->red, sig_bit->green,
+                     sig_bit->blue, sig_bit->alpha);
+        }
 #endif
         // 0 seems to indicate no information available
-        if (pos_le(info_ptr->sig_bit.red, SK_R16_BITS) &&
-                pos_le(info_ptr->sig_bit.green, SK_G16_BITS) &&
-                pos_le(info_ptr->sig_bit.blue, SK_B16_BITS)) {
+        if (has_sbit && pos_le(sig_bit->red, SK_R16_BITS) &&
+                pos_le(sig_bit->green, SK_G16_BITS) &&
+                pos_le(sig_bit->blue, SK_B16_BITS)) {
             doDither = false;
         }
     }
@@ -418,7 +414,7 @@ bool SkPNGImageDecoder::onDecode(SkStream* sk_stream, SkBitmap* decodedBitmap,
         for (int i = 0; i < number_passes; i++) {
             for (png_uint_32 y = 0; y < origHeight; y++) {
                 uint8_t* bmRow = decodedBitmap->getAddr8(0, y);
-                png_read_rows(png_ptr, &bmRow, png_bytepp_NULL, 1);
+                png_read_rows(png_ptr, &bmRow, NULL, 1);
             }
         }
     } else {
@@ -453,7 +449,7 @@ bool SkPNGImageDecoder::onDecode(SkStream* sk_stream, SkBitmap* decodedBitmap,
                 uint8_t* row = base;
                 for (png_uint_32 y = 0; y < origHeight; y++) {
                     uint8_t* bmRow = row;
-                    png_read_rows(png_ptr, &bmRow, png_bytepp_NULL, 1);
+                    png_read_rows(png_ptr, &bmRow, NULL, 1);
                     row += rb;
                 }
             }
@@ -470,7 +466,7 @@ bool SkPNGImageDecoder::onDecode(SkStream* sk_stream, SkBitmap* decodedBitmap,
 
             for (int y = 0; y < height; y++) {
                 uint8_t* tmp = srcRow;
-                png_read_rows(png_ptr, &tmp, png_bytepp_NULL, 1);
+                png_read_rows(png_ptr, &tmp, NULL, 1);
                 reallyHasAlpha |= sampler.next(srcRow);
                 if (y < height - 1) {
                     skip_src_rows(png_ptr, srcRow, sampler.srcDY() - 1);
@@ -501,7 +497,7 @@ bool SkPNGImageDecoder::onDecode(SkStream* sk_stream, SkBitmap* decodedBitmap,
 #include "SkUnPreMultiply.h"
 
 static void sk_write_fn(png_structp png_ptr, png_bytep data, png_size_t len) {
-    SkWStream* sk_stream = (SkWStream*)png_ptr->io_ptr;
+    SkWStream* sk_stream = (SkWStream*)png_get_io_ptr(png_ptr);
     if (!sk_stream->write(data, len)) {
         png_error(png_ptr, "sk_write_fn Error!");
     }
@@ -706,6 +702,11 @@ static inline int pack_palette(SkColorTable* ctable,
 class SkPNGImageEncoder : public SkImageEncoder {
 protected:
     virtual bool onEncode(SkWStream* stream, const SkBitmap& bm, int quality);
+private:
+    bool doEncode(SkWStream* stream, const SkBitmap& bm,
+                  const bool& hasAlpha, int colorType,
+                  int bitDepth, SkBitmap::Config config,
+                  png_color_8& sig_bit);
 };
 
 bool SkPNGImageEncoder::onEncode(SkWStream* stream, const SkBitmap& bitmap,
@@ -768,6 +769,15 @@ bool SkPNGImageEncoder::onEncode(SkWStream* stream, const SkBitmap& bitmap,
         bitDepth = computeBitDepth(ctable->count());
     }
 
+    return doEncode(stream, bitmap, hasAlpha, colorType,
+                    bitDepth, config, sig_bit);
+}
+
+bool SkPNGImageEncoder::doEncode(SkWStream* stream, const SkBitmap& bitmap,
+                  const bool& hasAlpha, int colorType,
+                  int bitDepth, SkBitmap::Config config,
+                  png_color_8& sig_bit) {
+
     png_structp png_ptr;
     png_infop info_ptr;
 
@@ -779,7 +789,7 @@ bool SkPNGImageEncoder::onEncode(SkWStream* stream, const SkBitmap& bitmap,
 
     info_ptr = png_create_info_struct(png_ptr);
     if (NULL == info_ptr) {
-        png_destroy_write_struct(&png_ptr,  png_infopp_NULL);
+        png_destroy_write_struct(&png_ptr,  NULL);
         return false;
     }
 
@@ -791,7 +801,7 @@ bool SkPNGImageEncoder::onEncode(SkWStream* stream, const SkBitmap& bitmap,
         return false;
     }
 
-    png_set_write_fn(png_ptr, (void*)stream, sk_write_fn, png_flush_ptr_NULL);
+    png_set_write_fn(png_ptr, (void*)stream, sk_write_fn, NULL);
 
     /* Set the image information here.  Width and height are up to 2^31,
     * bit_depth is one of 1, 2, 4, 8, or 16, but valid values also depend on
@@ -841,6 +851,9 @@ bool SkPNGImageEncoder::onEncode(SkWStream* stream, const SkBitmap& bitmap,
     return true;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+DEFINE_DECODER_CREATOR(PNGImageDecoder);
+DEFINE_ENCODER_CREATOR(PNGImageEncoder);
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "SkTRegistry.h"

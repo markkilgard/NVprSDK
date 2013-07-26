@@ -1,4 +1,12 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "SkScript2.h"
+#include "SkData.h"
 #include "SkFloatingPoint.h"
 #include "SkMath.h"
 #include "SkParse.h"
@@ -8,34 +16,34 @@
 #include "SkOpArray.h"
 
 const SkScriptEngine2::OperatorAttributes SkScriptEngine2::gOpAttributes[] = {
-{ SkOperand2::kNoType },
+{ SkOperand2::kNoType, SkOperand2::kNoType, kNoBias, kResultIsNotBoolean },
 { SkOperand2::OpType(SkOperand2::kS32 | SkOperand2::kScalar | SkOperand2::kString), 
-    SkOperand2::OpType(SkOperand2::kS32 | SkOperand2::kScalar | SkOperand2::kString), kTowardsString },    // kAdd
-{ SkOperand2::kS32, SkOperand2::kS32, kNoBias }, // kBitAnd
-{ SkOperand2::kNoType, SkOperand2::kS32, kNoBias }, // kBitNot
-{ SkOperand2::kS32, SkOperand2::kS32, kNoBias }, // kBitOr
+    SkOperand2::OpType(SkOperand2::kS32 | SkOperand2::kScalar | SkOperand2::kString), kTowardsString, kResultIsNotBoolean },    // kAdd
+{ SkOperand2::kS32, SkOperand2::kS32, kNoBias, kResultIsNotBoolean }, // kBitAnd
+{ SkOperand2::kNoType, SkOperand2::kS32, kNoBias, kResultIsNotBoolean }, // kBitNot
+{ SkOperand2::kS32, SkOperand2::kS32, kNoBias, kResultIsNotBoolean }, // kBitOr
 { SkOperand2::OpType(SkOperand2::kS32 | SkOperand2::kScalar), 
-    SkOperand2::OpType(SkOperand2::kS32 | SkOperand2::kScalar), kNoBias }, // kDivide
+    SkOperand2::OpType(SkOperand2::kS32 | SkOperand2::kScalar), kNoBias, kResultIsNotBoolean }, // kDivide
 { SkOperand2::OpType(SkOperand2::kS32 | SkOperand2::kScalar | SkOperand2::kString), 
     SkOperand2::OpType(SkOperand2::kS32 | SkOperand2::kScalar |SkOperand2:: kString), kTowardsNumber, 
     kResultIsBoolean }, // kEqual
-{ SkOperand2::kS32 },     // kFlipOps
+{ SkOperand2::kS32, SkOperand2::kNoType, kNoBias, kResultIsNotBoolean },     // kFlipOps
 { SkOperand2::OpType(SkOperand2::kS32 | SkOperand2::kScalar | SkOperand2::kString), 
     SkOperand2::OpType(SkOperand2::kS32 | SkOperand2::kScalar | SkOperand2::kString), kTowardsNumber,
     kResultIsBoolean }, // kGreaterEqual
-{ SkOperand2::kNoType, SkOperand2::kS32, kNoBias }, // kLogicalAnd    (really, ToBool)
-{ SkOperand2::kNoType, SkOperand2::kS32, kNoBias }, // kLogicalNot
-{ SkOperand2::kS32, SkOperand2::kS32, kNoBias }, // kLogicalOr
-{ SkOperand2::kNoType, SkOperand2::OpType(SkOperand2::kS32 | SkOperand2::kScalar), kNoBias }, // kMinus
+{ SkOperand2::kNoType, SkOperand2::kS32, kNoBias, kResultIsNotBoolean }, // kLogicalAnd    (really, ToBool)
+{ SkOperand2::kNoType, SkOperand2::kS32, kNoBias, kResultIsNotBoolean }, // kLogicalNot
+{ SkOperand2::kS32, SkOperand2::kS32, kNoBias, kResultIsNotBoolean }, // kLogicalOr
+{ SkOperand2::kNoType, SkOperand2::OpType(SkOperand2::kS32 | SkOperand2::kScalar), kNoBias, kResultIsNotBoolean }, // kMinus
 { SkOperand2::OpType(SkOperand2::kS32 | SkOperand2::kScalar), 
-    SkOperand2::OpType(SkOperand2::kS32 |SkOperand2:: kScalar), kNoBias }, // kModulo
+    SkOperand2::OpType(SkOperand2::kS32 |SkOperand2:: kScalar), kNoBias, kResultIsNotBoolean }, // kModulo
 { SkOperand2::OpType(SkOperand2::kS32 | SkOperand2::kScalar), 
-    SkOperand2::OpType(SkOperand2::kS32 | SkOperand2::kScalar), kNoBias }, // kMultiply
-{ SkOperand2::kS32, SkOperand2::kS32, kNoBias }, // kShiftLeft
-{ SkOperand2::kS32, SkOperand2::kS32, kNoBias }, // kShiftRight
+    SkOperand2::OpType(SkOperand2::kS32 | SkOperand2::kScalar), kNoBias, kResultIsNotBoolean }, // kMultiply
+{ SkOperand2::kS32, SkOperand2::kS32, kNoBias, kResultIsNotBoolean }, // kShiftLeft
+{ SkOperand2::kS32, SkOperand2::kS32, kNoBias, kResultIsNotBoolean }, // kShiftRight
 { SkOperand2::OpType(SkOperand2::kS32 | SkOperand2::kScalar), 
-    SkOperand2::OpType(SkOperand2::kS32 | SkOperand2::kScalar), kNoBias }, // kSubtract
-{ SkOperand2::kS32, SkOperand2::kS32, kNoBias } // kXor
+    SkOperand2::OpType(SkOperand2::kS32 | SkOperand2::kScalar), kNoBias, kResultIsNotBoolean }, // kSubtract
+{ SkOperand2::kS32, SkOperand2::kS32, kNoBias, kResultIsNotBoolean } // kXor
 };
 
 #define kBracketPrecedence 16
@@ -308,8 +316,8 @@ twoChar:
         } while (true);
         signed char topPrecedence = gPrecedence[compare];
         SkASSERT(topPrecedence != -1);
-        if (topPrecedence > precedence || topPrecedence == precedence && 
-            gOpAttributes[op].fLeftType == SkOperand2::kNoType) {
+        if (topPrecedence > precedence || (topPrecedence == precedence && 
+            gOpAttributes[op].fLeftType == SkOperand2::kNoType)) {
             break;
         }
         processOp();
@@ -497,8 +505,9 @@ bool SkScriptEngine2::innerScript(const char** scriptPtr, SkScriptValue2* value)
                 }
                 lastPush = false;
                 continue;
-            } else
+            } else {
                 SkASSERT(token_length(script) > 0);
+            }
         }
         if (lastPush != false && fTokenLength > 0) {
             if (ch == '(') {
@@ -594,7 +603,7 @@ scalarCommon:
         }
         if (ch ==  '.') {
             if (fTokenLength == 0) {
-                SkScriptValue2 scriptValue;
+                SkDEBUGCODE(SkScriptValue2 scriptValue;)
                 SkDEBUGCODE(scriptValue.fOperand.fObject = NULL);
                 int tokenLength = token_length(++script);
                 const char* token = script;
@@ -736,11 +745,12 @@ scalarCommon:
     }
     if (fStream.getOffset() > 0) {
         addToken(kEnd);
+        SkAutoDataUnref data(fStream.copyToData());
 #ifdef SK_DEBUG
-        decompile((const unsigned char*)fStream.getStream(), fStream.getOffset());
+        decompile(data.bytes(), data.size());
 #endif
         SkScriptRuntime runtime(fCallBackArray);
-        runtime.executeTokens((unsigned char*) fStream.getStream());
+        runtime.executeTokens((unsigned char*) data.bytes());
         SkScriptValue2 value1;
         runtime.getResult(&value1.fOperand);
         value1.fType = fReturnType;
@@ -1029,8 +1039,9 @@ void SkScriptEngine2::processLogicalOp(Op op) {
                 SkASSERT(fValueStack.top().fType == SkOperand2::kS32); // !!! add error handling, and conversion to int?
                 addTokenValue(fValueStack.top(), kAccumulator);
                 fValueStack.pop();
-            } else
+            } else {
                 SkASSERT(fAccumulatorType == SkOperand2::kS32);
+            }
             // if 'and', write beq goto opcode after end of predicate (after to bool)
             // if 'or', write bne goto to bool
             addToken(op == kLogicalAnd ? kLogicalAndInt : kLogicalOrInt);
@@ -1051,7 +1062,8 @@ bool SkScriptEngine2::processOp() {
     fOpStack.pop(&op);
     op = (Op) (op & ~kArtificialOp);
     const OperatorAttributes* attributes = &gOpAttributes[op];
-    SkScriptValue2 value1 = { 0 };
+    SkScriptValue2 value1;
+    memset(&value1, 0, sizeof(SkScriptValue2));
     SkScriptValue2 value2;
     fValueStack.pop(&value2);
     value2.fIsWritten = SkScriptValue2::kUnwritten;
@@ -1123,8 +1135,8 @@ bool SkScriptEngine2::processOp() {
     else if (value2.fType == SkOperand2::kString)
         typeOp = (TypeOp) (typeOp + 2);
     SkDynamicMemoryWStream stream;
-    SkOperand2::OpType saveType;
-    SkBool saveOperand;
+    SkOperand2::OpType saveType = SkOperand2::kNoType;
+    SkBool saveOperand = false;
     if (constantOperands) {
         fActiveStream = &stream;
         saveType = fAccumulatorType;
@@ -1141,11 +1153,12 @@ bool SkScriptEngine2::processOp() {
     addToken(typeOp);
     if (constantOperands) {
         addToken(kEnd);
+        SkAutoDataUnref data(fStream.copyToData());
 #ifdef SK_DEBUG        
-        decompile((const unsigned char*) stream.getStream(), stream.getOffset());
+        decompile(data.bytes(), data.size());
 #endif
         SkScriptRuntime runtime(fCallBackArray);
-        runtime.executeTokens((unsigned char*) stream.getStream());
+        runtime.executeTokens((unsigned char*)data.bytes());
         runtime.getResult(&value1.fOperand);
         if (attributes->fResultIsBoolean == kResultIsBoolean)
             value1.fType = SkOperand2::kS32;
@@ -1230,7 +1243,7 @@ bool SkScriptEngine2::ConvertTo(SkScriptEngine2* engine, SkOperand2::OpType toTy
 
 SkScalar SkScriptEngine2::IntToScalar(int32_t s32) {
     SkScalar scalar;
-    if (s32 == SK_NaN32)
+    if (s32 == (int32_t) SK_NaN32)
         scalar = SK_ScalarNaN;
     else if (SkAbs32(s32) == SK_MaxS32)
         scalar = SkSign32(s32) * SK_ScalarMax;
@@ -1261,21 +1274,21 @@ bool SkScriptEngine2::ValueToString(const SkScriptValue2& value, SkString* strin
 
 #ifdef SK_DEBUG
 
-#define testInt(expression) { #expression, SkOperand2::kS32, expression }
+#define testInt(expression) { #expression, SkOperand2::kS32, expression, 0, NULL }
 #ifdef SK_SCALAR_IS_FLOAT
-#define testScalar(expression) { #expression, SkOperand2::kScalar, 0, (float) expression }
-#define testRemainder(exp1, exp2) { #exp1 "%" #exp2, SkOperand2::kScalar, 0, fmodf(exp1, exp2) }
+#define testScalar(expression) { #expression, SkOperand2::kScalar, 0, (float) expression, NULL }
+#define testRemainder(exp1, exp2) { #exp1 "%" #exp2, SkOperand2::kScalar, 0, fmodf(exp1, exp2), NULL }
 #else
 #ifdef SK_CAN_USE_FLOAT
-#define testScalar(expression) { #expression, SkOperand2::kScalar, 0, (int) ((expression) * 65536.0f) }
-#define testRemainder(exp1, exp2) { #exp1 "%" #exp2, SkOperand2::kScalar, 0, (int) (fmod(exp1, exp2)  * 65536.0f) }
+#define testScalar(expression) { #expression, SkOperand2::kScalar, 0, (int) ((expression) * 65536.0f), NULL }
+#define testRemainder(exp1, exp2) { #exp1 "%" #exp2, SkOperand2::kScalar, 0, (int) (fmod(exp1, exp2)  * 65536.0f), NULL }
 #endif
 #endif
-#define testTrue(expression) { #expression, SkOperand2::kS32, 1 }
-#define testFalse(expression) { #expression, SkOperand2::kS32, 0 }
+#define testTrue(expression) { #expression, SkOperand2::kS32, 1, 0, NULL }
+#define testFalse(expression) { #expression, SkOperand2::kS32, 0, 0, NULL }
 
 static const SkScriptNAnswer2 scriptTests[]  = {
-    testInt(1||0&&3),
+    testInt(1||(0&&3)),
 #ifdef SK_CAN_USE_FLOAT
     testScalar(- -5.5- -1.5),
     testScalar(1.0+5), 
@@ -1307,12 +1320,12 @@ static const SkScriptNAnswer2 scriptTests[]  = {
     {    "'123'+\"456\"", SkOperand2::kString, 0, 0, "123456" },
     {    "123+\"456\"", SkOperand2::kString, 0, 0, "123456" },
     {    "'123'+456", SkOperand2::kString, 0, 0, "123456" },
-    {    "'123'|\"456\"", SkOperand2::kS32, 123|456 },
-    {    "123|\"456\"", SkOperand2::kS32, 123|456 },
-    {    "'123'|456", SkOperand2::kS32, 123|456 },
-    {    "'2'<11", SkOperand2::kS32, 1 },
-    {    "2<'11'", SkOperand2::kS32, 1 },
-    {    "'2'<'11'", SkOperand2::kS32, 0 },
+    {    "'123'|\"456\"", SkOperand2::kS32, 123|456, 0, NULL },
+    {    "123|\"456\"", SkOperand2::kS32, 123|456, 0, NULL },
+    {    "'123'|456", SkOperand2::kS32, 123|456, 0, NULL },
+    {    "'2'<11", SkOperand2::kS32, 1, 0, NULL },
+    {    "2<'11'", SkOperand2::kS32, 1, 0, NULL },
+    {    "'2'<'11'", SkOperand2::kS32, 0, 0, NULL },
     testInt(123),
     testInt(-345),
     testInt(+678),
@@ -1461,15 +1474,15 @@ static const SkScriptNAnswer2 scriptTests[]  = {
     // logic
     testInt(1?2:3),
     testInt(0?2:3),
-    testInt(1&&2||3),
-    testInt(1&&0||3),
-    testInt(1&&0||0),
-    testInt(1||0&&3),
-    testInt(0||0&&3),
-    testInt(0||1&&3),
+    testInt((1&&2)||3),
+    testInt((1&&0)||3),
+    testInt((1&&0)||0),
+    testInt(1||(0&&3)),
+    testInt(0||(0&&3)),
+    testInt(0||(1&&3)),
     testInt(0&&1?2:3)
 #ifdef SK_CAN_USE_FLOAT
-    , {    "123.5", SkOperand2::kScalar, 0, SkIntToScalar(123) + SK_Scalar1/2 }
+    , {    "123.5", SkOperand2::kScalar, 0, SkIntToScalar(123) + SK_Scalar1/2, NULL }
 #endif
 };
 

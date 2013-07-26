@@ -1,18 +1,11 @@
+
 /*
- * Copyright (C) 2006 The Android Open Source Project
+ * Copyright 2006 The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
  */
+
 
 #ifndef SkFDot6_DEFINED
 #define SkFDot6_DEFINED
@@ -21,12 +14,11 @@
 
 typedef int32_t SkFDot6;
 
-#define SK_FDot61           (64)
+#define SK_FDot6One         (64)
 #define SK_FDot6Half        (32)
 
 #ifdef SK_DEBUG
-    inline SkFDot6 SkIntToFDot6(S16CPU x)
-    {
+    inline SkFDot6 SkIntToFDot6(S16CPU x) {
         SkASSERT(SkToS16(x) == x);
         return x << 6;
     }
@@ -40,8 +32,7 @@ typedef int32_t SkFDot6;
 
 #define SkFixedToFDot6(x)   ((x) >> 10)
 
-inline SkFixed SkFDot6ToFixed(SkFDot6 x)
-{
+inline SkFixed SkFDot6ToFixed(SkFDot6 x) {
     SkASSERT((x << 10 >> 10) == x);
 
     return x << 10;
@@ -53,14 +44,14 @@ inline SkFixed SkFDot6ToFixed(SkFDot6 x)
     #define SkScalarToFDot6(x)  ((x) >> 10)
 #endif
 
-inline SkFixed SkFDot6Div(SkFDot6 a, SkFDot6 b)
-{
+inline SkFixed SkFDot6Div(SkFDot6 a, SkFDot6 b) {
     SkASSERT(b != 0);
 
-    if (a == (int16_t)a)
+    if (a == (int16_t)a) {
         return (a << 16) / b;
-    else
+    } else {
         return SkFixedDiv(a, b);
+    }
 }
 
 #endif

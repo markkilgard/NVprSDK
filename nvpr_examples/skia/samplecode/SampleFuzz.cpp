@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "SampleCode.h"
 #include "SkView.h"
 #include "SkCanvas.h"
@@ -31,22 +38,28 @@ static int R(float x) {
   return (int)floor(SkScalarToFloat(gRand.nextUScalar1()) * x);
 }
 
+static float huge() {
+    double d = 1e100;
+    float f = (float)d;
+    return f;
+}
+
 static float make_number() {
-  float v;
+  float v = 0;
   int sel;
 
   if (return_large == true && R(3) == 1) sel = R(6); else  sel = R(4);
   if (return_undef == false && sel == 0) sel = 1;
 
-  if (R(2) == 1) v = R(100); else
+  if (R(2) == 1) v = (float)R(100); else
 
   switch (sel) {
     case 0: break; 
     case 1: v = 0; break;
-    case 2: v = 0.000001; break;
+    case 2: v = 0.000001f; break;
     case 3: v = 10000; break;
     case 4: v = 2000000000; break;
-    case 5: v = 1e100; break;
+    case 5: v = huge(); break;
   }
 
   if (R(4) == 1) v = -v;
@@ -118,9 +131,11 @@ static void do_fuzz(SkCanvas* canvas) {
       case 2: {
           SkXfermode::Mode mode;
           switch (R(3)) {
-              case 0: mode = SkXfermode::kSrc_Mode; break;
+            case 0: mode = SkXfermode::kSrc_Mode; break;
             case 1: mode = SkXfermode::kXor_Mode; break;
-            case 2: mode = SkXfermode::kSrcOver_Mode; break;
+            case 2:
+            default:  // silence warning
+              mode = SkXfermode::kSrcOver_Mode; break;
           }
           paint.setXfermodeMode(mode);
       }
@@ -150,7 +165,7 @@ static void do_fuzz(SkCanvas* canvas) {
 
     case 7: 
       if (quick == true) break;
-          paint.setMaskFilter(SkBlurMaskFilter::Create(make_number(), SkBlurMaskFilter::kNormal_BlurStyle))->safeUnref();
+          SkSafeUnref(paint.setMaskFilter(SkBlurMaskFilter::Create(make_number(), SkBlurMaskFilter::kNormal_BlurStyle)));
       break;
 
     case 8: 
@@ -303,8 +318,8 @@ static void do_fuzz(SkCanvas* canvas) {
           case 0: canvas->scale(-1000000000,1); 
                   canvas->scale(-1000000000,1);
                   scval = 1; break;
-          case 1: canvas->scale(-.000000001,1); scval = 2; break;
-          case 2: canvas->scale(-.000000001,1); scval = 0; break;
+          case 1: canvas->scale(-.000000001f,1); scval = 2; break;
+          case 2: canvas->scale(-.000000001f,1); scval = 0; break;
         }
 
       }
@@ -320,9 +335,11 @@ static void do_fuzz(SkCanvas* canvas) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-class FuzzView : public SkView {
+class FuzzView : public SampleView {
 public:
-	FuzzView() {}
+	FuzzView() {
+        this->setBGColor(0xFFDDDDDD);
+    }
     
 protected:
     // overrides from SkEventSink
@@ -338,9 +355,7 @@ protected:
         canvas->drawColor(0xFFDDDDDD);
     }
     
-    virtual void onDraw(SkCanvas* canvas) {
-        SkIRect r = canvas->getTotalClip().getBounds();
-        this->drawBG(canvas);
+    virtual void onDrawContent(SkCanvas* canvas) {
         do_fuzz(canvas);
         this->inval(NULL);
     }

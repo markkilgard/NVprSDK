@@ -1,5 +1,11 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "SkPictureRecord.h"
-#include "SkShape.h"
 #include "SkTSearch.h"
 
 #define MIN_WRITER_SIZE 16384
@@ -15,8 +21,9 @@ SkPictureRecord::SkPictureRecord(uint32_t flags) :
 
     fRestoreOffsetStack.setReserve(32);
     fRestoreOffsetStack.push(0);
-            
+
     fPathHeap = NULL;   // lazy allocate
+    fFirstSavedLayerIndex = kNoSavedLayerIndex;
 }
 
 SkPictureRecord::~SkPictureRecord() {
@@ -28,9 +35,9 @@ SkPictureRecord::~SkPictureRecord() {
 int SkPictureRecord::save(SaveFlags flags) {
     addDraw(SAVE);
     addInt(flags);
-    
+
     fRestoreOffsetStack.push(0);
-    
+
     validate();
     return this->INHERITED::save(flags);
 }
@@ -44,6 +51,10 @@ int SkPictureRecord::saveLayer(const SkRect* bounds, const SkPaint* paint,
 
     fRestoreOffsetStack.push(0);
 
+    if (kNoSavedLayerIndex == fFirstSavedLayerIndex) {
+        fFirstSavedLayerIndex = fRestoreOffsetStack.count();
+    }
+
     validate();
     /*  Don't actually call saveLayer, because that will try to allocate an
         offscreen device (potentially very big) which we don't actually need
@@ -51,7 +62,13 @@ int SkPictureRecord::saveLayer(const SkRect* bounds, const SkPaint* paint,
         clip starts out the size of the picture, which is often much larger
         than the size of the actual device we'll use during playback).
      */
-    return this->INHERITED::save(flags);
+    int count = this->INHERITED::save(flags);
+    this->clipRectBounds(bounds, flags, NULL);
+    return count;
+}
+
+bool SkPictureRecord::isDrawingToLayer() const {
+    return fFirstSavedLayerIndex != kNoSavedLayerIndex;
 }
 
 void SkPictureRecord::restore() {
@@ -68,6 +85,11 @@ void SkPictureRecord::restore() {
         offset = *peek;
         *peek = restoreOffset;
     }
+
+    if (fRestoreOffsetStack.count() == fFirstSavedLayerIndex) {
+        fFirstSavedLayerIndex = kNoSavedLayerIndex;
+    }
+
     fRestoreOffsetStack.pop();
 
     addDraw(RESTORE);
@@ -84,7 +106,7 @@ bool SkPictureRecord::translate(SkScalar dx, SkScalar dy) {
 }
 
 bool SkPictureRecord::scale(SkScalar sx, SkScalar sy) {
-    addDraw(SCALE); 
+    addDraw(SCALE);
     addScalar(sx);
     addScalar(sy);
     validate();
@@ -92,14 +114,14 @@ bool SkPictureRecord::scale(SkScalar sx, SkScalar sy) {
 }
 
 bool SkPictureRecord::rotate(SkScalar degrees) {
-    addDraw(ROTATE); 
-    addScalar(degrees); 
+    addDraw(ROTATE);
+    addScalar(degrees);
     validate();
     return this->INHERITED::rotate(degrees);
 }
 
 bool SkPictureRecord::skew(SkScalar sx, SkScalar sy) {
-    addDraw(SKEW); 
+    addDraw(SKEW);
     addScalar(sx);
     addScalar(sy);
     validate();
@@ -122,48 +144,83 @@ void SkPictureRecord::setMatrix(const SkMatrix& matrix) {
     this->INHERITED::setMatrix(matrix);
 }
 
-bool SkPictureRecord::clipRect(const SkRect& rect, SkRegion::Op op) {
-    addDraw(CLIP_RECT);
-    addRect(rect);
-    addInt(op);
-    
-    size_t offset = fWriter.size();
-    addInt(fRestoreOffsetStack.top());
-    fRestoreOffsetStack.top() = offset;
-
-    validate();
-    return this->INHERITED::clipRect(rect, op);
+static bool regionOpExpands(SkRegion::Op op) {
+    switch (op) {
+        case SkRegion::kUnion_Op:
+        case SkRegion::kXOR_Op:
+        case SkRegion::kReverseDifference_Op:
+        case SkRegion::kReplace_Op:
+            return true;
+        case SkRegion::kIntersect_Op:
+        case SkRegion::kDifference_Op:
+            return false;
+        default:
+            SkDEBUGFAIL("unknown region op");
+            return false;
+    }
 }
 
-bool SkPictureRecord::clipPath(const SkPath& path, SkRegion::Op op) {
-    addDraw(CLIP_PATH);
-    addPath(path);
-    addInt(op);
-    
+void SkPictureRecord::recordOffsetForRestore(SkRegion::Op op) {
+    if (regionOpExpands(op)) {
+        // Run back through any previous clip ops, and mark their offset to
+        // be 0, disabling their ability to trigger a jump-to-restore, otherwise
+        // they could hide this clips ability to expand the clip (i.e. go from
+        // empty to non-empty).
+        uint32_t offset = fRestoreOffsetStack.top();
+        while (offset) {
+            uint32_t* peek = fWriter.peek32(offset);
+            offset = *peek;
+            *peek = 0;
+        }
+    }
+
     size_t offset = fWriter.size();
     addInt(fRestoreOffsetStack.top());
     fRestoreOffsetStack.top() = offset;
-    
+}
+
+bool SkPictureRecord::clipRect(const SkRect& rect, SkRegion::Op op, bool doAA) {
+    addDraw(CLIP_RECT);
+    addRect(rect);
+    addInt(ClipParams_pack(op, doAA));
+
+    this->recordOffsetForRestore(op);
+
     validate();
-    
+    return this->INHERITED::clipRect(rect, op, doAA);
+}
+
+bool SkPictureRecord::clipPath(const SkPath& path, SkRegion::Op op, bool doAA) {
+    addDraw(CLIP_PATH);
+    addPath(path);
+    addInt(ClipParams_pack(op, doAA));
+
+    this->recordOffsetForRestore(op);
+
+    validate();
+
     if (fRecordFlags & SkPicture::kUsePathBoundsForClip_RecordingFlag) {
-        return this->INHERITED::clipRect(path.getBounds(), op);
+        return this->INHERITED::clipRect(path.getBounds(), op, doAA);
     } else {
-        return this->INHERITED::clipPath(path, op);
+        return this->INHERITED::clipPath(path, op, doAA);
     }
 }
 
 bool SkPictureRecord::clipRegion(const SkRegion& region, SkRegion::Op op) {
-    addDraw(CLIP_REGION); 
+    addDraw(CLIP_REGION);
     addRegion(region);
-    addInt(op);
-    
-    size_t offset = fWriter.size();
-    addInt(fRestoreOffsetStack.top());
-    fRestoreOffsetStack.top() = offset;
-    
+    addInt(ClipParams_pack(op, false));
+
+    this->recordOffsetForRestore(op);
+
     validate();
     return this->INHERITED::clipRegion(region, op);
+}
+
+void SkPictureRecord::clear(SkColor color) {
+    addDraw(DRAW_CLEAR);
+    addInt(color);
+    validate();
 }
 
 void SkPictureRecord::drawPaint(const SkPaint& paint) {
@@ -217,11 +274,21 @@ void SkPictureRecord::drawBitmapRect(const SkBitmap& bitmap, const SkIRect* src,
 }
 
 void SkPictureRecord::drawBitmapMatrix(const SkBitmap& bitmap, const SkMatrix& matrix,
-                              const SkPaint* paint) {
+                                       const SkPaint* paint) {
     addDraw(DRAW_BITMAP_MATRIX);
     addPaintPtr(paint);
     addBitmap(bitmap);
     addMatrix(matrix);
+    validate();
+}
+
+void SkPictureRecord::drawBitmapNine(const SkBitmap& bitmap, const SkIRect& center,
+                                     const SkRect& dst, const SkPaint* paint) {
+    addDraw(DRAW_BITMAP_NINE);
+    addPaintPtr(paint);
+    addBitmap(bitmap);
+    addIRect(center);
+    addRect(dst);
     validate();
 }
 
@@ -236,59 +303,70 @@ void SkPictureRecord::drawSprite(const SkBitmap& bitmap, int left, int top,
 }
 
 void SkPictureRecord::addFontMetricsTopBottom(const SkPaint& paint,
-                                              SkScalar baselineY) {
+                                              SkScalar minY, SkScalar maxY) {
     SkPaint::FontMetrics metrics;
     paint.getFontMetrics(&metrics);
     SkRect bounds;
     // construct a rect so we can see any adjustments from the paint.
     // we use 0,1 for left,right, just so the rect isn't empty
-    bounds.set(0, metrics.fTop + baselineY,
-               SK_Scalar1, metrics.fBottom + baselineY);
+    bounds.set(0, metrics.fTop + minY,
+               SK_Scalar1, metrics.fBottom + maxY);
     (void)paint.computeFastBounds(bounds, &bounds);
     // now record the top and bottom
     addScalar(bounds.fTop);
     addScalar(bounds.fBottom);
 }
 
-void SkPictureRecord::drawText(const void* text, size_t byteLength, SkScalar x, 
+void SkPictureRecord::drawText(const void* text, size_t byteLength, SkScalar x,
                       SkScalar y, const SkPaint& paint) {
     bool fast = paint.canComputeFastBounds();
-    
+
     addDraw(fast ? DRAW_TEXT_TOP_BOTTOM : DRAW_TEXT);
     addPaint(paint);
     addText(text, byteLength);
     addScalar(x);
     addScalar(y);
     if (fast) {
-        addFontMetricsTopBottom(paint, y);
+        addFontMetricsTopBottom(paint, y, y);
     }
     validate();
 }
 
-void SkPictureRecord::drawPosText(const void* text, size_t byteLength, 
+void SkPictureRecord::drawPosText(const void* text, size_t byteLength,
                          const SkPoint pos[], const SkPaint& paint) {
     size_t points = paint.countText(text, byteLength);
     if (0 == points)
         return;
 
     bool canUseDrawH = true;
+    SkScalar minY = pos[0].fY;
+    SkScalar maxY = pos[0].fY;
     // check if the caller really should have used drawPosTextH()
     {
         const SkScalar firstY = pos[0].fY;
         for (size_t index = 1; index < points; index++) {
             if (pos[index].fY != firstY) {
                 canUseDrawH = false;
-                break;
+                if (pos[index].fY < minY) {
+                    minY = pos[index].fY;
+                } else if (pos[index].fY > maxY) {
+                    maxY = pos[index].fY;
+                }
             }
         }
     }
-    
-    bool fast = canUseDrawH && paint.canComputeFastBounds();
+
+    bool fastBounds = paint.canComputeFastBounds();
+    bool fast = canUseDrawH && fastBounds;
 
     if (fast) {
         addDraw(DRAW_POS_TEXT_H_TOP_BOTTOM);
+    } else if (canUseDrawH) {
+        addDraw(DRAW_POS_TEXT_H);
+    } else if (fastBounds) {
+        addDraw(DRAW_POS_TEXT_TOP_BOTTOM);
     } else {
-        addDraw(canUseDrawH ? DRAW_POS_TEXT_H : DRAW_POS_TEXT);
+        addDraw(DRAW_POS_TEXT);
     }
     addPaint(paint);
     addText(text, byteLength);
@@ -299,15 +377,18 @@ void SkPictureRecord::drawPosText(const void* text, size_t byteLength,
 #endif
     if (canUseDrawH) {
         if (fast) {
-            addFontMetricsTopBottom(paint, pos[0].fY);
+            addFontMetricsTopBottom(paint, pos[0].fY, pos[0].fY);
         }
         addScalar(pos[0].fY);
         SkScalar* xptr = (SkScalar*)fWriter.reserve(points * sizeof(SkScalar));
-        for (size_t index = 0; index < points; index++) 
+        for (size_t index = 0; index < points; index++)
             *xptr++ = pos[index].fX;
     }
     else {
         fWriter.writeMul4(pos, points * sizeof(SkPoint));
+        if (fastBounds) {
+            addFontMetricsTopBottom(paint, minY, maxY);
+        }
     }
 #ifdef SK_DEBUG_SIZE
     fPointBytes += fWriter.size() - start;
@@ -322,19 +403,19 @@ void SkPictureRecord::drawPosTextH(const void* text, size_t byteLength,
     size_t points = paint.countText(text, byteLength);
     if (0 == points)
         return;
-    
+
     bool fast = paint.canComputeFastBounds();
 
     addDraw(fast ? DRAW_POS_TEXT_H_TOP_BOTTOM : DRAW_POS_TEXT_H);
     addPaint(paint);
     addText(text, byteLength);
     addInt(points);
-    
+
 #ifdef SK_DEBUG_SIZE
     size_t start = fWriter.size();
 #endif
     if (fast) {
-        addFontMetricsTopBottom(paint, constY);
+        addFontMetricsTopBottom(paint, constY, constY);
     }
     addScalar(constY);
     fWriter.writeMul4(xpos, points * sizeof(SkScalar));
@@ -345,8 +426,8 @@ void SkPictureRecord::drawPosTextH(const void* text, size_t byteLength,
     validate();
 }
 
-void SkPictureRecord::drawTextOnPath(const void* text, size_t byteLength, 
-                            const SkPath& path, const SkMatrix* matrix, 
+void SkPictureRecord::drawTextOnPath(const void* text, size_t byteLength,
+                            const SkPath& path, const SkMatrix* matrix,
                             const SkPaint& paint) {
     addDraw(DRAW_TEXT_ON_PATH);
     addPaint(paint);
@@ -359,20 +440,6 @@ void SkPictureRecord::drawTextOnPath(const void* text, size_t byteLength,
 void SkPictureRecord::drawPicture(SkPicture& picture) {
     addDraw(DRAW_PICTURE);
     addPicture(picture);
-    validate();
-}
-
-void SkPictureRecord::drawShape(SkShape* shape) {
-    addDraw(DRAW_SHAPE);
-
-    int index = fShapes.find(shape);
-    if (index < 0) {    // not found
-        index = fShapes.count();
-        *fShapes.append() = shape;
-        shape->ref();
-    }
-    // follow the convention of recording a 1-based index
-    addInt(index + 1);
     validate();
 }
 
@@ -417,9 +484,9 @@ void SkPictureRecord::drawData(const void* data, size_t length) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-    
+
 void SkPictureRecord::reset() {
-    fPathHeap->safeUnref();
+    SkSafeUnref(fPathHeap);
     fPathHeap = NULL;
 
     fBitmaps.reset();
@@ -427,15 +494,14 @@ void SkPictureRecord::reset() {
     fPaints.reset();
     fPictureRefs.unrefAll();
     fRegions.reset();
-    fShapes.safeUnrefAll();
     fWriter.reset();
     fHeap.reset();
-    
+
     fRestoreOffsetStack.setCount(1);
     fRestoreOffsetStack.top() = 0;
-    
-    fRCRecorder.reset();
-    fTFRecorder.reset();
+
+    fRCSet.reset();
+    fTFSet.reset();
 }
 
 void SkPictureRecord::addBitmap(const SkBitmap& bitmap) {
@@ -486,7 +552,7 @@ void SkPictureRecord::addPoint(const SkPoint& point) {
     fPointWrites++;
 #endif
 }
-    
+
 void SkPictureRecord::addPoints(const SkPoint pts[], int count) {
     fWriter.writeMul4(pts, count * sizeof(SkPoint));
 #ifdef SK_DEBUG_SIZE
@@ -510,6 +576,10 @@ void SkPictureRecord::addRectPtr(const SkRect* rect) {
     if (fWriter.writeBool(rect != NULL)) {
         fWriter.writeRect(*rect);
     }
+}
+
+void SkPictureRecord::addIRect(const SkIRect& rect) {
+    fWriter.write(&rect, sizeof(rect));
 }
 
 void SkPictureRecord::addIRectPtr(const SkIRect* rect) {
@@ -538,8 +608,8 @@ void SkPictureRecord::addText(const void* text, size_t byteLength) {
 
 int SkPictureRecord::find(SkTDArray<const SkFlatBitmap* >& bitmaps, const SkBitmap& bitmap) {
     SkFlatBitmap* flat = SkFlatBitmap::Flatten(&fHeap, bitmap, fBitmapIndex,
-                                               &fRCRecorder);
-    int index = SkTSearch<SkFlatData>((const SkFlatData**) bitmaps.begin(), 
+                                               &fRCSet);
+    int index = SkTSearch<SkFlatData>((const SkFlatData**) bitmaps.begin(),
         bitmaps.count(), (SkFlatData*) flat, sizeof(flat), &SkFlatData::Compare);
     if (index >= 0) {
         (void)fHeap.unalloc(flat);
@@ -554,7 +624,7 @@ int SkPictureRecord::find(SkTDArray<const SkFlatMatrix* >& matrices, const SkMat
     if (matrix == NULL)
         return 0;
     SkFlatMatrix* flat = SkFlatMatrix::Flatten(&fHeap, *matrix, fMatrixIndex);
-    int index = SkTSearch<SkFlatData>((const SkFlatData**) matrices.begin(), 
+    int index = SkTSearch<SkFlatData>((const SkFlatData**) matrices.begin(),
         matrices.count(), (SkFlatData*) flat, sizeof(flat), &SkFlatData::Compare);
     if (index >= 0) {
         (void)fHeap.unalloc(flat);
@@ -569,10 +639,10 @@ int SkPictureRecord::find(SkTDArray<const SkFlatPaint* >& paints, const SkPaint*
     if (paint == NULL) {
         return 0;
     }
-    
+
     SkFlatPaint* flat = SkFlatPaint::Flatten(&fHeap, *paint, fPaintIndex,
-                                             &fRCRecorder, &fTFRecorder);
-    int index = SkTSearch<SkFlatData>((const SkFlatData**) paints.begin(), 
+                                             &fRCSet, &fTFSet);
+    int index = SkTSearch<SkFlatData>((const SkFlatData**) paints.begin(),
         paints.count(), (SkFlatData*) flat, sizeof(flat), &SkFlatData::Compare);
     if (index >= 0) {
         (void)fHeap.unalloc(flat);
@@ -586,7 +656,7 @@ int SkPictureRecord::find(SkTDArray<const SkFlatPaint* >& paints, const SkPaint*
 
 int SkPictureRecord::find(SkTDArray<const SkFlatRegion* >& regions, const SkRegion& region) {
     SkFlatRegion* flat = SkFlatRegion::Flatten(&fHeap, region, fRegionIndex);
-    int index = SkTSearch<SkFlatData>((const SkFlatData**) regions.begin(), 
+    int index = SkTSearch<SkFlatData>((const SkFlatData**) regions.begin(),
         regions.count(), (SkFlatData*) flat, sizeof(flat), &SkFlatData::Compare);
     if (index >= 0) {
         (void)fHeap.unalloc(flat);
@@ -610,7 +680,7 @@ void SkPictureRecord::dumpMatrices() {
 
 void SkPictureRecord::dumpPaints() {
     int count = fPaints.count();
-    for (int index = 0; index < count; index++) 
+    for (int index = 0; index < count; index++)
         fPaints[index]->dump();
 }
 #endif
@@ -638,7 +708,7 @@ size_t SkPictureRecord::size() const {
 int SkPictureRecord::bitmaps(size_t* size) const {
     size_t result = 0;
     int count = fBitmaps.count();
-    for (int index = 0; index < count; index++) 
+    for (int index = 0; index < count; index++)
         result += sizeof(fBitmaps[index]) + fBitmaps[index]->size();
     *size = result;
     return count;
@@ -653,7 +723,7 @@ int SkPictureRecord::matrices(size_t* size) const {
 int SkPictureRecord::paints(size_t* size) const {
     size_t result = 0;
     int count = fPaints.count();
-    for (int index = 0; index < count; index++) 
+    for (int index = 0; index < count; index++)
         result += sizeof(fPaints[index]) + fPaints[index]->size();
     *size = result;
     return count;
@@ -662,7 +732,7 @@ int SkPictureRecord::paints(size_t* size) const {
 int SkPictureRecord::paths(size_t* size) const {
     size_t result = 0;
     int count = fPaths.count();
-    for (int index = 0; index < count; index++) 
+    for (int index = 0; index < count; index++)
         result += sizeof(fPaths[index]) + fPaths[index]->size();
     *size = result;
     return count;
@@ -671,7 +741,7 @@ int SkPictureRecord::paths(size_t* size) const {
 int SkPictureRecord::regions(size_t* size) const {
     size_t result = 0;
     int count = fRegions.count();
-    for (int index = 0; index < count; index++) 
+    for (int index = 0; index < count; index++)
         result += sizeof(fRegions[index]) + fRegions[index]->size();
     *size = result;
     return count;
@@ -708,7 +778,7 @@ void SkPictureRecord::validateMatrices() const {
     for (int index = 0; index < count; index++) {
         const SkFlatMatrix* matrix = fMatrices[index];
         SkASSERT(matrix);
-        matrix->validate(); 
+        matrix->validate();
     }
 }
 

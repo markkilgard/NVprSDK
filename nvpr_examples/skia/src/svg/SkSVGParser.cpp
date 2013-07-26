@@ -1,19 +1,11 @@
-/* libs/graphics/svg/SkSVGParser.cpp
-**
-** Copyright 2006, The Android Open Source Project
-**
-** Licensed under the Apache License, Version 2.0 (the "License"); 
-** you may not use this file except in compliance with the License. 
-** You may obtain a copy of the License at 
-**
-**     http://www.apache.org/licenses/LICENSE-2.0 
-**
-** Unless required by applicable law or agreed to in writing, software 
-** distributed under the License is distributed on an "AS IS" BASIS, 
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-** See the License for the specific language governing permissions and 
-** limitations under the License.
-*/
+
+/*
+ * Copyright 2006 The Android Open Source Project
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
+
 
 #include "SkSVGParser.h"
 #include "SkSVGCircle.h"
@@ -43,7 +35,9 @@
 
 static int gGeneratedMatrixID = 0;
 
-SkSVGParser::SkSVGParser() : fHead(&fEmptyPaint), fIDs(256),
+SkSVGParser::SkSVGParser(SkXMLParserError* errHandler) : 
+	SkXMLParser(errHandler),
+	fHead(&fEmptyPaint), fIDs(256),
         fXMLWriter(&fStream), fCurrElement(NULL), fInSVG(false), fSuppressPaint(false) {
     fLastTransform.reset();
     fEmptyPaint.f_fill.set("black");
@@ -74,8 +68,8 @@ void SkSVGParser::Delete(SkTDArray<SkSVGElement*>& fChildren) {
 int SkSVGParser::findAttribute(SkSVGBase* element, const char* attrValue,
         size_t len, bool isPaint) {
     const SkSVGAttribute* attributes;
-    int count = element->getAttributes(&attributes);
-    int result = 0;
+    size_t count = element->getAttributes(&attributes);
+    size_t result = 0;
     while (result < count) {
         if (strncmp(attributes->fName, attrValue, len) == 0 && strlen(attributes->fName) == len) {
             SkASSERT(result == (attributes->fOffset - 
@@ -88,6 +82,7 @@ int SkSVGParser::findAttribute(SkSVGBase* element, const char* attrValue,
     return -1;
 }
 
+#if 0
 const char* SkSVGParser::getFinal() {
     _startElement("screenplay");
     // generate defs
@@ -112,6 +107,7 @@ const char* SkSVGParser::getFinal() {
     fStream.write("", 1);
     return fStream.getStream();
 }
+#endif
 
 SkString& SkSVGParser::getPaintLast(SkSVGPaint::Field field) {
     SkSVGPaint* state = fHead;
@@ -157,7 +153,7 @@ bool SkSVGParser::onAddAttributeLen(const char name[], const char value[], size_
     if (fCurrElement == NULL)    // this signals we should ignore attributes for this element
         return true;
     if (fCurrElement->fIsDef == false && fCurrElement->fIsNotDef == false)
-        return true; // also an ignored element
+        return false; // also an ignored element
     size_t nameLen = strlen(name);
     int attrIndex = findAttribute(fCurrElement, name, nameLen, false);
     if (attrIndex == -1) {
@@ -198,12 +194,14 @@ bool SkSVGParser::onStartElementLen(const char name[], size_t len) {
     } else if (fInSVG == false)
         return false;
     const char* nextColon = strchr(name, ':');
-    if (nextColon && nextColon - name < len)
+    if (nextColon && (size_t)(nextColon - name) < len)
         return false;
     SkSVGTypes type = GetType(name, len);
-    SkASSERT(type >= 0);
-    if (type < 0)
-        return true;
+//    SkASSERT(type >= 0);
+    if (type < 0) {
+		type = SkSVGType_G;
+//        return true;
+	}
     SkSVGElement* parent = fParents.count() > 0 ? fParents.top() : NULL;
     SkSVGElement* element = CreateElement(type, parent);
     bool result = false;

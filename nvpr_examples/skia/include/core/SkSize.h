@@ -1,4 +1,11 @@
 
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
+
 
 #ifndef SkSize_DEFINED
 #define SkSize_DEFINED
@@ -83,19 +90,19 @@ struct SkSize : public SkTSize<SkScalar> {
         return *this;
     }
 
-    SkISize round() const {
+    SkISize toRound() const {
         SkISize s;
         s.set(SkScalarRound(fWidth), SkScalarRound(fHeight));
         return s;
     }
-    
-    SkISize ceil() const {
+
+    SkISize toCeil() const {
         SkISize s;
         s.set(SkScalarCeil(fWidth), SkScalarCeil(fHeight));
         return s;
     }
 
-    SkISize floor() const {
+    SkISize toFloor() const {
         SkISize s;
         s.set(SkScalarFloor(fWidth), SkScalarFloor(fHeight));
         return s;

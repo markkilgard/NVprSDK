@@ -1,19 +1,11 @@
-/* libs/graphics/ports/SkFontHost_android.cpp
-**
-** Copyright 2006, The Android Open Source Project
-**
-** Licensed under the Apache License, Version 2.0 (the "License"); 
-** you may not use this file except in compliance with the License. 
-** You may obtain a copy of the License at 
-**
-**     http://www.apache.org/licenses/LICENSE-2.0 
-**
-** Unless required by applicable law or agreed to in writing, software 
-** distributed under the License is distributed on an "AS IS" BASIS, 
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-** See the License for the specific language governing permissions and 
-** limitations under the License.
-*/
+
+/*
+ * Copyright 2006 The Android Open Source Project
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
+
 
 #include "SkFontHost.h"
 #include "SkDescriptor.h"
@@ -269,6 +261,16 @@ SkTypeface* SkFontHost::CreateTypeface(const SkTypeface* familyFace,
     return SkNEW_ARGS(FontFaceRec_Typeface, (face));
 }
 
+// static
+SkAdvancedTypefaceMetrics* SkFontHost::GetAdvancedTypefaceMetrics(
+        uint32_t fontID,
+        SkAdvancedTypefaceMetrics::PerGlyphInfo perGlyphInfo,
+        const uint32_t* glyphIDs,
+        uint32_t glyphIDsCount) {
+    sk_throw();  // not implemented
+    return NULL;
+}
+
 SkTypeface* SkFontHost::CreateTypefaceFromStream(SkStream* stream) {
     sk_throw();  // not implemented
     return NULL;
@@ -277,10 +279,6 @@ SkTypeface* SkFontHost::CreateTypefaceFromStream(SkStream* stream) {
 SkTypeface* SkFontHost::CreateTypefaceFromFile(const char path[]) {
     sk_throw();  // not implemented
     return NULL;
-}
-
-bool SkFontHost::ValidFontID(uint32_t fontID) {
-    return get_id(*get_default_face()) == fontID;
 }
 
 SkStream* SkFontHost::OpenStream(uint32_t fontID) {
@@ -322,10 +320,5 @@ SkScalerContext* SkFontHost::CreateFallbackScalerContext(
     desc->computeChecksum();
 
     return SkFontHost::CreateScalerContext(desc);
-}
-
-size_t SkFontHost::ShouldPurgeFontCache(size_t sizeAllocatedSoFar)
-{
-    return 0;   // nothing to do (change me if you want to limit the font cache)
 }
 

@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "SampleCode.h"
 #include "SkView.h"
 #include "SkCanvas.h"
@@ -6,7 +13,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class AvoidView : public SkView {
+class AvoidView : public SampleView {
     SkShader* fShader;
 
     enum {
@@ -23,7 +30,7 @@ public:
                                                  SK_ARRAY_COUNT(colors),
                                                  SkShader::kMirror_TileMode);
 #else
-        SkPoint pts[] = { SkIntToScalar(W)/2, SkIntToScalar(H)/2 };
+        SkPoint pts[] = { { SkIntToScalar(W)/2, SkIntToScalar(H)/2 } };
         fShader = SkGradientShader::CreateRadial(pts[0], SkIntToScalar(H)/5,
                                                  colors, NULL,
                                                  SK_ARRAY_COUNT(colors),
@@ -44,9 +51,7 @@ protected:
         return this->INHERITED::onQuery(evt);
     }
 
-    virtual void onDraw(SkCanvas* canvas) {
-        canvas->drawColor(SK_ColorWHITE);
-        
+    virtual void onDrawContent(SkCanvas* canvas) {
         SkPaint paint;
         SkRect r = { 0, 0, SkIntToScalar(W), SkIntToScalar(H) };
         
@@ -88,7 +93,7 @@ protected:
     }
     
 private:
-    typedef SkView INHERITED;
+    typedef SampleView INHERITED;
 };
 
 //////////////////////////////////////////////////////////////////////////////

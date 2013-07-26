@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "SampleCode.h"
 #include "SkView.h"
 #include "SkCanvas.h"
@@ -23,7 +30,7 @@ static void lettersToBitmap(SkBitmap* dst, const char chars[],
     SkScalar x = 0;
     SkScalar width;
     SkPath p;
-    for (int i = 0; i < strlen(chars); i++) {
+    for (size_t i = 0; i < strlen(chars); i++) {
         original.getTextPath(&chars[i], 1, x, 0, &p);
         path.addPath(p);
         original.getTextWidths(&chars[i], 1, &width);
@@ -69,7 +76,7 @@ static void lettersToBitmap2(SkBitmap* dst, const char chars[],
     SkScalar x = 0;
     SkScalar width;
     SkPath p;
-    for (int i = 0; i < strlen(chars); i++) {
+    for (size_t i = 0; i < strlen(chars); i++) {
         original.getTextPath(&chars[i], 1, x, 0, &p);
         path.addPath(p);
         original.getTextWidths(&chars[i], 1, &width);
@@ -98,10 +105,12 @@ static void lettersToBitmap2(SkBitmap* dst, const char chars[],
     canvas.drawPath(path, paint);
 }
 
-class StrokeTextView : public SkView {
+class StrokeTextView : public SampleView {
     bool fAA;
 public:
-	StrokeTextView() : fAA(false) {}
+	StrokeTextView() : fAA(false) {
+        this->setBGColor(0xFFCC8844);
+    }
     
 protected:
     // overrides from SkEventSink
@@ -113,14 +122,7 @@ protected:
         return this->INHERITED::onQuery(evt);
     }
     
-    void drawBG(SkCanvas* canvas) {
-        canvas->drawColor(0xFF333333);
-        canvas->drawColor(0xFFCC8844);
-    }
-    
-    virtual void onDraw(SkCanvas* canvas) {
-        this->drawBG(canvas);
-        
+    virtual void onDrawContent(SkCanvas* canvas) {
         SkBitmap bm;
         SkPaint paint;
         
@@ -135,7 +137,7 @@ protected:
     
 private:
     
-    typedef SkView INHERITED;
+    typedef SampleView INHERITED;
 };
 
 //////////////////////////////////////////////////////////////////////////////

@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "SampleCode.h"
 #include "SkCanvas.h"
 #include "SkParsePath.h"
@@ -88,7 +95,7 @@ static const struct {
     { SkPaint::kStrokeAndFill_Style,    SkPaint::kMiter_Join,   10 },
 };
 
-class StrokePathView : public SkView {
+class StrokePathView : public SampleView {
     SkScalar    fWidth;
     SkPath      fPath;
 public:
@@ -111,6 +118,8 @@ public:
         scale_to_width(&fPath, fWidth);
         const SkRect& bounds = fPath.getBounds();
         fPath.offset(-bounds.fLeft, -bounds.fTop);
+
+        this->setBGColor(0xFFDDDDDD);
     }
     
 protected:
@@ -121,10 +130,6 @@ protected:
             return true;
         }
         return this->INHERITED::onQuery(evt);
-    }
-    
-    void drawBG(SkCanvas* canvas) {
-        canvas->drawColor(0xFFDDDDDD);
     }
     
     SkRandom rand;
@@ -141,9 +146,7 @@ protected:
         }
     }
 
-    virtual void onDraw(SkCanvas* canvas) {
-        drawBG(canvas);
-        //return;
+    virtual void onDrawContent(SkCanvas* canvas) {
         test_huge_stroke(canvas); return;
         canvas->translate(SkIntToScalar(10), SkIntToScalar(10));
 
@@ -171,7 +174,7 @@ protected:
                         mf = SkBlurMaskFilter::Create(radius, gStyle[x - 1]);
                         paint.setMaskFilter(mf)->unref();
                     }
-                    canvas->drawText("Title Bar", 9, x*100, y*30, paint);
+                    canvas->drawText("Title Bar", 9, x*SkIntToScalar(100), y*SkIntToScalar(30), paint);
                     radius *= 0.75f;
                 }
                 
@@ -211,7 +214,7 @@ protected:
         return this->INHERITED::onFindClickHandler(x, y);
     }
 private:
-    typedef SkView INHERITED;
+    typedef SampleView INHERITED;
 };
 
 //////////////////////////////////////////////////////////////////////////////

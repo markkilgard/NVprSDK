@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "SampleCode.h"
 #include "SkView.h"
 #include "SkCanvas.h"
@@ -23,11 +30,13 @@ public:
 	DecodeView() {
         SkFILEStream stream("/skimages/index.png");
         SkImageDecoder* codec = SkImageDecoder::Factory(&stream);
-        for (size_t i = 0; i < SK_ARRAY_COUNT(gRec); i++) {
-            stream.rewind();
-            codec->setDitherImage(gRec[i].fDither);
-            codec->decode(&stream, &fBitmap[i], gRec[i].fPrefConfig,
-                          SkImageDecoder::kDecodePixels_Mode);
+        if (codec) {
+            for (size_t i = 0; i < SK_ARRAY_COUNT(gRec); i++) {
+                stream.rewind();
+                codec->setDitherImage(gRec[i].fDither);
+                codec->decode(&stream, &fBitmap[i], gRec[i].fPrefConfig,
+                              SkImageDecoder::kDecodePixels_Mode);
+            }
         }
     }
     

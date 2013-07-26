@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "SampleCode.h"
 #include "SkView.h"
 #include "SkCanvas.h"
@@ -16,9 +23,9 @@ static inline SkPMColor rgb2gray(SkPMColor c)
     unsigned r = SkGetPackedR32(c);
     unsigned g = SkGetPackedG32(c);
     unsigned b = SkGetPackedB32(c);
-    
-    unsigned x = r * 5 + g * 7 + b * 4 >> 4;
-    
+
+    unsigned x = (r * 5 + g * 7 + b * 4) >> 4;
+
     return SkPackARGB32(0, x, x, x) | (c & (SK_A32_MASK << SK_A32_SHIFT));
 }
 
@@ -44,7 +51,7 @@ public:
         for (int i = 0; i < count; i++)
             result[i] = src[i] & mask;
     }
-    
+
 private:
     SkPMColor   fMask;
 };
@@ -63,13 +70,7 @@ public:
                     SkTDArray<SkPoint>* pts)
     : Sk2DPathEffect(matrix), fRadius(radius), fPts(pts) {}
 
-    virtual void flatten(SkFlattenableWriteBuffer& buffer)
-    {
-        this->INHERITED::flatten(buffer);
-        
-        buffer.writeScalar(fRadius);
-    }
-    virtual Factory getFactory() { return CreateProc; }
+    SK_DECLARE_PUBLIC_FLATTENABLE_DESERIALIZATION_PROCS(Dot2DPathEffect)
 
 protected:
     virtual void begin(const SkIRect& uvBounds, SkPath* dst) {
@@ -86,20 +87,20 @@ protected:
         }
         dst->addCircle(loc.fX, loc.fY, fRadius);
     }
-    
-    Dot2DPathEffect(SkFlattenableReadBuffer& buffer) : Sk2DPathEffect(buffer)
+
+    Dot2DPathEffect(SkFlattenableReadBuffer& buffer) : INHERITED(buffer)
     {
         fRadius = buffer.readScalar();
         fPts = NULL;
     }
+    virtual void flatten(SkFlattenableWriteBuffer& buffer) const SK_OVERRIDE {
+        this->INHERITED::flatten(buffer);
+        buffer.writeScalar(fRadius);
+    }
+
 private:
     SkScalar fRadius;
     SkTDArray<SkPoint>* fPts;
-
-    static SkFlattenable* CreateProc(SkFlattenableReadBuffer& buffer)
-    {
-        return new Dot2DPathEffect(buffer);
-    }
 
     typedef Sk2DPathEffect INHERITED;
 };
@@ -112,13 +113,12 @@ public:
         dst->setFillType(SkPath::kInverseWinding_FillType);
         return true;
     }
-    virtual Factory getFactory() { return Factory; }
+    SK_DECLARE_PUBLIC_FLATTENABLE_DESERIALIZATION_PROCS(InverseFillPE)
+
 protected:
-//    InverseFillPE(SkFlattenableReadBuffer& buffer) : INHERITED(buffer) {}
+    InverseFillPE(SkFlattenableReadBuffer& buffer) : INHERITED(buffer) {}
 private:
-    static SkFlattenable* Factory(SkFlattenableReadBuffer& buffer) {
-        return new InverseFillPE;
-    }
+
     typedef SkPathEffect INHERITED;
 };
 
@@ -147,7 +147,7 @@ typedef void (*raster_proc)(SkLayerRasterizer*, SkPaint&);
 #include "SkXfermode.h"
 
 static void apply_shader(SkPaint* paint, float scale)
-{    
+{
     SkPaint p;
     SkLayerRasterizer*  rast = new SkLayerRasterizer;
 
@@ -169,10 +169,10 @@ public:
         fInterp = 0;
         fDx = SK_Scalar1/64;
     }
-    
+
     virtual ~ClockFaceView()
     {
-        fFace->safeUnref();
+        SkSafeUnref(fFace);
     }
 
 protected:
@@ -186,22 +186,22 @@ protected:
         }
         return this->INHERITED::onQuery(evt);
     }
-    
+
     void drawBG(SkCanvas* canvas)
     {
 //        canvas->drawColor(0xFFDDDDDD);
         canvas->drawColor(SK_ColorWHITE);
     }
-    
+
     static void drawdots(SkCanvas* canvas, const SkPaint& orig) {
         SkTDArray<SkPoint> pts;
         SkPathEffect* pe = makepe(0, &pts);
-        
+
         SkScalar width = -1;
         SkPath path, dstPath;
         orig.getTextPath("9", 1, 0, 0, &path);
         pe->filterPath(&dstPath, path, &width);
-        
+
         SkPaint p;
         p.setAntiAlias(true);
         p.setStrokeWidth(10);
@@ -209,14 +209,14 @@ protected:
         canvas->drawPoints(SkCanvas::kPoints_PointMode, pts.count(), pts.begin(),
                            p);
     }
-    
+
     virtual void onDraw(SkCanvas* canvas) {
         this->drawBG(canvas);
-        
+
         SkScalar    x = SkIntToScalar(20);
         SkScalar    y = SkIntToScalar(300);
         SkPaint     paint;
-        
+
         paint.setAntiAlias(true);
         paint.setTextSize(SkIntToScalar(240));
         paint.setTypeface(SkTypeface::CreateFromName("sans-serif",
@@ -225,7 +225,7 @@ protected:
         SkString str("9");
 
         paint.setTypeface(fFace);
-        
+
         apply_shader(&paint, fInterp);
         canvas->drawText(str.c_str(), str.size(), x, y, paint);
 

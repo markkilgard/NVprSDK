@@ -1,19 +1,11 @@
-/* libs/graphics/ports/SkFontHost_fontconfig.cpp
-**
-** Copyright 2008, Google Inc.
-**
-** Licensed under the Apache License, Version 2.0 (the "License");
-** you may not use this file except in compliance with the License.
-** You may obtain a copy of the License at
-**
-**     http://www.apache.org/licenses/LICENSE-2.0
-**
-** Unless required by applicable law or agreed to in writing, software
-** distributed under the License is distributed on an "AS IS" BASIS,
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-** See the License for the specific language governing permissions and
-** limitations under the License.
-*/
+
+/*
+ * Copyright 2008 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
+
 
 // -----------------------------------------------------------------------------
 // This file provides implementations of the font resolution members of
@@ -46,14 +38,11 @@ SkTypeface::Style find_name_and_style(SkStream* stream, SkString* name);
 // Although truetype fonts can support multiple faces in a single file, at the
 // moment Skia doesn't.
 // -----------------------------------------------------------------------------
-static SkMutex global_fc_map_lock;
+SK_DECLARE_STATIC_MUTEX(global_fc_map_lock);
 static std::map<std::string, unsigned> global_fc_map;
 static std::map<unsigned, std::string> global_fc_map_inverted;
 static std::map<uint32_t, SkTypeface *> global_fc_typefaces;
 static unsigned global_fc_map_next_id = 0;
-
-// This is the maximum size of the font cache.
-static const unsigned kFontCacheMemoryBudget = 2 * 1024 * 1024;  // 2MB
 
 static unsigned UniqueIdToFileId(unsigned uniqueid)
 {
@@ -122,7 +111,7 @@ static FcPattern* FontMatch(const char* type, FcType vtype, const void* value,
                 fcvalue.u.i = (int)(intptr_t)value;
                 break;
             default:
-                SkASSERT(!"FontMatch unhandled type");
+                SkDEBUGFAIL("FontMatch unhandled type");
         }
         FcPatternAdd(pattern, type, fcvalue, 0);
 
@@ -303,21 +292,15 @@ SkTypeface* SkFontHost::CreateTypeface(const SkTypeface* familyFace,
 // static
 SkTypeface* SkFontHost::CreateTypefaceFromStream(SkStream* stream)
 {
-    SkASSERT(!"SkFontHost::CreateTypefaceFromStream unimplemented");
+    SkDEBUGFAIL("SkFontHost::CreateTypefaceFromStream unimplemented");
     return NULL;
 }
 
 // static
 SkTypeface* SkFontHost::CreateTypefaceFromFile(const char path[])
 {
-    SkASSERT(!"SkFontHost::CreateTypefaceFromFile unimplemented");
+    SkDEBUGFAIL("SkFontHost::CreateTypefaceFromFile unimplemented");
     return NULL;
-}
-
-// static
-bool SkFontHost::ValidFontID(SkFontID uniqueID) {
-    SkAutoMutexAcquire ac(global_fc_map_lock);
-    return global_fc_typefaces.find(uniqueID) != global_fc_typefaces.end();
 }
 
 // static
@@ -337,8 +320,8 @@ SkStream* SkFontHost::OpenStream(uint32_t id)
 size_t SkFontHost::GetFileName(SkFontID fontID, char path[], size_t length,
                                int32_t* index) {
     SkAutoMutexAcquire ac(global_fc_map_lock);
-    const unsigned fileid = UniqueIdToFileId(id);
-    
+    const unsigned fileid = UniqueIdToFileId(fontID);
+
     std::map<unsigned, std::string>::const_iterator i =
     global_fc_map_inverted.find(fileid);
     if (i == global_fc_map_inverted.end()) {
@@ -356,26 +339,16 @@ size_t SkFontHost::GetFileName(SkFontID fontID, char path[], size_t length,
 }
 
 void SkFontHost::Serialize(const SkTypeface*, SkWStream*) {
-    SkASSERT(!"SkFontHost::Serialize unimplemented");
+    SkDEBUGFAIL("SkFontHost::Serialize unimplemented");
 }
 
 SkTypeface* SkFontHost::Deserialize(SkStream* stream) {
-    SkASSERT(!"SkFontHost::Deserialize unimplemented");
+    SkDEBUGFAIL("SkFontHost::Deserialize unimplemented");
     return NULL;
 }
 
-// static
-uint32_t SkFontHost::NextLogicalFont(SkFontID fontID) {
+SkFontID SkFontHost::NextLogicalFont(SkFontID currFontID, SkFontID origFontID) {
     // We don't handle font fallback, WebKit does.
     return 0;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-
-size_t SkFontHost::ShouldPurgeFontCache(size_t sizeAllocatedSoFar)
-{
-    if (sizeAllocatedSoFar > kFontCacheMemoryBudget)
-        return sizeAllocatedSoFar - kFontCacheMemoryBudget;
-    else
-        return 0;   // nothing to do
-}

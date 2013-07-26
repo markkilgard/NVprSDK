@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "Test.h"
 #include "SkRandom.h"
 #include "SkRefCnt.h"
@@ -23,17 +30,17 @@ static void test_refptr(skiatest::Reporter* reporter) {
 
     SkRefPtr<RefClass> rc1;
     REPORTER_ASSERT(reporter, rc0 == rc1);
-    REPORTER_ASSERT(reporter, rc0 != r0);
+    REPORTER_ASSERT(reporter, rc0.get() != r0);
 
     rc0 = r0;
     REPORTER_ASSERT(reporter, rc0);
     REPORTER_ASSERT(reporter, rc0 != rc1);
-    REPORTER_ASSERT(reporter, rc0 == r0);
+    REPORTER_ASSERT(reporter, rc0.get() == r0);
 
     rc1 = rc0;
     REPORTER_ASSERT(reporter, rc1);
     REPORTER_ASSERT(reporter, rc0 == rc1);
-    REPORTER_ASSERT(reporter, rc0 == r0);
+    REPORTER_ASSERT(reporter, rc0.get() == r0);
 
     rc0 = NULL;
     REPORTER_ASSERT(reporter, rc0.get() == NULL);
@@ -43,7 +50,28 @@ static void test_refptr(skiatest::Reporter* reporter) {
     r0->unref();
 }
 
-///////////////////////////////////////////////////////////////////////////////
+static void test_autounref(skiatest::Reporter* reporter) {
+    RefClass obj(0);
+    REPORTER_ASSERT(reporter, 1 == obj.getRefCnt());
+
+    SkAutoTUnref<RefClass> tmp(&obj);
+    REPORTER_ASSERT(reporter, &obj == tmp.get());
+    REPORTER_ASSERT(reporter, 1 == obj.getRefCnt());
+
+    REPORTER_ASSERT(reporter, &obj == tmp.detach());
+    REPORTER_ASSERT(reporter, 1 == obj.getRefCnt());
+    REPORTER_ASSERT(reporter, NULL == tmp.detach());
+    REPORTER_ASSERT(reporter, NULL == tmp.get());
+
+    obj.ref();
+    REPORTER_ASSERT(reporter, 2 == obj.getRefCnt());
+    {
+        SkAutoTUnref<RefClass> tmp2(&obj);
+    }
+    REPORTER_ASSERT(reporter, 1 == obj.getRefCnt());
+}
+
+/////////////////////////////////////////////////////////////////////////////
 
 #define kSEARCH_COUNT   91
 
@@ -145,7 +173,8 @@ static void TestUTF(skiatest::Reporter* reporter) {
     test_utf16(reporter);
     test_search(reporter);
     test_refptr(reporter);
+    test_autounref(reporter);
 }
 
 #include "TestClassDef.h"
-DEFINE_TESTCLASS("UTF", UtfTestClass, TestUTF)
+DEFINE_TESTCLASS("Utils", UtfTestClass, TestUTF)

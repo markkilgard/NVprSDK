@@ -1,16 +1,41 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "Test.h"
 
+#include "SkCanvas.h"
+#include "SkPaint.h"
 #include "SkCubicClipper.h"
 #include "SkGeometry.h"
 
+// Currently the supersampler blitter uses int16_t for its index into an array
+// the width of the clip. Test that we don't crash/assert if we try to draw
+// with a device/clip that is larger.
+static void test_giantClip() {
+    SkBitmap bm;
+    bm.setConfig(SkBitmap::kARGB_8888_Config, 64919, 1);
+    bm.allocPixels();
+    SkCanvas canvas(bm);
+    canvas.clear(0);
+    
+    SkPath path;
+    path.moveTo(0, 0); path.lineTo(1, 0); path.lineTo(33, 1);
+    SkPaint paint;
+    paint.setAntiAlias(true);
+    canvas.drawPath(path, paint);
+}
 
 static void PrintCurve(const char *name, const SkPoint crv[4]) {
     printf("%s: %.10g, %.10g, %.10g, %.10g, %.10g, %.10g, %.10g, %.10g\n",
             name,
-            crv[0].fX, crv[0].fY,
-            crv[1].fX, crv[1].fY,
-            crv[2].fX, crv[2].fY,
-            crv[3].fX, crv[3].fY);
+            (float)crv[0].fX, (float)crv[0].fY,
+            (float)crv[1].fX, (float)crv[1].fY,
+            (float)crv[2].fX, (float)crv[2].fY,
+            (float)crv[3].fX, (float)crv[3].fY);
 
 }
 
@@ -46,17 +71,17 @@ static SkPoint* SetCurve(float x0, float y0,
 
 static void TestCubicClipping(skiatest::Reporter* reporter) {
     static SkPoint crv[4] = {
-        { SkFloatToScalar(0), SkFloatToScalar(0)  },
-        { SkFloatToScalar(2), SkFloatToScalar(3)  },
-        { SkFloatToScalar(1), SkFloatToScalar(10) },
-        { SkFloatToScalar(4), SkFloatToScalar(12) }
+        { SkIntToScalar(0), SkIntToScalar(0)  },
+        { SkIntToScalar(2), SkIntToScalar(3)  },
+        { SkIntToScalar(1), SkIntToScalar(10) },
+        { SkIntToScalar(4), SkIntToScalar(12) }
     };
 
     SkCubicClipper clipper;
     SkPoint clipped[4], shouldbe[4];
     SkIRect clipRect;
     bool success;
-    const float tol = 1e-4;
+    const float tol = SkFloatToScalar(1e-4);
 
     // Test no clip, with plenty of room.
     clipRect.set(-2, -2, 6, 14);
@@ -135,6 +160,8 @@ static void TestCubicClipping(skiatest::Reporter* reporter) {
         1.297736168, 7.059780121,
         2.505550385, 10,
         shouldbe), tol));
+
+    test_giantClip();
 }
 
 

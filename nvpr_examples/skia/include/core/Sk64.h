@@ -1,30 +1,22 @@
+
 /*
- * Copyright (C) 2006 The Android Open Source Project
+ * Copyright 2006 The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
  */
+
 
 #ifndef Sk64_DEFINED
 #define Sk64_DEFINED
 
 #include "SkFixed.h"
-#include "SkMath.h"
 
 /** \class Sk64
 
     Sk64 is a 64-bit math package that does not require long long support from the compiler.
 */
-struct Sk64 {
+struct SK_API Sk64 {
     int32_t  fHi;   //!< the high 32 bits of the number (including sign)
     uint32_t fLo;   //!< the low 32 bits of the number
 

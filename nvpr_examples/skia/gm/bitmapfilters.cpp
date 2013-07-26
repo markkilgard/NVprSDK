@@ -1,17 +1,29 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "gm.h"
 
 namespace skiagm {
 
 static void make_bm(SkBitmap* bm) {
-    const SkColor colors[] = {
+    const SkColor colors[4] = {
         SK_ColorRED, SK_ColorGREEN,
         SK_ColorBLUE, SK_ColorWHITE
     };
-    SkColorTable* ctable = new SkColorTable(colors, 4);
+    SkPMColor colorsPM[4];
+    for (size_t i = 0; i < SK_ARRAY_COUNT(colors); ++i) {
+        colorsPM[i] = SkPreMultiplyColor(colors[i]);
+    }
+    SkColorTable* ctable = new SkColorTable(colorsPM, 4);
+
     bm->setConfig(SkBitmap::kIndex8_Config, 2, 2);
     bm->allocPixels(ctable);
     ctable->unref();
-    
+
     *bm->getAddr8(0, 0) = 0;
     *bm->getAddr8(1, 0) = 1;
     *bm->getAddr8(0, 1) = 2;
@@ -57,7 +69,7 @@ static SkScalar draw_row(SkCanvas* canvas, const SkBitmap& bm) {
     canvas->translate(SkIntToScalar(48), 0);
 
     canvas->scale(SkIntToScalar(scale), SkIntToScalar(scale));
-    
+
     x += draw_set(canvas, bm, 0, &paint);
     paint.reset();
     paint.setAlpha(0x80);
@@ -66,14 +78,22 @@ static SkScalar draw_row(SkCanvas* canvas, const SkBitmap& bm) {
 }
 
 class FilterGM : public GM {
-public:
-    SkBitmap    fBM8, fBM4444, fBM16, fBM32;
-
-	FilterGM() {
+    bool fOnce;
+    void init() {
+        if (fOnce) {
+            return;
+        }
+        fOnce = true;
         make_bm(&fBM8);
         fBM8.copyTo(&fBM4444, SkBitmap::kARGB_4444_Config);
         fBM8.copyTo(&fBM16, SkBitmap::kRGB_565_Config);
         fBM8.copyTo(&fBM32, SkBitmap::kARGB_8888_Config);
+    }
+public:
+    SkBitmap    fBM8, fBM4444, fBM16, fBM32;
+
+	FilterGM() : fOnce(false) {
+        this->setBGColor(0xFFDDDDDD);
     }
 
 protected:
@@ -86,11 +106,11 @@ protected:
     }
 
     virtual void onDraw(SkCanvas* canvas) {
-        canvas->drawColor(0xFFDDDDDD);
+        this->init();
 
         SkScalar x = SkIntToScalar(10);
         SkScalar y = SkIntToScalar(10);
-        
+
         canvas->translate(x, y);
         y = draw_row(canvas, fBM8);
         canvas->translate(0, y);
@@ -100,7 +120,7 @@ protected:
         canvas->translate(0, y);
         draw_row(canvas, fBM32);
     }
-    
+
 private:
     typedef GM INHERITED;
 };

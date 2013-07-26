@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "Forth.h"
 #include "ForthParser.h"
 #include "SkTDArray.h"
@@ -277,6 +284,11 @@ ForthParser::ForthParser() : fDict(4096) {
 }
 
 ForthParser::~ForthParser() {
+    SkTDict<ForthWord*>::Iter iter(fDict);
+    ForthWord* word;
+    while (iter.next(&word)) {
+        delete word;
+    }
 }
 
 static const char* parse_error(const char msg[]) {

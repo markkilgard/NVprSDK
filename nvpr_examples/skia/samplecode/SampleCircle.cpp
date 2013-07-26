@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "SampleCode.h"
 #include "SkView.h"
 #include "SkCanvas.h"
@@ -10,18 +17,18 @@
 // see bug# 1504910
 static void test_circlebounds(SkCanvas* canvas) {
 #ifdef SK_SCALAR_IS_FLOAT
-    SkRect r = { 1.39999998, 1, 21.3999996, 21 };
+    SkRect r = { 1.39999998f, 1, 21.3999996f, 21 };
     SkPath p;
     p.addOval(r);
     SkASSERT(r == p.getBounds());
 #endif
 }
 
-class CircleView : public SkView {
+class CircleView : public SampleView {
 public:
-    static const SkScalar ANIM_DX = SK_Scalar1 / 67;
-    static const SkScalar ANIM_DY = SK_Scalar1 / 29;
-    static const SkScalar ANIM_RAD = SK_Scalar1 / 19;
+    static const SkScalar ANIM_DX;
+    static const SkScalar ANIM_DY;
+    static const SkScalar ANIM_RAD;
     SkScalar fDX, fDY, fRAD;
 
     CircleView() {
@@ -37,10 +44,6 @@ protected:
             return true;
         }
         return this->INHERITED::onQuery(evt);
-    }
-    
-    void drawBG(SkCanvas* canvas) {
-        canvas->drawColor(SK_ColorWHITE);
     }
     
     void circle(SkCanvas* canvas, int width, bool aa) {
@@ -95,9 +98,7 @@ protected:
         canvas->translate(px, py);
     }
 
-    virtual void onDraw(SkCanvas* canvas) {
-        this->drawBG(canvas);
-        
+    virtual void onDrawContent(SkCanvas* canvas) {
         SkPaint paint;
         paint.setAntiAlias(true);
         paint.setStyle(SkPaint::kStroke_Style);
@@ -114,39 +115,16 @@ protected:
             canvas->translate(-SK_Scalar1, 0);
             canvas->drawPath(path, paint);
         }
-        
-        if (false) {
-            test_circlebounds(canvas);
-            
-            SkScalar dx = SkIntToScalar(32);
-            SkScalar dy = SkIntToScalar(32);
-            
-            canvas->translate(dx + fDX, dy + fDY);
-            drawSix(canvas, dx, dy);
-
-            canvas->translate(dx, 0);
-            canvas->translate(SK_ScalarHalf, SK_ScalarHalf);
-            drawSix(canvas, dx, dy);
-        }
-        
-        fDX += ANIM_DX;
-        fDY += ANIM_DY;
-        fRAD += ANIM_RAD;
-        fN += 1;
-        if (fN > 40) {
-            fN = 3;
-        }
-        this->inval(NULL);
     }
     
 private:
     int fN;
-    typedef SkView INHERITED;
+    typedef SampleView INHERITED;
 };
 
-const SkScalar CircleView::ANIM_DX;
-const SkScalar CircleView::ANIM_DY;
-const SkScalar CircleView::ANIM_RAD;
+const SkScalar CircleView::ANIM_DX(SK_Scalar1 / 67);
+const SkScalar CircleView::ANIM_DY(SK_Scalar1 / 29);
+const SkScalar CircleView::ANIM_RAD(SK_Scalar1 / 19);
 
 //////////////////////////////////////////////////////////////////////////////
 

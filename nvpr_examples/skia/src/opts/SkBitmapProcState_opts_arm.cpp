@@ -1,28 +1,23 @@
+
 /*
- * Copyright (C) 2009 The Android Open Source Project
+ * Copyright 2009 The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
  */
 
-#ifdef ANDROID
-    #include <machine/cpu-features.h>
-#endif
 
 #include "SkBitmapProcState.h"
 #include "SkColorPriv.h"
 #include "SkUtils.h"
 
 #if __ARM_ARCH__ >= 6 && !defined(SK_CPU_BENDIAN)
+void SI8_D16_nofilter_DX_arm(
+    const SkBitmapProcState& s,
+    const uint32_t* SK_RESTRICT xy,
+    int count,
+    uint16_t* SK_RESTRICT colors) __attribute__((optimize("O1")));
+
 void SI8_D16_nofilter_DX_arm(const SkBitmapProcState& s,
                              const uint32_t* SK_RESTRICT xy,
                              int count, uint16_t* SK_RESTRICT colors) {
@@ -107,6 +102,12 @@ void SI8_D16_nofilter_DX_arm(const SkBitmapProcState& s,
 
     s.fBitmap->getColorTable()->unlock16BitCache(); 
 }
+
+void SI8_opaque_D32_nofilter_DX_arm(
+    const SkBitmapProcState& s,
+    const uint32_t* SK_RESTRICT xy,
+    int count,
+    SkPMColor* SK_RESTRICT colors) __attribute__((optimize("O1")));
 
 void SI8_opaque_D32_nofilter_DX_arm(const SkBitmapProcState& s,
                                     const uint32_t* SK_RESTRICT xy,

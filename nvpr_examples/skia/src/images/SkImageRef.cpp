@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "SkImageRef.h"
 #include "SkBitmap.h"
 #include "SkFlattenable.h"
@@ -9,7 +16,7 @@
 //#define DUMP_IMAGEREF_LIFECYCLE
 
 // can't be static, as SkImageRef_Pool needs to see it
-SkMutex gImageRefMutex;
+SK_DECLARE_GLOBAL_MUTEX(gImageRefMutex);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -40,21 +47,31 @@ SkImageRef::~SkImageRef() {
 #endif
 
     fStream->unref();
-    fFactory->safeUnref();
+    SkSafeUnref(fFactory);
 }
 
 bool SkImageRef::getInfo(SkBitmap* bitmap) {
     SkAutoMutexAcquire ac(gImageRefMutex);
-    
+
     if (!this->prepareBitmap(SkImageDecoder::kDecodeBounds_Mode)) {
         return false;
     }
-    
+
     SkASSERT(SkBitmap::kNo_Config != fBitmap.config());
     if (bitmap) {
         bitmap->setConfig(fBitmap.config(), fBitmap.width(), fBitmap.height());
     }
     return true;
+}
+
+bool SkImageRef::isOpaque(SkBitmap* bitmap) {
+    if (bitmap && bitmap->pixelRef() == this) {
+        bitmap->lockPixels();
+        bitmap->setIsOpaque(fBitmap.isOpaque());
+        bitmap->unlockPixels();
+        return true;
+    }
+    return false;
 }
 
 SkImageDecoderFactory* SkImageRef::setDecoderFactory(
@@ -77,7 +94,7 @@ bool SkImageRef::prepareBitmap(SkImageDecoder::Mode mode) {
     if (fErrorInDecoding) {
         return false;
     }
-    
+
     /*  As soon as we really know our config, we record it, so that on
         subsequent calls to the codec, we are sure we will always get the same
         result.
@@ -85,7 +102,7 @@ bool SkImageRef::prepareBitmap(SkImageDecoder::Mode mode) {
     if (SkBitmap::kNo_Config != fBitmap.config()) {
         fConfig = fBitmap.config();
     }
-    
+
     if (NULL != fBitmap.getPixels() ||
             (SkBitmap::kNo_Config != fBitmap.config() &&
              SkImageDecoder::kDecodeBounds_Mode == mode)) {

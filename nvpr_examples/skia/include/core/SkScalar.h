@@ -1,23 +1,17 @@
+
 /*
- * Copyright (C) 2006 The Android Open Source Project
+ * Copyright 2006 The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
  */
+
 
 #ifndef SkScalar_DEFINED
 #define SkScalar_DEFINED
 
 #include "SkFixed.h"
+#include "SkFloatingPoint.h"
 
 /** \file SkScalar.h
 
@@ -29,7 +23,6 @@
 */
 
 #ifdef SK_SCALAR_IS_FLOAT
-    #include "SkFloatingPoint.h"
 
     /** SkScalar is our type for fractional values and coordinates. Depending on
         compile configurations, it is either represented as an IEEE float, or
@@ -50,19 +43,63 @@
     #define SK_ScalarInfinity           (*(const float*)&gIEEEInfinity)
     /** SK_ScalarMax is defined to be the largest value representable as an SkScalar
     */
-    #define SK_ScalarMax            (3.4028235e+38f)
+    #define SK_ScalarMax            (3.402823466e+38f)
     /** SK_ScalarMin is defined to be the smallest value representable as an SkScalar
     */
-    #define SK_ScalarMin            (1.1754944e-38f)
+    #define SK_ScalarMin            (-SK_ScalarMax)
     /** SK_ScalarNaN is defined to be 'Not a Number' as an SkScalar
     */
     #define SK_ScalarNaN      (*(const float*)(const void*)&gIEEENotANumber)
     /** SkScalarIsNaN(n) returns true if argument is not a number
     */
     static inline bool SkScalarIsNaN(float x) { return x != x; }
+    /** Returns true if x is not NaN and not infinite */
+    static inline bool SkScalarIsFinite(float x) {
+        uint32_t bits = SkFloat2Bits(x);    // need unsigned for our shifts
+        int exponent = bits << 1 >> 24;
+        return exponent != 0xFF;
+    }
+#ifdef SK_DEBUG
+    /** SkIntToScalar(n) returns its integer argument as an SkScalar
+     *
+     * If we're compiling in DEBUG mode, and can thus afford some extra runtime
+     * cycles, check to make sure that the parameter passed in has not already
+     * been converted to SkScalar.  (A double conversion like this is harmless
+     * for SK_SCALAR_IS_FLOAT, but for SK_SCALAR_IS_FIXED this causes trouble.)
+     *
+     * Note that we need all of these method signatures to properly handle the
+     * various types that we pass into SkIntToScalar() to date:
+     * int, size_t, U8CPU, etc., even though what we really mean is "anything
+     * but a float".
+     */
+    static inline float SkIntToScalar(signed int param) {
+        return (float)param;
+    }
+    static inline float SkIntToScalar(unsigned int param) {
+        return (float)param;
+    }
+    static inline float SkIntToScalar(signed long param) {
+        return (float)param;
+    }
+    static inline float SkIntToScalar(unsigned long param) {
+        return (float)param;
+    }
+    static inline float SkIntToScalar(float param) {
+        /* If the parameter passed into SkIntToScalar is a float,
+         * one of two things has happened:
+         * 1. the parameter was an SkScalar (which is typedef'd to float)
+         * 2. the parameter was a float instead of an int
+         *
+         * Either way, it's not good.
+         */
+        SkDEBUGFAIL("looks like you passed an SkScalar into SkIntToScalar");
+        return (float)0;
+    }
+#else  // not SK_DEBUG
     /** SkIntToScalar(n) returns its integer argument as an SkScalar
     */
     #define SkIntToScalar(n)        ((float)(n))
+#endif // not SK_DEBUG
     /** SkFixedToScalar(n) returns its SkFixed argument as an SkScalar
     */
     #define SkFixedToScalar(x)      SkFixedToFloat(x)
@@ -79,15 +116,15 @@
     /** SkScalarFraction(x) returns the signed fractional part of the argument
     */
     #define SkScalarFraction(x)     sk_float_mod(x, 1.0f)
-    /** Rounds the SkScalar to the nearest integer value
-    */
-    #define SkScalarRound(x)        sk_float_round2int(x)
-    /** Returns the smallest integer that is >= the specified SkScalar
-    */
-    #define SkScalarCeil(x)         sk_float_ceil2int(x)
-    /** Returns the largest integer that is <= the specified SkScalar
-    */
-    #define SkScalarFloor(x)        sk_float_floor2int(x)
+
+    #define SkScalarFloorToScalar(x)    sk_float_floor(x)
+    #define SkScalarCeilToScalar(x)     sk_float_ceil(x)
+    #define SkScalarRoundToScalar(x)    sk_float_floor((x) + 0.5f)
+
+    #define SkScalarFloorToInt(x)       sk_float_floor2int(x)
+    #define SkScalarCeilToInt(x)        sk_float_ceil2int(x)
+    #define SkScalarRoundToInt(x)       sk_float_round2int(x)
+
     /** Returns the absolute value of the specified SkScalar
     */
     #define SkScalarAbs(x)          sk_float_abs(x)
@@ -167,6 +204,9 @@
     inline SkScalar SkMaxScalar(SkScalar a, SkScalar b) { return a > b ? a : b; }
     inline SkScalar SkMinScalar(SkScalar a, SkScalar b) { return a < b ? a : b; }
 
+    static inline bool SkScalarIsInt(SkScalar x) {
+        return x == (float)(int)x;
+    }
 #else
     typedef SkFixed SkScalar;
 
@@ -177,6 +217,8 @@
     #define SK_ScalarMin            SK_FixedMin
     #define SK_ScalarNaN            SK_FixedNaN
     #define SkScalarIsNaN(x)        ((x) == SK_FixedNaN)
+    #define SkScalarIsFinite(x)     ((x) != SK_FixedNaN)
+
     #define SkIntToScalar(n)        SkIntToFixed(n)
     #define SkFixedToScalar(x)      (x)
     #define SkScalarToFixed(x)      (x)
@@ -188,9 +230,15 @@
         #define SkDoubleToScalar(n) SkDoubleToFixed(n)
     #endif
     #define SkScalarFraction(x)     SkFixedFraction(x)
-    #define SkScalarRound(x)        SkFixedRound(x)
-    #define SkScalarCeil(x)         SkFixedCeil(x)
-    #define SkScalarFloor(x)        SkFixedFloor(x)
+
+    #define SkScalarFloorToScalar(x)    SkFixedFloorToFixed(x)
+    #define SkScalarCeilToScalar(x)     SkFixedCeilToFixed(x)
+    #define SkScalarRoundToScalar(x)    SkFixedRoundToFixed(x)
+
+    #define SkScalarFloorToInt(x)       SkFixedFloorToInt(x)
+    #define SkScalarCeilToInt(x)        SkFixedCeilToInt(x)
+    #define SkScalarRoundToInt(x)       SkFixedRoundToInt(x)
+
     #define SkScalarAbs(x)          SkFixedAbs(x)
     #define SkScalarCopySign(x, y)  SkCopySign32(x, y)
     #define SkScalarClampMax(x, max) SkClampMax(x, max)
@@ -229,7 +277,31 @@
 
     #define SkMaxScalar(a, b)       SkMax32(a, b)
     #define SkMinScalar(a, b)       SkMin32(a, b)
+
+    static inline bool SkScalarIsInt(SkFixed x) {
+        return 0 == (x & 0xffff);
+    }
 #endif
+
+// DEPRECATED : use ToInt or ToScalar variant
+#define SkScalarFloor(x)    SkScalarFloorToInt(x)
+#define SkScalarCeil(x)     SkScalarCeilToInt(x)
+#define SkScalarRound(x)    SkScalarRoundToInt(x)
+
+/**
+ *  Returns -1 || 0 || 1 depending on the sign of value:
+ *  -1 if x < 0
+ *   0 if x == 0
+ *   1 if x > 0
+ */
+static inline int SkScalarSignAsInt(SkScalar x) {
+    return x < 0 ? -1 : (x > 0);
+}
+
+// Scalar result version of above
+static inline SkScalar SkScalarSignAsScalar(SkScalar x) {
+    return x < 0 ? -SK_Scalar1 : ((x > 0) ? SK_Scalar1 : 0);
+}
 
 #define SK_ScalarNearlyZero         (SK_Scalar1 / (1 << 12))
 
@@ -237,9 +309,15 @@
 */
 
 static inline bool SkScalarNearlyZero(SkScalar x,
-                                  SkScalar tolerance = SK_ScalarNearlyZero) {
+                                    SkScalar tolerance = SK_ScalarNearlyZero) {
     SkASSERT(tolerance > 0);
     return SkScalarAbs(x) < tolerance;
+}
+
+static inline bool SkScalarNearlyEqual(SkScalar x, SkScalar y,
+                                     SkScalar tolerance = SK_ScalarNearlyZero) {
+    SkASSERT(tolerance > 0);
+    return SkScalarAbs(x-y) < tolerance;
 }
 
 /** Linearly interpolate between A and B, based on t.
@@ -253,5 +331,17 @@ static inline SkScalar SkScalarInterp(SkScalar A, SkScalar B, SkScalar t) {
     return A + SkScalarMul(B - A, t);
 }
 
-#endif
+/** Interpolate along the function described by (keys[length], values[length])
+    for the passed searchKey.  SearchKeys outside the range keys[0]-keys[Length]
+    clamp to the min or max value.  This function was inspired by a desire
+    to change the multiplier for thickness in fakeBold; therefore it assumes
+    the number of pairs (length) will be small, and a linear search is used.
+    Repeated keys are allowed for discontinuous functions (so long as keys is
+    monotonically increasing), and if key is the value of a repeated scalar in
+    keys, the first one will be used.  However, that may change if a binary
+    search is used.
+*/
+SkScalar SkScalarInterpFunc(SkScalar searchKey, const SkScalar keys[],
+                            const SkScalar values[], int length);
 
+#endif

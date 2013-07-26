@@ -1,18 +1,11 @@
+
 /*
- * Copyright (C) 2006-2008 The Android Open Source Project
+ * Copyright 2008 The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
  */
+
 
 #include "SkPoint.h"
 
@@ -35,6 +28,29 @@ void SkIPoint::rotateCCW(SkIPoint* dst) const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void SkPoint::setIRectFan(int l, int t, int r, int b, size_t stride) {
+    SkASSERT(stride >= sizeof(SkPoint));
+    
+    ((SkPoint*)((intptr_t)this + 0 * stride))->set(SkIntToScalar(l), 
+                                                   SkIntToScalar(t));
+    ((SkPoint*)((intptr_t)this + 1 * stride))->set(SkIntToScalar(l), 
+                                                   SkIntToScalar(b));
+    ((SkPoint*)((intptr_t)this + 2 * stride))->set(SkIntToScalar(r), 
+                                                   SkIntToScalar(b));
+    ((SkPoint*)((intptr_t)this + 3 * stride))->set(SkIntToScalar(r), 
+                                                   SkIntToScalar(t));
+}
+
+void SkPoint::setRectFan(SkScalar l, SkScalar t, SkScalar r, SkScalar b,
+                         size_t stride) {
+    SkASSERT(stride >= sizeof(SkPoint));
+    
+    ((SkPoint*)((intptr_t)this + 0 * stride))->set(l, t);
+    ((SkPoint*)((intptr_t)this + 1 * stride))->set(l, b);
+    ((SkPoint*)((intptr_t)this + 2 * stride))->set(r, b);
+    ((SkPoint*)((intptr_t)this + 3 * stride))->set(r, t);
+}
 
 void SkPoint::rotateCW(SkPoint* dst) const {
     SkASSERT(dst);
@@ -59,8 +75,6 @@ void SkPoint::scale(SkScalar scale, SkPoint* dst) const {
     dst->set(SkScalarMul(fX, scale), SkScalarMul(fY, scale));
 }
 
-#define kNearlyZero     (SK_Scalar1 / 8092)
-
 bool SkPoint::normalize() {
     return this->setLength(fX, fY, SK_Scalar1);
 }
@@ -73,29 +87,34 @@ bool SkPoint::setLength(SkScalar length) {
     return this->setLength(fX, fY, length);
 }
 
-#ifdef SK_SCALAR_IS_FLOAT
-
-SkScalar SkPoint::Length(SkScalar dx, SkScalar dy) {
-    return sk_float_sqrt(dx * dx + dy * dy);
-}
-
 SkScalar SkPoint::Normalize(SkPoint* pt) {
-    float mag = SkPoint::Length(pt->fX, pt->fY);
-    if (mag > kNearlyZero) {
-        float scale = 1 / mag;
-        pt->fX *= scale;
-        pt->fY *= scale;
+    SkScalar mag = SkPoint::Length(pt->fX, pt->fY);
+    if (mag > SK_ScalarNearlyZero) {
+        SkScalar scale = SkScalarInvert(mag);
+        pt->fX = SkScalarMul(pt->fX, scale);
+        pt->fY = SkScalarMul(pt->fY, scale);
         return mag;
     }
     return 0;
 }
 
+#ifdef SK_SCALAR_IS_FLOAT
+
+bool SkPoint::CanNormalize(SkScalar dx, SkScalar dy) {
+    float mag2 = dx * dx + dy * dy;
+    return mag2 > SK_ScalarNearlyZero * SK_ScalarNearlyZero;
+}
+
+SkScalar SkPoint::Length(SkScalar dx, SkScalar dy) {
+    return sk_float_sqrt(dx * dx + dy * dy);
+}
+
 bool SkPoint::setLength(float x, float y, float length) {
-    float mag = sk_float_sqrt(x * x + y * y);
-    if (mag > kNearlyZero) {
-        length /= mag;
-        fX = x * length;
-        fY = y * length;
+    float mag2 = x * x + y * y;
+    if (mag2 > SK_ScalarNearlyZero * SK_ScalarNearlyZero) {
+        float scale = length / sk_float_sqrt(mag2);
+        fX = x * scale;
+        fY = y * scale;
         return true;
     }
     return false;
@@ -104,6 +123,23 @@ bool SkPoint::setLength(float x, float y, float length) {
 #else
 
 #include "Sk64.h"
+
+bool SkPoint::CanNormalize(SkScalar dx, SkScalar dy) {
+    Sk64    tmp1, tmp2, tolSqr;
+    
+    tmp1.setMul(dx, dx);
+    tmp2.setMul(dy, dy);
+    tmp1.add(tmp2);
+
+    // we want nearlyzero^2, but to compute it fast we want to just do a
+    // 32bit multiply, so we require that it not exceed 31bits. That is true
+    // if nearlyzero is <= 0xB504, which should be trivial, since usually
+    // nearlyzero is a very small fixed-point value.
+    SkASSERT(SK_ScalarNearlyZero <= 0xB504);
+
+    tolSqr.set(0, SK_ScalarNearlyZero * SK_ScalarNearlyZero);
+    return tmp1 > tolSqr;
+}
 
 SkScalar SkPoint::Length(SkScalar dx, SkScalar dy) {
     Sk64    tmp1, tmp2;
@@ -343,3 +379,56 @@ bool SkPoint::setLength(SkFixed ox, SkFixed oy, SkFixed length) {
 
 #endif
 
+///////////////////////////////////////////////////////////////////////////////
+
+SkScalar SkPoint::distanceToLineBetweenSqd(const SkPoint& a,
+                                           const SkPoint& b,
+                                           Side* side) const {
+
+    SkVector u = b - a;
+    SkVector v = *this - a;
+    
+    SkScalar uLengthSqd = u.lengthSqd();
+    SkScalar det = u.cross(v);
+    if (NULL != side) {
+        SkASSERT(-1 == SkPoint::kLeft_Side &&
+                  0 == SkPoint::kOn_Side &&
+                  1 == kRight_Side);
+        *side = (Side) SkScalarSignAsInt(det);
+    }
+    return SkScalarMulDiv(det, det, uLengthSqd);
+}
+
+SkScalar SkPoint::distanceToLineSegmentBetweenSqd(const SkPoint& a,
+                                                  const SkPoint& b) const {
+    // See comments to distanceToLineBetweenSqd. If the projection of c onto
+    // u is between a and b then this returns the same result as that 
+    // function. Otherwise, it returns the distance to the closer of a and
+    // b. Let the projection of v onto u be v'.  There are three cases:
+    //    1. v' points opposite to u. c is not between a and b and is closer
+    //       to a than b.
+    //    2. v' points along u and has magnitude less than y. c is between
+    //       a and b and the distance to the segment is the same as distance
+    //       to the line ab.
+    //    3. v' points along u and has greater magnitude than u. c is not
+    //       not between a and b and is closer to b than a.
+    // v' = (u dot v) * u / |u|. So if (u dot v)/|u| is less than zero we're 
+    // in case 1. If (u dot v)/|u| is > |u| we are in case 3. Otherwise
+    // we're in case 2. We actually compare (u dot v) to 0 and |u|^2 to 
+    // avoid a sqrt to compute |u|.
+    
+    SkVector u = b - a;
+    SkVector v = *this - a;
+    
+    SkScalar uLengthSqd = u.lengthSqd();
+    SkScalar uDotV = SkPoint::DotProduct(u, v);
+    
+    if (uDotV <= 0) {
+        return v.lengthSqd();
+    } else if (uDotV > uLengthSqd) {
+        return b.distanceToSqd(*this);
+    } else {
+        SkScalar det = u.cross(v);
+        return SkScalarMulDiv(det, det, uLengthSqd);
+    }
+}

@@ -1,3 +1,12 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
+
+
 #include "SkTableMaskFilter.h"
 
 SkTableMaskFilter::SkTableMaskFilter() {
@@ -62,7 +71,7 @@ SkMask::Format SkTableMaskFilter::getFormat() {
     return SkMask::kA8_Format;
 }
 
-void SkTableMaskFilter::flatten(SkFlattenableWriteBuffer& wb) {
+void SkTableMaskFilter::flatten(SkFlattenableWriteBuffer& wb) const {
     this->INHERITED::flatten(wb);
     wb.writePad(fTable, 256);
 }
@@ -72,21 +81,16 @@ SkTableMaskFilter::SkTableMaskFilter(SkFlattenableReadBuffer& rb)
     rb.read(fTable, 256);
 }
 
-SkFlattenable* SkTableMaskFilter::Factory(SkFlattenableReadBuffer& rb) {
-    return SkNEW_ARGS(SkTableMaskFilter, (rb));
-}
-
-SkFlattenable::Factory SkTableMaskFilter::getFactory() {
-    return SkTableMaskFilter::Factory;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void SkTableMaskFilter::MakeGammaTable(uint8_t table[256], SkScalar gamma) {
-    float x = 0;
     const float dx = 1 / 255.0f;
+    const float g = SkScalarToFloat(gamma);
+
+    float x = 0;
     for (int i = 0; i < 256; i++) {
-        table[i] = SkPin32(SkScalarRound(powf(x, gamma) * 255), 0, 255);
+        float ee = powf(x, g) * 255;
+        table[i] = SkPin32(sk_float_round2int(powf(x, g) * 255), 0, 255);
         x += dx;
     }
 }

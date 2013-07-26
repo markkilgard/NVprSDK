@@ -1,18 +1,11 @@
+
 /*
- * Copyright (C) 2010 The Android Open Source Project
+ * Copyright 2010 The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
  */
+
 
 #include "SkJpegUtility.h"
 
@@ -21,6 +14,7 @@ static void sk_init_source(j_decompress_ptr cinfo) {
     skjpeg_source_mgr*  src = (skjpeg_source_mgr*)cinfo->src;
     src->next_input_byte = (const JOCTET*)src->fBuffer;
     src->bytes_in_buffer = 0;
+    src->fStream->rewind();
 }
 
 static boolean sk_fill_input_buffer(j_decompress_ptr cinfo) {
@@ -108,29 +102,29 @@ static void skmem_term_source(j_decompress_ptr /*cinfo*/) {}
 
 ///////////////////////////////////////////////////////////////////////////////
 
-skjpeg_source_mgr::skjpeg_source_mgr(SkStream* stream, SkImageDecoder* decoder) : fStream(stream) {
+skjpeg_source_mgr::skjpeg_source_mgr(SkStream* stream, SkImageDecoder* decoder,
+                                     bool ownStream) : fStream(stream) {
     fDecoder = decoder;
     const void* baseAddr = stream->getMemoryBase();
-    if (baseAddr && false) {
-        fMemoryBase = baseAddr;
-        fMemoryBaseSize = stream->getLength();
+    fMemoryBase = NULL;
+    fUnrefStream = ownStream;
+    fMemoryBaseSize = 0;
 
-        init_source = skmem_init_source;
-        fill_input_buffer = skmem_fill_input_buffer;
-        skip_input_data = skmem_skip_input_data;
-        resync_to_restart = skmem_resync_to_restart;
-        term_source = skmem_term_source;
-    } else {
-        fMemoryBase = NULL;
-        fMemoryBaseSize = 0;
-
-        init_source = sk_init_source;
-        fill_input_buffer = sk_fill_input_buffer;
-        skip_input_data = sk_skip_input_data;
-        resync_to_restart = sk_resync_to_restart;
-        term_source = sk_term_source;
-    }
+    init_source = sk_init_source;
+    fill_input_buffer = sk_fill_input_buffer;
+    skip_input_data = sk_skip_input_data;
+    resync_to_restart = sk_resync_to_restart;
+    term_source = sk_term_source;
 //    SkDebugf("**************** use memorybase %p %d\n", fMemoryBase, fMemoryBaseSize);
+}
+
+skjpeg_source_mgr::~skjpeg_source_mgr() {
+    if (fMemoryBase) {
+        sk_free(fMemoryBase);
+    }
+    if (fUnrefStream) {
+        fStream->unref();
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "SampleCode.h"
 #include "SkView.h"
 #include "SkCanvas.h"
@@ -94,17 +101,30 @@ static SkShader* Make2Radial(const SkPoint pts[2], const GradData& data,
                             data.fColors, data.fPos, data.fCount, tm, mapper);
 }
 
+static SkShader* Make2RadialConcentric(const SkPoint pts[2], const GradData& data,
+                                       SkShader::TileMode tm, SkUnitMapper* mapper) {
+    SkPoint center;
+    center.set(SkScalarAve(pts[0].fX, pts[1].fX),
+               SkScalarAve(pts[0].fY, pts[1].fY));
+    return SkGradientShader::CreateTwoPointRadial(
+                            center, (pts[1].fX - pts[0].fX) / 7,
+                            center, (pts[1].fX - pts[0].fX) / 2,
+                            data.fColors, data.fPos, data.fCount, tm, mapper);
+}
+
 typedef SkShader* (*GradMaker)(const SkPoint pts[2], const GradData& data,
                      SkShader::TileMode tm, SkUnitMapper* mapper);
 static const GradMaker gGradMakers[] = {
-    MakeLinear, MakeRadial, MakeSweep, Make2Radial
+    MakeLinear, MakeRadial, MakeSweep, Make2Radial, Make2RadialConcentric
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class GradientsView : public SkView {
+class GradientsView : public SampleView {
 public:
-	GradientsView() {}
+	GradientsView() {
+        this->setBGColor(0xFFDDDDDD);
+    }
     
 protected:
     // overrides from SkEventSink
@@ -116,45 +136,44 @@ protected:
         return this->INHERITED::onQuery(evt);
     }
 
-    void drawBG(SkCanvas* canvas) {
-        canvas->drawColor(0xFFDDDDDD);
-    }
-    
-    virtual void onDraw(SkCanvas* canvas) {
-        this->drawBG(canvas);
-        
+    virtual void onDrawContent(SkCanvas* canvas) {
         SkPoint pts[2] = {
             { 0, 0 },
             { SkIntToScalar(100), SkIntToScalar(100) }
         };
-        SkShader::TileMode tm = SkShader::kClamp_TileMode;
         SkRect r = { 0, 0, SkIntToScalar(100), SkIntToScalar(100) };
         SkPaint paint;
-        paint.setAntiAlias(true);
         paint.setDither(true);
 
         canvas->save();
         canvas->translate(SkIntToScalar(20), SkIntToScalar(10));
-        for (size_t i = 0; i < SK_ARRAY_COUNT(gGradData); i++) {
+
+        for (int tm = 0; tm < SkShader::kTileModeCount; ++tm) {
             canvas->save();
-            for (size_t j = 0; j < SK_ARRAY_COUNT(gGradMakers); j++) {
-                SkShader* shader = gGradMakers[j](pts, gGradData[i], tm, NULL);
-                paint.setShader(shader);
-                canvas->drawRect(r, paint);
-                shader->unref();
-                canvas->translate(0, SkIntToScalar(120));
+            for (size_t i = 0; i < SK_ARRAY_COUNT(gGradData); i++) {
+                canvas->save();
+                for (size_t j = 0; j < SK_ARRAY_COUNT(gGradMakers); j++) {
+                    SkShader* shader;
+                    shader = gGradMakers[j](pts, gGradData[i], (SkShader::TileMode)tm, NULL);
+                    paint.setShader(shader)->unref();
+                    canvas->drawRect(r, paint);
+                    canvas->translate(0, SkIntToScalar(120));
+                }
+                canvas->restore();
+                canvas->translate(SkIntToScalar(120), 0);
             }
             canvas->restore();
-            canvas->translate(SkIntToScalar(120), 0);
+            canvas->translate(SK_ARRAY_COUNT(gGradData)*SkIntToScalar(120), 0);
         }
         canvas->restore();
         
         canvas->translate(0, SkIntToScalar(370));
      //   test_alphagradients(canvas);
+        this->inval(NULL);
     }
     
 private:
-    typedef SkView INHERITED;
+    typedef SampleView INHERITED;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

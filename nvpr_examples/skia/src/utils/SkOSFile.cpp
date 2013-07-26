@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "SkOSFile.h"
 
 #ifdef SK_BUILD_FOR_WIN
@@ -31,18 +38,19 @@ SkUTF16_Str::SkUTF16_Str(const char src[])
     size_t  len = strlen(src);
 
     fStr = (uint16_t*)sk_malloc_throw((len + 1) * sizeof(uint16_t));
-    for (size_t i = 0; i < len; i++)
+    size_t i;
+    for (i = 0; i < len; i++)
         fStr[i] = src[i];
     fStr[i] = 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////
 
-SkOSFile::Iter::Iter() : fHandle(0), fPath16(nil)
+SkOSFile::Iter::Iter() : fHandle(0), fPath16(NULL)
 {
 }
 
-SkOSFile::Iter::Iter(const char path[], const char suffix[]) : fHandle(0), fPath16(nil)
+SkOSFile::Iter::Iter(const char path[], const char suffix[]) : fHandle(0), fPath16(NULL)
 {
     this->reset(path, suffix);
 }
@@ -61,7 +69,7 @@ void SkOSFile::Iter::reset(const char path[], const char suffix[])
         ::FindClose(fHandle);
         fHandle = 0;
     }
-    if (path == nil)
+    if (NULL == path)
         path = "";
 
     sk_free(fPath16);
@@ -78,7 +86,7 @@ static bool get_the_file(HANDLE handle, SkString* name, WIN32_FIND_DATAW* dataPt
 {
     WIN32_FIND_DATAW    data;
 
-    if (dataPtr == nil)
+    if (NULL == dataPtr)
     {
         if (::FindNextFileW(handle, &data))
             dataPtr = &data;
@@ -90,7 +98,7 @@ static bool get_the_file(HANDLE handle, SkString* name, WIN32_FIND_DATAW* dataPt
     {
         if (getDir)
         {
-            if ((dataPtr->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) && !is_magic_dir(dataPtr->cFileName))
+            if ((dataPtr->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) && !is_magic_dir((uint16_t*)dataPtr->cFileName))
                 break;
         }
         else
@@ -103,28 +111,28 @@ static bool get_the_file(HANDLE handle, SkString* name, WIN32_FIND_DATAW* dataPt
     }
     // if we get here, we've found a file/dir
     if (name)
-        name->setUTF16(dataPtr->cFileName);
+        name->setUTF16((uint16_t*)dataPtr->cFileName);
     return true;
 }
 
 bool SkOSFile::Iter::next(SkString* name, bool getDir)
 {
     WIN32_FIND_DATAW    data;
-    WIN32_FIND_DATAW*   dataPtr = nil;
+    WIN32_FIND_DATAW*   dataPtr = NULL;
 
     if (fHandle == 0)   // our first time
     {
-        if (fPath16 == nil || *fPath16 == 0)    // check for no path
+        if (fPath16 == NULL || *fPath16 == 0)    // check for no path
             return false;
 
-        fHandle = ::FindFirstFileW(fPath16, &data);
+        fHandle = ::FindFirstFileW((LPCWSTR)fPath16, &data);
         if (fHandle != 0 && fHandle != (HANDLE)~0)
             dataPtr = &data;
     }
     return fHandle != (HANDLE)~0 && get_the_file(fHandle, name, dataPtr, getDir);
 }
 
-#elif defined(SK_BUILD_FOR_MAC) || defined(SK_BUILD_FOR_UNIX)
+#elif defined(SK_BUILD_FOR_MAC) || defined(SK_BUILD_FOR_UNIX) || defined(SK_BUILD_FOR_ANDROID)
 
 #if 0
 OSStatus FSPathMakeRef (
@@ -172,9 +180,8 @@ static bool issuffixfor(const SkString& suffix, const char str[])
 {
     size_t  suffixLen = suffix.size();
     size_t  strLen = strlen(str);
-    
+
     return  strLen >= suffixLen &&
-            suffixLen == 0 ||
             memcmp(suffix.c_str(), str + strLen - suffixLen, suffixLen) == 0;
 }
 

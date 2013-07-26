@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "SampleCode.h"
 #include "SkView.h"
 #include "SkCanvas.h"
@@ -9,22 +16,47 @@
 #include "SkShader.h"
 #include "SkUtils.h"
 #include "SkRandom.h"
+#include "SkImageDecoder.h"
 
-class CameraView : public SkView {
+class CameraView : public SampleView {
+    SkTDArray<SkShader*> fShaders;
+    int     fShaderIndex;
+    bool    fFrontFace;
 public:
-	CameraView()
-    {
+	CameraView() {
         fRX = fRY = fRZ = 0;
+        fShaderIndex = 0;
+        fFrontFace = false;
+
+        for (int i = 0;; i++) {
+            SkString str;
+            str.printf("/skimages/elephant%d.jpeg", i);
+            SkBitmap bm;
+            if (SkImageDecoder::DecodeFile(str.c_str(), &bm)) {
+                SkShader* s = SkShader::CreateBitmapShader(bm,
+                                                           SkShader::kClamp_TileMode,
+                                                           SkShader::kClamp_TileMode);
+                
+                SkRect src = { 0, 0, SkIntToScalar(bm.width()), SkIntToScalar(bm.height()) };
+                SkRect dst = { -150, -150, 150, 150 };
+                SkMatrix matrix;
+                matrix.setRectToRect(src, dst, SkMatrix::kFill_ScaleToFit);
+                s->setLocalMatrix(matrix);
+                *fShaders.append() = s;
+            } else {
+                break;
+            }
+        }
+        this->setBGColor(0xFFDDDDDD);
     }
     
-    virtual ~CameraView()
-    {
+    virtual ~CameraView() {
+        fShaders.unrefAll();
     }
 
 protected:
     // overrides from SkEventSink
-    virtual bool onQuery(SkEvent* evt)
-    {
+    virtual bool onQuery(SkEvent* evt) {
         if (SampleCode::TitleQ(*evt))
         {
             SampleCode::TitleR(evt, "Camera");
@@ -32,70 +64,39 @@ protected:
         }
         return this->INHERITED::onQuery(evt);
     }
-    
-    void drawBG(SkCanvas* canvas)
-    {
-        canvas->drawColor(0xFFDDDDDD);
-    }
-    
-    virtual void onDraw(SkCanvas* canvas)
-    {
-        this->drawBG(canvas);
 
+    virtual void onDrawContent(SkCanvas* canvas) {
         canvas->translate(this->width()/2, this->height()/2);
 
         Sk3DView    view;
-        view.rotateX(SkIntToScalar(fRX));
-        view.rotateY(SkIntToScalar(fRY));
+        view.rotateX(fRX);
+        view.rotateY(fRY);
         view.applyToCanvas(canvas);
         
         SkPaint paint;
-        SkScalar rad = SkIntToScalar(50);
-        SkScalar dim = rad*2;
-
-        if (view.dotWithNormal(0, 0, SK_Scalar1) < 0) {
-            paint.setColor(SK_ColorRED);
+        if (fShaders.count() > 0) {
+            bool frontFace = view.dotWithNormal(0, 0, SK_Scalar1) < 0;
+            if (frontFace != fFrontFace) {
+                fFrontFace = frontFace;
+                fShaderIndex = (fShaderIndex + 1) % fShaders.count();
+            }
+        
+            paint.setAntiAlias(true);
+            paint.setShader(fShaders[fShaderIndex]);
+            SkRect r = { -150, -150, 150, 150 };
+            canvas->drawRoundRect(r, 30, 30, paint);
         }
         
-        paint.setAntiAlias(true);
-
-#if 0
-        SkEmbossMaskFilter::Light light;
-        light.fDirection[0] = SK_Scalar1;
-        light.fDirection[1] = SK_Scalar1;
-        light.fDirection[2] = SK_Scalar1;
-        light.fAmbient = 180;
-        light.fSpecular = 16 * 2;
-        paint.setMaskFilter(new SkEmbossMaskFilter(light, SkIntToScalar(4)));
-#endif
-
-        canvas->drawCircle(0, 0, rad, paint);
-        canvas->drawCircle(-dim, -dim, rad, paint);
-        canvas->drawCircle(-dim,  dim, rad, paint);
-        canvas->drawCircle( dim, -dim, rad, paint);
-        canvas->drawCircle( dim,  dim, rad, paint);
-        
-        fRY += 1;
-        if (fRY >= 360)
+        fRY += SampleCode::GetAnimSecondsDelta() * 90;
+        if (fRY >= SkIntToScalar(360)) {
             fRY = 0;
+        }
         this->inval(NULL);
     }
 
-    virtual SkView::Click* onFindClickHandler(SkScalar x, SkScalar y) 
-    {
-        SkScalar angle = SkScalarDiv(this->height()/2 - y, this->height());
-        fRX = SkScalarRound(angle * 180);
-        return this->INHERITED::onFindClickHandler(x, y);
-    }
-    
-    virtual bool onClick(Click* click) 
-    {
-        return this->INHERITED::onClick(click);
-    }
-    
 private:
-    int fRX, fRY, fRZ;
-    typedef SkView INHERITED;
+    SkScalar fRX, fRY, fRZ;
+    typedef SampleView INHERITED;
 };
 
 //////////////////////////////////////////////////////////////////////////////

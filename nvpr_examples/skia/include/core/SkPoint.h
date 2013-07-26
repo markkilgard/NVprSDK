@@ -1,18 +1,11 @@
+
 /*
- * Copyright (C) 2006 The Android Open Source Project
+ * Copyright 2006 The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
  */
+
 
 #ifndef SkPoint_DEFINED
 #define SkPoint_DEFINED
@@ -26,12 +19,27 @@
 */
 struct SkIPoint {
     int32_t fX, fY;
-    
+
     static SkIPoint Make(int32_t x, int32_t y) {
         SkIPoint pt;
         pt.set(x, y);
         return pt;
     }
+
+    int32_t x() const { return fX; }
+    int32_t y() const { return fY; }
+    void setX(int32_t x) { fX = x; }
+    void setY(int32_t y) { fY = y; }
+
+    /**
+     *  Returns true iff fX and fY are both zero.
+     */
+    bool isZero() const { return (fX | fY) == 0; }
+
+    /**
+     *  Set both fX and fY to zero. Same as set(0, 0)
+     */
+    void setZero() { fX = fY = 0; }
 
     /** Set the x and y values of the point. */
     void set(int32_t x, int32_t y) { fX = x; fY = y; }
@@ -55,11 +63,11 @@ struct SkIPoint {
         the point
     */
     void rotateCCW() { this->rotateCCW(this); }
-    
+
     /** Negate the X and Y coordinates of the point.
     */
     void negate() { fX = -fX; fY = -fY; }
-    
+
     /** Return a new point whose X and Y coordinates are the negative of the
         original point's
     */
@@ -75,7 +83,7 @@ struct SkIPoint {
         fX += v.fX;
         fY += v.fY;
     }
-    
+
     /** Subtract v's coordinates from this point's */
     void operator-=(const SkIPoint& v) {
         fX -= v.fX;
@@ -90,7 +98,7 @@ struct SkIPoint {
     friend bool operator==(const SkIPoint& a, const SkIPoint& b) {
         return a.fX == b.fX && a.fY == b.fY;
     }
-    
+
     friend bool operator!=(const SkIPoint& a, const SkIPoint& b) {
         return a.fX != b.fX || a.fY != b.fY;
     }
@@ -111,7 +119,7 @@ struct SkIPoint {
         v.set(a.fX + b.fX, a.fY + b.fY);
         return v;
     }
-    
+
     /** Returns the dot product of a and b, treating them as 2D vectors
     */
     static int32_t DotProduct(const SkIPoint& a, const SkIPoint& b) {
@@ -125,7 +133,7 @@ struct SkIPoint {
     }
 };
 
-struct SkPoint {
+struct SK_API SkPoint {
     SkScalar    fX, fY;
 
     static SkPoint Make(SkScalar x, SkScalar y) {
@@ -133,10 +141,13 @@ struct SkPoint {
         pt.set(x, y);
         return pt;
     }
-    
+
+    SkScalar x() const { return fX; }
+    SkScalar y() const { return fY; }
+
     /** Set the point's X and Y coordinates */
     void set(SkScalar x, SkScalar y) { fX = x; fY = y; }
-    
+
     /** Set the point's X and Y coordinates by automatically promoting (x,y) to
         SkScalar values.
     */
@@ -144,7 +155,7 @@ struct SkPoint {
         fX = SkIntToScalar(x);
         fY = SkIntToScalar(y);
     }
-    
+
     /** Set the point's X and Y coordinates by automatically promoting p's
         coordinates to SkScalar values.
     */
@@ -153,29 +164,79 @@ struct SkPoint {
         fY = SkIntToScalar(p.fY);
     }
 
+    void setAbs(const SkPoint& pt) {
+        fX = SkScalarAbs(pt.fX);
+        fY = SkScalarAbs(pt.fY);
+    }
+    
+    // counter-clockwise fan
+    void setIRectFan(int l, int t, int r, int b) {
+        SkPoint* v = this;
+        v[0].set(SkIntToScalar(l), SkIntToScalar(t));
+        v[1].set(SkIntToScalar(l), SkIntToScalar(b));
+        v[2].set(SkIntToScalar(r), SkIntToScalar(b));
+        v[3].set(SkIntToScalar(r), SkIntToScalar(t));
+    }
+    void setIRectFan(int l, int t, int r, int b, size_t stride);
+
+    // counter-clockwise fan
+    void setRectFan(SkScalar l, SkScalar t, SkScalar r, SkScalar b) {
+        SkPoint* v = this;
+        v[0].set(l, t);
+        v[1].set(l, b);
+        v[2].set(r, b);
+        v[3].set(r, t);
+    }
+    void setRectFan(SkScalar l, SkScalar t, SkScalar r, SkScalar b, size_t stride);
+
+    static void Offset(SkPoint points[], int count, const SkPoint& offset) {
+        Offset(points, count, offset.fX, offset.fY);
+    }
+
+    static void Offset(SkPoint points[], int count, SkScalar dx, SkScalar dy) {
+        for (int i = 0; i < count; ++i) {
+            points[i].offset(dx, dy);
+        }
+    }
+
+    void offset(SkScalar dx, SkScalar dy) {
+        fX += dx;
+        fY += dy;
+    }
+
     /** Return the euclidian distance from (0,0) to the point
     */
     SkScalar length() const { return SkPoint::Length(fX, fY); }
+    SkScalar distanceToOrigin() const { return this->length(); }
+
+    /**
+     *  Return true if the computed length of the vector is >= the internal
+     *  tolerance (used to avoid dividing by tiny values).
+     */
+    static bool CanNormalize(SkScalar dx, SkScalar dy);
+
+    bool canNormalize() const {
+        return CanNormalize(fX, fY);
+    }
 
     /** Set the point (vector) to be unit-length in the same direction as it
-        currently is, and return its old length. If the old length is
-        degenerately small (nearly zero), do nothing and return false, otherwise
-        return true.
+        already points.  If the point has a degenerate length (i.e. nearly 0)
+        then return false and do nothing; otherwise return true.
     */
     bool normalize();
-    
+
     /** Set the point (vector) to be unit-length in the same direction as the
         x,y params. If the vector (x,y) has a degenerate length (i.e. nearly 0)
         then return false and do nothing, otherwise return true.
     */
     bool setNormalize(SkScalar x, SkScalar y);
-    
+
     /** Scale the point (vector) to have the specified length, and return that
         length. If the original length is degenerately small (nearly zero),
         do nothing and return false, otherwise return true.
     */
     bool setLength(SkScalar length);
-    
+
     /** Set the point (vector) to have the specified length in the same
      direction as (x,y). If the vector (x,y) has a degenerate length
      (i.e. nearly 0) then return false and do nothing, otherwise return true.
@@ -186,7 +247,7 @@ struct SkPoint {
         It is legal for dst == this.
     */
     void scale(SkScalar scale, SkPoint* dst) const;
-    
+
     /** Scale the point's coordinates by scale, writing the answer back into
         the point.
     */
@@ -196,29 +257,29 @@ struct SkPoint {
         It is legal for dst == this.
     */
     void rotateCW(SkPoint* dst) const;
-    
+
     /** Rotate the point clockwise by 90 degrees, writing the answer back into
         the point.
     */
     void rotateCW() { this->rotateCW(this); }
-    
+
     /** Rotate the point counter-clockwise by 90 degrees, writing the answer
         into dst. It is legal for dst == this.
     */
     void rotateCCW(SkPoint* dst) const;
-    
+
     /** Rotate the point counter-clockwise by 90 degrees, writing the answer
         back into the point.
     */
     void rotateCCW() { this->rotateCCW(this); }
-    
+
     /** Negate the point's coordinates
     */
     void negate() {
         fX = -fX;
         fY = -fY;
     }
-    
+
     /** Returns a new point whose coordinates are the negative of the point's
     */
     SkPoint operator-() const {
@@ -234,7 +295,7 @@ struct SkPoint {
         fX += v.fX;
         fY += v.fY;
     }
-    
+
     /** Subtract v's coordinates from the point's
     */
     void operator-=(const SkPoint& v) {
@@ -249,9 +310,16 @@ struct SkPoint {
     friend bool operator==(const SkPoint& a, const SkPoint& b) {
         return a.fX == b.fX && a.fY == b.fY;
     }
-    
+
     friend bool operator!=(const SkPoint& a, const SkPoint& b) {
         return a.fX != b.fX || a.fY != b.fY;
+    }
+
+    /** Return true if this and the given point are componentwise within tol.
+    */
+    bool equalsWithinTolerance(const SkPoint& v, SkScalar tol) const {
+        return SkScalarNearlyZero(fX - v.fX, tol)
+               && SkScalarNearlyZero(fY - v.fY, tol);
     }
 
     /** Returns a new point whose coordinates are the difference between
@@ -276,7 +344,13 @@ struct SkPoint {
     static SkScalar Length(SkScalar x, SkScalar y);
 
     /** Normalize pt, returning its previous length. If the prev length is too
-        small (degenerate), return 0 and leave pt unchanged.
+        small (degenerate), return 0 and leave pt unchanged. This uses the same
+        tolerance as CanNormalize.
+
+        Note that this method may be significantly more expensive than
+        the non-static normalize(), because it has to return the previous length
+        of the point.  If you don't need the previous length, call the
+        non-static normalize() method instead.
      */
     static SkScalar Normalize(SkPoint* pt);
 
@@ -297,9 +371,88 @@ struct SkPoint {
     static SkScalar CrossProduct(const SkPoint& a, const SkPoint& b) {
         return SkScalarMul(a.fX, b.fY) - SkScalarMul(a.fY, b.fX);
     }
+
+    SkScalar cross(const SkPoint& vec) const {
+        return CrossProduct(*this, vec);
+    }
+
+    SkScalar dot(const SkPoint& vec) const {
+        return DotProduct(*this, vec);
+    }
+    
+    SkScalar lengthSqd() const {
+        return DotProduct(*this, *this);
+    }
+    
+    SkScalar distanceToSqd(const SkPoint& pt) const {
+        SkScalar dx = fX - pt.fX;
+        SkScalar dy = fY - pt.fY;
+        return SkScalarMul(dx, dx) + SkScalarMul(dy, dy);
+    }
+
+    /**
+     * The side of a point relative to a line. If the line is from a to b then
+     * the values are consistent with the sign of (b-a) cross (pt-a)
+     */
+    enum Side {
+        kLeft_Side  = -1,
+        kOn_Side    =  0,
+        kRight_Side =  1
+    };
+
+    /**
+     * Returns the squared distance to the infinite line between two pts. Also
+     * optionally returns the side of the line that the pt falls on (looking
+     * along line from a to b)
+     */
+    SkScalar distanceToLineBetweenSqd(const SkPoint& a,
+                                      const SkPoint& b,
+                                      Side* side = NULL) const;
+
+    /**
+     * Returns the distance to the infinite line between two pts. Also
+     * optionally returns the side of the line that the pt falls on (looking
+     * along the line from a to b)
+     */
+    SkScalar distanceToLineBetween(const SkPoint& a,
+                                   const SkPoint& b,
+                                   Side* side = NULL) const {
+        return SkScalarSqrt(this->distanceToLineBetweenSqd(a, b, side));
+    }
+
+    /**
+     * Returns the squared distance to the line segment between pts a and b
+     */
+    SkScalar distanceToLineSegmentBetweenSqd(const SkPoint& a,
+                                             const SkPoint& b) const;
+
+    /**
+     * Returns the distance to the line segment between pts a and b.
+     */
+    SkScalar distanceToLineSegmentBetween(const SkPoint& a,
+                                          const SkPoint& b) const {
+        return SkScalarSqrt(this->distanceToLineSegmentBetweenSqd(a, b));
+    }
+
+    /**
+     * Make this vector be orthogonal to vec. Looking down vec the
+     * new vector will point in direction indicated by side (which
+     * must be kLeft_Side or kRight_Side).
+     */
+    void setOrthog(const SkPoint& vec, Side side = kLeft_Side) {
+        // vec could be this
+        SkScalar tmp = vec.fX;
+        if (kRight_Side == side) {
+            fX = -vec.fY;
+            fY = tmp;
+        } else {
+            SkASSERT(kLeft_Side == side);
+            fX = vec.fY;
+            fY = -tmp;
+        }
+    }
 };
 
 typedef SkPoint SkVector;
 
 #endif
-

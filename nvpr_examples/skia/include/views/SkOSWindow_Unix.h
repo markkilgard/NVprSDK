@@ -1,60 +1,78 @@
 /*
- * Copyright (C) 2006 The Android Open Source Project
+ * Copyright 2006 The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
  */
 
 #ifndef SkOSWindow_Unix_DEFINED
 #define SkOSWindow_Unix_DEFINED
 
-#include "SkWindow.h"
+#include <GL/glx.h>
 #include <X11/Xlib.h>
+
+#include "SkWindow.h"
+
+class SkEvent;
 
 struct SkUnixWindow {
   Display* fDisplay;
   Window fWin;
   size_t fOSWin;
+  GC fGc;
+  GLXContext fGLContext;
 };
 
 class SkOSWindow : public SkWindow {
 public:
-    SkOSWindow(Display* display, Window win);
+    SkOSWindow(void*);
+    ~SkOSWindow();
 
-    void*   getHWND() const { return (void*)fUnixWindow.fWin; }
-  void* getDisplay() const { return (void*)fUnixWindow.fDisplay; }
-  void* getUnixWindow() const { return (void*)&fUnixWindow; }
-  void  setSize(int width, int height);
-    void    updateSize();
+    void* getHWND() const { return (void*)fUnixWindow.fWin; }
+    void* getDisplay() const { return (void*)fUnixWindow.fDisplay; }
+    void* getUnixWindow() const { return (void*)&fUnixWindow; }
+    void loop();
+    void post_linuxevent();
 
-    static bool PostEvent(SkEvent* evt, SkEventSinkID, SkMSec delay);
+    enum SkBackEndTypes {
+        kNone_BackEndType,
+        kNativeGL_BackEndType,
+    };
 
-    static bool WndProc(SkUnixWindow* w,  XEvent &e);
+    bool attach(SkBackEndTypes attachType, int msaaSampleCount);
+    void detach();
+    void present();
+
+    int getMSAASampleCount() const { return fMSAASampleCount; }
+
+    //static bool PostEvent(SkEvent* evt, SkEventSinkID, SkMSec delay);
+
+    //static bool WndProc(SkUnixWindow* w,  XEvent &e);
 
 protected:
-    // overrides from SkWindow
-    virtual void onHandleInval(const SkIRect&);
-    // overrides from SkView
-    virtual void onAddMenu(const SkOSMenu*);
+    // Overridden from from SkWindow:
+    virtual bool onEvent(const SkEvent&) SK_OVERRIDE;
+    virtual void onHandleInval(const SkIRect&) SK_OVERRIDE;
+    virtual bool onHandleChar(SkUnichar) SK_OVERRIDE;
+    virtual bool onHandleKey(SkKey) SK_OVERRIDE;
+    virtual bool onHandleKeyUp(SkKey) SK_OVERRIDE;
+    virtual void onSetTitle(const char title[]) SK_OVERRIDE;
 
 private:
-    SkUnixWindow  fUnixWindow;
+    void doPaint();
+    void mapWindowAndWait();
 
-    void    doPaint();
+    void closeWindow();
+    void initWindow(int newMSAASampleCount);
 
-    void*   fMBar;
+    SkUnixWindow fUnixWindow;
+
+    // Needed for GL
+    XVisualInfo* fVi;
+    // we recreate the underlying xwindow if this changes
+    int fMSAASampleCount;
 
     typedef SkWindow INHERITED;
 };
 
 #endif
-

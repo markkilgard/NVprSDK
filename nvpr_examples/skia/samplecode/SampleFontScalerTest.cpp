@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "SampleCode.h"
 #include "SkView.h"
 #include "SkCanvas.h"
@@ -29,7 +36,7 @@ static const struct {
 
 static const int gFaceCount = SK_ARRAY_COUNT(gFaces);
 
-class FontScalerTestView : public SkView {
+class FontScalerTestView : public SampleView {
     SkTypeface* fFaces[gFaceCount];
 
 public:
@@ -38,11 +45,12 @@ public:
             fFaces[i] = SkTypeface::CreateFromName(gFaces[i].fName,
                                                    gFaces[i].fStyle);
         }
+//        this->setBGColor(0xFFDDDDDD);
     }
-    
+
     virtual ~FontScalerTestView() {
         for (int i = 0; i < gFaceCount; i++) {
-            fFaces[i]->safeUnref();
+            SkSafeUnref(fFaces[i]);
         }
     }
 
@@ -55,61 +63,70 @@ protected:
         }
         return this->INHERITED::onQuery(evt);
     }
-    
-    void drawBG(SkCanvas* canvas) {
-        canvas->drawColor(0xFFDDDDDD);
+
+    static void rotate_about(SkCanvas* canvas, SkScalar degrees, SkScalar px, SkScalar py) {
+        canvas->translate(px, py);
+        canvas->rotate(degrees);
+        canvas->translate(-px, -py);
     }
-    
-    virtual void onDraw(SkCanvas* canvas) {
-        this->drawBG(canvas);
-        
+
+    virtual void onDrawContent(SkCanvas* canvas) {
         SkPaint paint;
 
         // test handling of obscene cubic values (currently broken)
         if (false) {
             SkPoint pts[4];
-            pts[0].set(1.61061274e+09, 6291456);
-            pts[1].set(-7.18397061e+15, -1.53091184e+13);
-            pts[2].set(-1.30077315e+16, -2.77196141e+13);
-            pts[3].set(-1.30077315e+16, -2.77196162e+13);
-            
+            pts[0].set(1.61061274e+09f, 6291456);
+            pts[1].set(-7.18397061e+15f, -1.53091184e+13f);
+            pts[2].set(-1.30077315e+16f, -2.77196141e+13f);
+            pts[3].set(-1.30077315e+16f, -2.77196162e+13f);
+
             SkPath path;
             path.moveTo(pts[0]);
             path.cubicTo(pts[1], pts[2], pts[3]);
             canvas->drawPath(path, paint);
         }
-        
-        canvas->translate(200, 20);
-        canvas->rotate(30);
 
+//        paint.setSubpixelText(true);
         paint.setAntiAlias(true);
-        paint.setTypeface(SkTypeface::CreateFromName("Times Roman", SkTypeface::kNormal))->safeUnref();
-        
+        paint.setLCDRenderText(true);
+        SkSafeUnref(paint.setTypeface(SkTypeface::CreateFromName("Times Roman", SkTypeface::kNormal)));
+
 //        const char* text = "abcdefghijklmnopqrstuvwxyz";
-        const char* text = "HnHnHnHnHnHnHnHnH";
-        size_t textLen = strlen(text);
+        const char* text = "Hamburgefons ooo mmm";
+        const size_t textLen = strlen(text);
 
-        SkScalar x = SkIntToScalar(10);
-        SkScalar y = SkIntToScalar(20);
+        for (int j = 0; j < 2; ++j) {
+            for (int i = 0; i < 6; ++i) {
+                SkScalar x = SkIntToScalar(10);
+                SkScalar y = SkIntToScalar(20);
 
-        {
-            SkPaint p;
-            p.setColor(SK_ColorRED);
-            SkRect r;
-            r.set(0, 0, x, y*20);
-            canvas->drawRect(r, p);
-        }
-        
-        int index = 0;
-        for (int ps = 9; ps <= 24; ps++) {
-            textLen = strlen(text);
-            paint.setTextSize(SkIntToScalar(ps));
-            canvas->drawText(text, textLen, x, y, paint);
-            y += paint.getFontMetrics(NULL);
-            index += 1;
+                SkAutoCanvasRestore acr(canvas, true);
+                canvas->translate(SkIntToScalar(50 + i * 230),
+                                  SkIntToScalar(20));
+                rotate_about(canvas, SkIntToScalar(i * 5), x, y * 10);
+
+                {
+                    SkPaint p;
+                    p.setAntiAlias(true);
+                    SkRect r;
+                    r.set(x-3, 15, x-1, 280);
+                    canvas->drawRect(r, p);
+                }
+
+                int index = 0;
+                for (int ps = 6; ps <= 22; ps++) {
+                    paint.setTextSize(SkIntToScalar(ps));
+                    canvas->drawText(text, textLen, x, y, paint);
+                    y += paint.getFontMetrics(NULL);
+                    index += 1;
+                }
+            }
+            canvas->translate(0, 400);
+            paint.setSubpixelText(true);
         }
     }
-    
+
 private:
     typedef SkView INHERITED;
 };

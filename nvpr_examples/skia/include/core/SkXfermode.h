@@ -1,18 +1,11 @@
+
 /*
- * Copyright (C) 2006 The Android Open Source Project
+ * Copyright 2006 The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
  */
+
 
 #ifndef SkXfermode_DEFINED
 #define SkXfermode_DEFINED
@@ -28,7 +21,7 @@
     specified in the Modes enum. When an SkXfermode is assigned to an SkPaint,
     then objects drawn with that paint have the xfermode applied.
 */
-class SkXfermode : public SkFlattenable {
+class SK_API SkXfermode : public SkFlattenable {
 public:
     SkXfermode() {}
 
@@ -40,7 +33,7 @@ public:
                           const SkAlpha aa[]);
     virtual void xferA8(SkAlpha dst[], const SkPMColor src[], int count,
                         const SkAlpha aa[]);
-    
+
     /** Enum of possible coefficients to describe some xfermodes
      */
     enum Coeff {
@@ -54,18 +47,18 @@ public:
         kISA_Coeff,     /** inverse src alpha (i.e. 1 - sa) */
         kDA_Coeff,      /** dst alpha */
         kIDA_Coeff,     /** inverse dst alpha (i.e. 1 - da) */
-        
+
         kCoeffCount
     };
-    
+
     /** If the xfermode can be expressed as an equation using the coefficients
         in Coeff, then asCoeff() returns true, and sets (if not null) src and
         dst accordingly.
-     
+
             result = src_coeff * src_color + dst_coeff * dst_color;
-     
+
         As examples, here are some of the porterduff coefficients
-     
+
         MODE        SRC_COEFF       DST_COEFF
         clear       zero            zero
         src         one             zero
@@ -74,6 +67,12 @@ public:
         dstover     ida             one
      */
     virtual bool asCoeff(Coeff* src, Coeff* dst);
+
+    /**
+     *  The same as calling xfermode->asCoeff(..), except that this also checks
+     *  if the xfermode is NULL, and if so, treats its as kSrcOver_Mode.
+     */
+    static bool AsCoeff(SkXfermode*, Coeff* src, Coeff* dst);
 
     /** List of predefined xfermodes.
         The algebra for the modes uses the following symbols:
@@ -97,11 +96,15 @@ public:
         kDstATop_Mode,  //!< [Sa, Sa * Dc + Sc * (1 - Da)]
         kXor_Mode,      //!< [Sa + Da - 2 * Sa * Da, Sc * (1 - Da) + (1 - Sa) * Dc]
 
-        // these modes are defined in the SVG Compositing standard
+        // all remaining modes are defined in the SVG Compositing standard
         // http://www.w3.org/TR/2009/WD-SVGCompositing-20090430/
         kPlus_Mode,
-        kMultiply_Mode,
-        kScreen_Mode,
+        kMultiply_Mode, 
+        
+        // all above modes can be expressed as pair of src/dst Coeffs
+        kCoeffModesCnt, 
+        
+        kScreen_Mode = kCoeffModesCnt,
         kOverlay_Mode,
         kDarken_Mode,
         kLighten_Mode,
@@ -114,6 +117,31 @@ public:
 
         kLastMode = kExclusion_Mode
     };
+
+    /**
+     *  If the xfermode is one of the modes in the Mode enum, then asMode()
+     *  returns true and sets (if not null) mode accordingly. Otherwise it
+     *  returns false and ignores the mode parameter.
+     */
+    virtual bool asMode(Mode* mode);
+
+    /**
+     *  The same as calling xfermode->asMode(mode), except that this also checks
+     *  if the xfermode is NULL, and if so, treats its as kSrcOver_Mode.
+     */
+    static bool AsMode(SkXfermode*, Mode* mode);
+
+    /**
+     *  Returns true if the xfermode claims to be the specified Mode. This works
+     *  correctly even if the xfermode is NULL (which equates to kSrcOver.) Thus
+     *  you can say this without checking for a null...
+     *
+     *  If (SkXfermode::IsMode(paint.getXfermode(),
+     *                         SkXfermode::kDstOver_Mode)) {
+     *      ...
+     *  }
+     */
+    static bool IsMode(SkXfermode* xfer, Mode mode);
 
     /** Return an SkXfermode object for the specified mode.
      */
@@ -131,21 +159,28 @@ public:
       */
     static SkXfermodeProc16 GetProc16(Mode mode, SkColor srcColor);
 
-    /** If the specified xfermode advertises itself as one of the porterduff
-        modes (via SkXfermode::Coeff), return true and if not null, set mode
-        to the corresponding porterduff mode. If it is not recognized as a one,
-        return false and ignore the mode parameter.
+    /**
+     *  If the specified mode can be represented by a pair of Coeff, then return
+     *  true and set (if not NULL) the corresponding coeffs. If the mode is
+     *  not representable as a pair of Coeffs, return false and ignore the
+     *  src and dst parameters.
      */
-    static bool IsMode(SkXfermode*, Mode* mode);
+    static bool ModeAsCoeff(Mode mode, Coeff* src, Coeff* dst);
 
+    // DEPRECATED: call AsMode(...)
+    static bool IsMode(SkXfermode* xfer, Mode* mode) {
+        return AsMode(xfer, mode);
+    }
+
+    SK_DECLARE_FLATTENABLE_REGISTRAR_GROUP()
 protected:
     SkXfermode(SkFlattenableReadBuffer& rb) : SkFlattenable(rb) {}
-    
+
     /** The default implementation of xfer32/xfer16/xferA8 in turn call this
         method, 1 color at a time (upscaled to a SkPMColor). The default
         implmentation of this method just returns dst. If performance is
         important, your subclass should override xfer32/xfer16/xferA8 directly.
-        
+
         This method will not be called directly by the client, so it need not
         be implemented if your subclass has overridden xfer32/xfer16/xferA8
     */
@@ -171,29 +206,29 @@ public:
 
     // overrides from SkXfermode
     virtual void xfer32(SkPMColor dst[], const SkPMColor src[], int count,
-                        const SkAlpha aa[]);
+                        const SkAlpha aa[]) SK_OVERRIDE;
     virtual void xfer16(uint16_t dst[], const SkPMColor src[], int count,
-                        const SkAlpha aa[]);
+                        const SkAlpha aa[]) SK_OVERRIDE;
     virtual void xfer4444(uint16_t dst[], const SkPMColor src[], int count,
-                          const SkAlpha aa[]);
+                          const SkAlpha aa[]) SK_OVERRIDE;
     virtual void xferA8(SkAlpha dst[], const SkPMColor src[], int count,
-                        const SkAlpha aa[]);
+                        const SkAlpha aa[]) SK_OVERRIDE;
 
-    // overrides from SkFlattenable
-    virtual Factory getFactory() { return CreateProc; }
-    virtual void    flatten(SkFlattenableWriteBuffer&);
+    SK_DECLARE_PUBLIC_FLATTENABLE_DESERIALIZATION_PROCS(SkProcXfermode)
 
 protected:
     SkProcXfermode(SkFlattenableReadBuffer&);
+    virtual void flatten(SkFlattenableWriteBuffer&) const SK_OVERRIDE;
+
+    // allow subclasses to update this after we unflatten
+    void setProc(SkXfermodeProc proc) {
+        fProc = proc;
+    }
 
 private:
     SkXfermodeProc  fProc;
-    
-    static SkFlattenable* CreateProc(SkFlattenableReadBuffer& buffer) {
-        return SkNEW_ARGS(SkProcXfermode, (buffer)); }
 
     typedef SkXfermode INHERITED;
 };
 
 #endif
-

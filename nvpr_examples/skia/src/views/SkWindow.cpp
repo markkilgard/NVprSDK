@@ -1,5 +1,13 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "SkWindow.h"
 #include "SkCanvas.h"
+#include "SkDevice.h"
 #include "SkOSMenu.h"
 #include "SkSystemEventTypes.h"
 #include "SkTime.h"
@@ -40,21 +48,41 @@ private:
 
 SkWindow::SkWindow() : fFocusView(NULL)
 {
-	fClick = NULL;
-	fWaitingOnInval = false;
+    fClicks.reset();
+    fWaitingOnInval = false;
 
 #ifdef SK_BUILD_FOR_WINCE
-	fConfig = SkBitmap::kRGB_565_Config;
+    fConfig = SkBitmap::kRGB_565_Config;
 #else
-	fConfig = SkBitmap::kARGB_8888_Config;
+    fConfig = SkBitmap::kARGB_8888_Config;
 #endif
+
+    fMatrix.reset();
 }
 
 SkWindow::~SkWindow()
 {
-	delete fClick;
+    fClicks.deleteAll();
+    fMenus.deleteAll();
+}
 
-	fMenus.deleteAll();
+void SkWindow::setMatrix(const SkMatrix& matrix) {
+    if (fMatrix != matrix) {
+        fMatrix = matrix;
+        this->inval(NULL);
+    }
+}
+
+void SkWindow::preConcat(const SkMatrix& matrix) {
+    SkMatrix m;
+    m.setConcat(fMatrix, matrix);
+    this->setMatrix(m);
+}
+
+void SkWindow::postConcat(const SkMatrix& matrix) {
+    SkMatrix m;
+    m.setConcat(matrix, fMatrix);
+    this->setMatrix(m);
 }
 
 void SkWindow::setConfig(SkBitmap::Config config)
@@ -72,6 +100,7 @@ void SkWindow::resize(int width, int height, SkBitmap::Config config)
 		fConfig = config;
 		fBitmap.setConfig(config, width, height);
 		fBitmap.allocPixels();
+        fBitmap.setIsOpaque(true);
 
 		this->setSize(SkIntToScalar(width), SkIntToScalar(height));
 		this->inval(NULL);
@@ -88,23 +117,33 @@ void SkWindow::eraseRGB(U8CPU r, U8CPU g, U8CPU b)
 	fBitmap.eraseRGB(r, g, b);
 }
 
-bool SkWindow::handleInval(const SkRect& r)
+bool SkWindow::handleInval(const SkRect* localR)
 {
 	SkIRect	ir;
 
-	r.round(&ir);
+    if (localR) {
+        SkRect devR;
+        SkMatrix inverse;
+        if (!fMatrix.invert(&inverse)) {
+            return false;
+        }
+        fMatrix.mapRect(&devR, *localR);
+        devR.round(&ir);
+    } else {
+        ir.set(0, 0,
+			   SkScalarRound(this->width()),
+			   SkScalarRound(this->height()));
+    }
 	fDirtyRgn.op(ir, SkRegion::kUnion_Op);
 
-#ifdef SK_BUILD_FOR_WIN32xxxx
-	if (!fWaitingOnInval)
-	{
-		fWaitingOnInval = true;
-		(new SkEvent(SK_EventDelayInval))->post(this->getSinkID(), 10);
-	}
-#else
 	this->onHandleInval(ir);
-#endif
 	return true;
+}
+
+void SkWindow::forceInvalAll() {
+    fDirtyRgn.setRect(0, 0,
+                      SkScalarCeil(this->width()),
+                      SkScalarCeil(this->height()));
 }
 
 #if defined(SK_BUILD_FOR_WINCE) && defined(USE_GX_SCREEN)
@@ -117,7 +156,7 @@ bool SkWindow::handleInval(const SkRect& r)
 extern bool gEnableControlledThrow;
 #endif
 
-bool SkWindow::update(SkIRect* updateArea)
+bool SkWindow::update(SkIRect* updateArea, SkCanvas* canvas)
 {
 	if (!fDirtyRgn.isEmpty())
 	{
@@ -134,11 +173,19 @@ bool SkWindow::update(SkIRect* updateArea)
 		bm.setPixels(buffer);
 #endif
 
-		SkCanvas	canvas(bm);
+		SkCanvas	rasterCanvas;
 
-		canvas.clipRegion(fDirtyRgn);
+        if (NULL == canvas) {
+            canvas = &rasterCanvas;
+        }
+        canvas->setBitmapDevice(bm);
+
+		canvas->clipRegion(fDirtyRgn);
 		if (updateArea)
 			*updateArea = fDirtyRgn.getBounds();
+
+        SkAutoCanvasRestore acr(canvas, true);
+        canvas->concat(fMatrix);
 
 		// empty this now, so we can correctly record any inval calls that
 		// might be made during the draw call.
@@ -146,25 +193,25 @@ bool SkWindow::update(SkIRect* updateArea)
 
 #ifdef TEST_BOUNDER
 		test_bounder	b(bm);
-		canvas.setBounder(&b);
+		canvas->setBounder(&b);
 #endif
 #ifdef SK_SIMULATE_FAILED_MALLOC
 		gEnableControlledThrow = true;
 #endif
 #ifdef SK_BUILD_FOR_WIN32
-		try {
-			this->draw(&canvas);
-		}
-		catch (...) {
-		}
+		//try {
+			this->draw(canvas);
+		//}
+		//catch (...) {
+		//}
 #else
-		this->draw(&canvas);
+		this->draw(canvas);
 #endif
 #ifdef SK_SIMULATE_FAILED_MALLOC
 		gEnableControlledThrow = false;
 #endif
 #ifdef TEST_BOUNDER
-		canvas.setBounder(NULL);
+		canvas->setBounder(NULL);
 #endif
 
 #if defined(SK_BUILD_FOR_WINCE) && defined(USE_GX_SCREEN)
@@ -242,8 +289,7 @@ bool SkWindow::handleKeyUp(SkKey key)
     return false;
 }
 
-void SkWindow::addMenu(SkOSMenu* menu)
-{
+void SkWindow::addMenu(SkOSMenu* menu) {
 	*fMenus.append() = menu;
 	this->onAddMenu(menu);
 }
@@ -254,20 +300,6 @@ void SkWindow::setTitle(const char title[]) {
     }
     fTitle.set(title);
     this->onSetTitle(title);
-}
-
-bool SkWindow::handleMenu(uint32_t cmd)
-{
-	for (int i = 0; i < fMenus.count(); i++)
-	{
-		SkEvent* evt = fMenus[i]->createEvent(cmd);
-		if (evt)
-		{
-			evt->post(this->getSinkID());
-			return true;
-		}
-	}
-	return false;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -327,37 +359,57 @@ bool SkWindow::onHandleKeyUp(SkKey key)
     return false;
 }
 
-bool SkWindow::handleClick(int x, int y, Click::State state)
-{
+bool SkWindow::handleClick(int x, int y, Click::State state, void *owner) {
+    return this->onDispatchClick(x, y, state, owner);
+}
+
+bool SkWindow::onDispatchClick(int x, int y, Click::State state,
+        void* owner) {
 	bool handled = false;
 
+    // First, attempt to find an existing click with this owner.
+    int index = -1;
+    for (int i = 0; i < fClicks.count(); i++) {
+        if (owner == fClicks[i]->fOwner) {
+            index = i;
+            break;
+        }
+    }
+
 	switch (state) {
-	case Click::kDown_State:
-		if (fClick)
-			delete fClick;
-		fClick = this->findClickHandler(SkIntToScalar(x), SkIntToScalar(y));
-		if (fClick)
-		{
-			SkView::DoClickDown(fClick, x, y);
-			handled = true;
-		}
-		break;
-	case Click::kMoved_State:
-		if (fClick)
-		{
-			SkView::DoClickMoved(fClick, x, y);
-			handled = true;
-		}
-		break;
-	case Click::kUp_State:
-		if (fClick)
-		{
-			SkView::DoClickUp(fClick, x, y);
-			delete fClick;
-			fClick = NULL;
-			handled = true;
-		}
-		break;
+        case Click::kDown_State: {
+            if (index != -1) {
+                delete fClicks[index];
+                fClicks.remove(index);
+            }
+            Click* click = this->findClickHandler(SkIntToScalar(x),
+                    SkIntToScalar(y));
+
+            if (click) {
+                click->fOwner = owner;
+                *fClicks.append() = click;
+                SkView::DoClickDown(click, x, y);
+                handled = true;
+            }
+            break;
+        }
+        case Click::kMoved_State:
+            if (index != -1) {
+                SkView::DoClickMoved(fClicks[index], x, y);
+                handled = true;
+            }
+            break;
+        case Click::kUp_State:
+            if (index != -1) {
+                SkView::DoClickUp(fClicks[index], x, y);
+                delete fClicks[index];
+                fClicks.remove(index);
+                handled = true;
+            }
+            break;
+        default:
+            // Do nothing
+            break;
 	}
 	return handled;
 }

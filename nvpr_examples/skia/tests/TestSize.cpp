@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "Test.h"
 #include "SkSize.h"
 
@@ -53,7 +60,7 @@ static void TestSize(skiatest::Reporter* reporter) {
     SkISize ia;
     ia.set(ix, iy);
     a.set(x, y);
-    REPORTER_ASSERT(reporter, a.round() == ia);
+    REPORTER_ASSERT(reporter, a.toRound() == ia);
 };
 
 #include "TestClassDef.h"

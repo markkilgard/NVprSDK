@@ -1,9 +1,19 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #ifndef skiatest_Test_DEFINED
 #define skiatest_Test_DEFINED
 
 #include "SkRefCnt.h"
 #include "SkString.h"
 #include "SkTRegistry.h"
+
+class GrContext;
+class SkGLContext;
 
 namespace skiatest {
 
@@ -87,6 +97,17 @@ namespace skiatest {
         SkString    fName;
     };
 
+    class GpuTest : public Test{
+    public:
+        GpuTest() : Test() {
+            fContext = GetContext();
+        }
+    protected:
+        GrContext* fContext;
+    private:
+        static GrContext* GetContext();
+    };
+
     typedef SkTRegistry<Test*, void*> TestRegistry;
 }
 
@@ -94,9 +115,18 @@ namespace skiatest {
     do {                                                                \
         if (!(cond)) {                                                  \
             SkString desc;                                              \
-            desc.printf("%s:%d: %s", __FILE__, __LINE__, #cond);      \
+            desc.printf("%s:%d: %s", __FILE__, __LINE__, #cond);        \
             r->reportFailed(desc);                                      \
         }                                                               \
+    } while(0)
+
+#define REPORTER_ASSERT_MESSAGE(r, cond, message)                            \
+    do {                                                                     \
+        if (!(cond)) {                                                       \
+            SkString desc;                                                   \
+            desc.printf("%s %s:%d: %s", message, __FILE__, __LINE__, #cond); \
+            r->reportFailed(desc);                                           \
+        }                                                                    \
     } while(0)
 
 

@@ -1,18 +1,11 @@
+
 /*
- * Copyright 2007, The Android Open Source Project
+ * Copyright 2007 The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); 
- * you may not use this file except in compliance with the License. 
- * You may obtain a copy of the License at 
- *
- *     http://www.apache.org/licenses/LICENSE-2.0 
- *
- * Unless required by applicable law or agreed to in writing, software 
- * distributed under the License is distributed on an "AS IS" BASIS, 
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
- * See the License for the specific language governing permissions and 
- * limitations under the License.
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
  */
+
 
 #include "SkScaledBitmapSampler.h"
 #include "SkBitmap.h"
@@ -89,6 +82,18 @@ static bool Sample_RGBx_D565(void* SK_RESTRICT dstRow,
     for (int x = 0; x < width; x++) {
         dst[x] = SkPack888ToRGB16(src[0], src[1], src[2]);
         src += deltaSrc;
+    }
+    return false;
+}
+
+static bool Sample_D565_D565(void* SK_RESTRICT dstRow,
+                             const uint8_t* SK_RESTRICT src,
+                             int width, int deltaSrc, int, const SkPMColor[]) {
+    uint16_t* SK_RESTRICT dst = (uint16_t*)dstRow;
+    uint16_t* SK_RESTRICT castedSrc = (uint16_t*) src;
+    for (int x = 0; x < width; x++) {
+        dst[x] = castedSrc[0];
+        castedSrc += deltaSrc >> 1;
     }
     return false;
 }
@@ -290,6 +295,10 @@ static bool Sample_Index_DI(void* SK_RESTRICT dstRow,
 
 SkScaledBitmapSampler::SkScaledBitmapSampler(int width, int height,
                                              int sampleSize) {
+    fCTable = NULL;
+    fDstRow = NULL;
+    fRowProc = NULL;
+
     if (width <= 0 || height <= 0) {
         sk_throw();
     }
@@ -322,9 +331,6 @@ SkScaledBitmapSampler::SkScaledBitmapSampler(int width, int height,
     
     SkASSERT(fDX > 0 && (fX0 + fDX * (fScaledWidth - 1)) < width);
     SkASSERT(fDY > 0 && (fY0 + fDY * (fScaledHeight - 1)) < height);
-    
-    fRowProc = NULL;
-    fCTable = NULL;
 }
 
 bool SkScaledBitmapSampler::begin(SkBitmap* dst, SrcConfig sc, bool dither,
@@ -335,21 +341,25 @@ bool SkScaledBitmapSampler::begin(SkBitmap* dst, SrcConfig sc, bool dither,
         Sample_RGBx_D8888,  Sample_RGBx_D8888,
         Sample_RGBA_D8888,  Sample_RGBA_D8888,
         Sample_Index_D8888, Sample_Index_D8888,
+        NULL,               NULL,
         // 565 (no alpha distinction)
         Sample_Gray_D565,   Sample_Gray_D565_D,
         Sample_RGBx_D565,   Sample_RGBx_D565_D,
         Sample_RGBx_D565,   Sample_RGBx_D565_D,
         Sample_Index_D565,  Sample_Index_D565_D,
+        Sample_D565_D565,   Sample_D565_D565,
         // 4444
         Sample_Gray_D4444,  Sample_Gray_D4444_D,
         Sample_RGBx_D4444,  Sample_RGBx_D4444_D,
         Sample_RGBA_D4444,  Sample_RGBA_D4444_D,
         Sample_Index_D4444, Sample_Index_D4444_D,
+        NULL,               NULL,
         // Index8
         NULL,               NULL,
         NULL,               NULL,
         NULL,               NULL,
         Sample_Index_DI,    Sample_Index_DI,
+        NULL,               NULL,
     };
 
     fCTable = ctable;
@@ -379,6 +389,10 @@ bool SkScaledBitmapSampler::begin(SkBitmap* dst, SrcConfig sc, bool dither,
             fSrcPixelSize = 1;
             index += 6;
             break;
+        case SkScaledBitmapSampler::kRGB_565:
+            fSrcPixelSize = 2;
+            index += 8;
+            break;
         default:
             return false;
     }
@@ -388,13 +402,13 @@ bool SkScaledBitmapSampler::begin(SkBitmap* dst, SrcConfig sc, bool dither,
             index += 0;
             break;
         case SkBitmap::kRGB_565_Config:
-            index += 8;
+            index += 10;
             break;
         case SkBitmap::kARGB_4444_Config:
-            index += 16;
+            index += 20;
             break;
         case SkBitmap::kIndex8_Config:
-            index += 24;
+            index += 30;
             break;
         default:
             return false;

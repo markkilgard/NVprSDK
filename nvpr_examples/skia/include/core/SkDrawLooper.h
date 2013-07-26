@@ -1,25 +1,16 @@
+
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright 2011 The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
  */
+
 
 #ifndef SkDrawLooper_DEFINED
 #define SkDrawLooper_DEFINED
 
 #include "SkFlattenable.h"
-
-////////////////// EXPERIMENTAL //////////////////////////
 
 class SkCanvas;
 class SkPaint;
@@ -32,27 +23,42 @@ class SkPaint;
     invoked multiple times (hence the name loop-er), allow it to perform effects
     like shadows or frame/fills, that require more than one pass.
 */
-class SkDrawLooper : public SkFlattenable {
+class SK_API SkDrawLooper : public SkFlattenable {
 public:
-    /** Called right before something is being drawn to the specified canvas
-        with the specified paint. Subclass that want to modify either parameter
-        can do so now.
-    */
-    virtual void init(SkCanvas*, SkPaint*) {}
-    /** Called in a loop (after init()). Each time true is returned, the object
-        is drawn (possibly with a modified canvas and/or paint). When false is
-        finally returned, drawing for the object stops.
-    */
-    virtual bool next() { return false; }
-    /** Called after the looper has finally returned false from next(), allowing
-        the looper to restore the canvas/paint to their original states.
-        is this required, since the subclass knows when it is done???
-        should we pass the canvas/paint here, and/or to the next call
-        so that subclasses don't need to retain pointers to them during the 
-        loop?
-    */
-    virtual void restore() {}
+    /**
+     *  Called right before something is being drawn. This will be followed by
+     *  calls to next() until next() returns false.
+     */
+    virtual void init(SkCanvas*) = 0;
+
+    /**
+     *  Called in a loop (after init()). Each time true is returned, the object
+     *  is drawn (possibly with a modified canvas and/or paint). When false is
+     *  finally returned, drawing for the object stops.
+     *
+     *  On each call, the paint will be in its original state, but the canvas
+     *  will be as it was following the previous call to next() or init().
+     *
+     *  The implementation must ensure that, when next() finally returns false,
+     *  that the canvas has been restored to the state it was initially, before
+     *  init() was first called.
+     */
+    virtual bool next(SkCanvas*, SkPaint* paint) = 0;
     
+    /**
+     * The fast bounds functions are used to enable the paint to be culled early
+     * in the drawing pipeline. If a subclass can support this feature it must
+     * return true for the canComputeFastBounds() function.  If that function
+     * returns false then computeFastBounds behavior is undefined otherwise it
+     * is expected to have the following behavior. Given the parent paint and
+     * the parent's bounding rect the subclass must fill in and return the
+     * storage rect, where the storage rect is with the union of the src rect
+     * and the looper's bounding rect.
+     */
+    virtual bool canComputeFastBounds(const SkPaint& paint);
+    virtual void computeFastBounds(const SkPaint& paint,
+                                   const SkRect& src, SkRect* dst);
+
 protected:
     SkDrawLooper() {}
     SkDrawLooper(SkFlattenableReadBuffer& buffer) : INHERITED(buffer) {}

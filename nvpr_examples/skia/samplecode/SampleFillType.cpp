@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "SampleCode.h"
 #include "SkView.h"
 #include "SkCanvas.h"
@@ -9,13 +16,15 @@
 #include "SkShader.h"
 #include "SkUtils.h"
 
-class FillTypeView : public SkView {
+class FillTypeView : public SampleView {
     SkPath fPath;
 public:
 	FillTypeView() {
         const SkScalar radius = SkIntToScalar(45);
         fPath.addCircle(SkIntToScalar(50), SkIntToScalar(50), radius);
         fPath.addCircle(SkIntToScalar(100), SkIntToScalar(100), radius);
+
+        this->setBGColor(0xFFDDDDDD);
     }
     
 protected:
@@ -26,10 +35,6 @@ protected:
             return true;
         }
         return this->INHERITED::onQuery(evt);
-    }
-    
-    void drawBG(SkCanvas* canvas) {
-        canvas->drawColor(0xFFDDDDDD);
     }
     
     void showPath(SkCanvas* canvas, int x, int y, SkPath::FillType ft,
@@ -60,9 +65,7 @@ protected:
                  scale, paint);
     }
     
-    virtual void onDraw(SkCanvas* canvas) {
-        drawBG(canvas);
-        
+    virtual void onDrawContent(SkCanvas* canvas) {
         canvas->translate(SkIntToScalar(20), SkIntToScalar(20));
         
         SkPaint paint;
@@ -83,16 +86,8 @@ protected:
         showFour(canvas, scale, paint);
     }
     
-    virtual SkView::Click* onFindClickHandler(SkScalar x, SkScalar y) {
-        return this->INHERITED::onFindClickHandler(x, y);
-    }
-    
-    virtual bool onClick(Click* click) {
-        return this->INHERITED::onClick(click);
-    }
-    
 private:
-    typedef SkView INHERITED;
+    typedef SampleView INHERITED;
 };
 
 //////////////////////////////////////////////////////////////////////////////
