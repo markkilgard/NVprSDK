@@ -1,0 +1,219 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{3A0016AA-AC89-6CC6-3EF1-AFE5DCD5B8E6}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>skgr</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="PropertySheets">
+    <Import Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <ExecutablePath>$(ExecutablePath);$(MSBuildProjectDirectory)\..\..\gyp\bin\;$(MSBuildProjectDirectory)\..\..\gyp\bin\</ExecutablePath>
+    <IntDir>$(Platform)_2013\$(Configuration)\$(ProjectName)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
+    <OutDir>$(Platform)_2013\$(Configuration)\</OutDir>
+    <TargetName>$(ProjectName)</TargetName>
+    <TargetPath>$(OutDir)\lib\$(ProjectName).lib</TargetPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\..\include\config;..\..\include\core;..\..\src\core;..\..\include\gpu;..\..\third_party\glu;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>false</ExceptionHandling>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_DEBUG;GR_WIN32_BUILD=1;GR_GL_FUNCTION_TYPE=__stdcall;SK_SCALAR_IS_FLOAT;SK_CAN_USE_FLOAT;SK_BUILD_FOR_WIN32;SK_IGNORE_STDINT_DOT_H;_CRT_SECURE_NO_WARNINGS;SK_DEBUG;GR_DEBUG=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ProgramDataBaseFileName>$(OutDir)$(ProjectName).pdb</ProgramDataBaseFileName>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <WarningLevel>Level3</WarningLevel>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(OutDir)lib\$(ProjectName).lib</OutputFile>
+    </Lib>
+    <Link>
+      <AdditionalDependencies>OpenGL32.lib;usp10.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\include\config;..\..\include\core;..\..\src\core;..\..\include\gpu;..\..\third_party\glu;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>GR_WIN32_BUILD=1;GR_GL_FUNCTION_TYPE=__stdcall;SK_SCALAR_IS_FLOAT;SK_CAN_USE_FLOAT;SK_BUILD_FOR_WIN32;SK_IGNORE_STDINT_DOT_H;_CRT_SECURE_NO_WARNINGS;SK_DEBUG;GR_DEBUG=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\..\include\config;..\..\include\core;..\..\src\core;..\..\include\gpu;..\..\third_party\glu;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>false</ExceptionHandling>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_DEBUG;GR_WIN32_BUILD=1;GR_GL_FUNCTION_TYPE=__stdcall;SK_SCALAR_IS_FLOAT;SK_CAN_USE_FLOAT;SK_BUILD_FOR_WIN32;SK_IGNORE_STDINT_DOT_H;_CRT_SECURE_NO_WARNINGS;SK_DEBUG;GR_DEBUG=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ProgramDataBaseFileName>$(OutDir)$(ProjectName).pdb</ProgramDataBaseFileName>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <WarningLevel>Level3</WarningLevel>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(OutDir)lib\$(ProjectName).lib</OutputFile>
+    </Lib>
+    <Link>
+      <AdditionalDependencies>OpenGL32.lib;usp10.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\include\config;..\..\include\core;..\..\src\core;..\..\include\gpu;..\..\third_party\glu;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>GR_WIN32_BUILD=1;GR_GL_FUNCTION_TYPE=__stdcall;SK_SCALAR_IS_FLOAT;SK_CAN_USE_FLOAT;SK_BUILD_FOR_WIN32;SK_IGNORE_STDINT_DOT_H;_CRT_SECURE_NO_WARNINGS;SK_DEBUG;GR_DEBUG=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\..\include\config;..\..\include\core;..\..\src\core;..\..\include\gpu;..\..\third_party\glu;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>false</ExceptionHandling>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <Optimization>Full</Optimization>
+      <PreprocessorDefinitions>NDEBUG;GR_WIN32_BUILD=1;GR_GL_FUNCTION_TYPE=__stdcall;SK_SCALAR_IS_FLOAT;SK_CAN_USE_FLOAT;SK_BUILD_FOR_WIN32;SK_IGNORE_STDINT_DOT_H;_CRT_SECURE_NO_WARNINGS;SK_RELEASE;GR_RELEASE=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ProgramDataBaseFileName>$(OutDir)$(ProjectName).pdb</ProgramDataBaseFileName>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <WarningLevel>Level3</WarningLevel>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+    </ClCompile>
+    <Lib>
+      <LinkTimeCodeGeneration>true</LinkTimeCodeGeneration>
+      <OutputFile>$(OutDir)lib\$(ProjectName).lib</OutputFile>
+    </Lib>
+    <Link>
+      <AdditionalDependencies>OpenGL32.lib;usp10.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+    </Link>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\include\config;..\..\include\core;..\..\src\core;..\..\include\gpu;..\..\third_party\glu;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>GR_WIN32_BUILD=1;GR_GL_FUNCTION_TYPE=__stdcall;SK_SCALAR_IS_FLOAT;SK_CAN_USE_FLOAT;SK_BUILD_FOR_WIN32;SK_IGNORE_STDINT_DOT_H;_CRT_SECURE_NO_WARNINGS;SK_RELEASE;GR_RELEASE=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\..\include\config;..\..\include\core;..\..\src\core;..\..\include\gpu;..\..\third_party\glu;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>false</ExceptionHandling>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <Optimization>Full</Optimization>
+      <PreprocessorDefinitions>NDEBUG;GR_WIN32_BUILD=1;GR_GL_FUNCTION_TYPE=__stdcall;SK_SCALAR_IS_FLOAT;SK_CAN_USE_FLOAT;SK_BUILD_FOR_WIN32;SK_IGNORE_STDINT_DOT_H;_CRT_SECURE_NO_WARNINGS;SK_RELEASE;GR_RELEASE=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ProgramDataBaseFileName>$(OutDir)$(ProjectName).pdb</ProgramDataBaseFileName>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <WarningLevel>Level3</WarningLevel>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+    </ClCompile>
+    <Lib>
+      <LinkTimeCodeGeneration>true</LinkTimeCodeGeneration>
+      <OutputFile>$(OutDir)lib\$(ProjectName).lib</OutputFile>
+    </Lib>
+    <Link>
+      <AdditionalDependencies>OpenGL32.lib;usp10.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+    </Link>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\include\config;..\..\include\core;..\..\src\core;..\..\include\gpu;..\..\third_party\glu;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>GR_WIN32_BUILD=1;GR_GL_FUNCTION_TYPE=__stdcall;SK_SCALAR_IS_FLOAT;SK_CAN_USE_FLOAT;SK_BUILD_FOR_WIN32;SK_IGNORE_STDINT_DOT_H;_CRT_SECURE_NO_WARNINGS;SK_RELEASE;GR_RELEASE=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <None Include="..\..\gyp\gpu.gyp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\include\gpu\SkGpuCanvas.h" />
+    <ClInclude Include="..\..\include\gpu\SkGr.h" />
+    <ClInclude Include="..\..\include\gpu\SkGpuDevice.h" />
+    <ClInclude Include="..\..\include\gpu\SkGrTexturePixelRef.h" />
+    <ClInclude Include="..\..\include\gpu\gl\SkMesaGLContext.h" />
+    <ClInclude Include="..\..\include\gpu\gl\SkNativeGLContext.h" />
+    <ClInclude Include="..\..\include\gpu\gl\SkNullGLContext.h" />
+    <ClInclude Include="..\..\include\gpu\gl\SkGLContext.h" />
+    <ClInclude Include="..\..\include\gpu\gl\SkDebugGLContext.h" />
+    <ClInclude Include="..\..\include\gpu\gl\SkANGLEGLContext.h">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\gpu\SkGpuDevice.cpp" />
+    <ClCompile Include="..\..\src\gpu\SkGr.cpp" />
+    <ClCompile Include="..\..\src\gpu\SkGrFontScaler.cpp" />
+    <ClCompile Include="..\..\src\gpu\SkGrTexturePixelRef.cpp" />
+    <ClCompile Include="..\..\src\gpu\SkGpuCanvas.cpp" />
+    <ClCompile Include="..\..\src\gpu\android\SkNativeGLContext_android.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gpu\gl\SkGLContext.cpp" />
+    <ClCompile Include="..\..\src\gpu\gl\SkNullGLContext.cpp" />
+    <ClCompile Include="..\..\src\gpu\gl\angle\SkANGLEGLContext.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gpu\gl\angle\GrGLCreateANGLEInterface.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gpu\gl\win\SkNativeGLContext_win.cpp" />
+    <ClCompile Include="..\..\src\gpu\gl\unix\SkNativeGLContext_unix.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gpu\gl\mac\SkNativeGLContext_mac.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gpu\gl\debug\SkDebugGLContext.cpp" />
+    <ClCompile Include="..\..\src\gpu\gl\mesa\SkMesaGLContext.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets" />
+</Project>
