@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="9.00"
 	Name="glutstatic"
-	ProjectGUID="{47C9817F-F497-45BF-90E6-5857F3128042}"
+	ProjectGUID="{84CD2543-D9A4-4E57-97C6-176C2C78B50E}"
 	RootNamespace="glut"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="0"
@@ -86,8 +86,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory="$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
+			OutputDirectory="$(PlatformName)_2008\$(ConfigurationName)"
+			IntermediateDirectory="$(PlatformName)_2008\$(ConfigurationName)"
 			ConfigurationType="4"
 			>
 			<Tool
@@ -154,7 +154,7 @@
 			OutputDirectory="$(PlatformName)_2008\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)_2008\$(ConfigurationName)"
 			ConfigurationType="4"
-			WholeProgramOptimization="1"
+			WholeProgramOptimization="0"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -217,10 +217,10 @@
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory="$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
+			OutputDirectory="$(PlatformName)_2008\$(ConfigurationName)"
+			IntermediateDirectory="$(PlatformName)_2008\$(ConfigurationName)"
 			ConfigurationType="4"
-			WholeProgramOptimization="1"
+			WholeProgramOptimization="0"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
