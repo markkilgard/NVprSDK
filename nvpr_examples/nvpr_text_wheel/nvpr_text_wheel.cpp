@@ -41,7 +41,6 @@ using std::cout;
 using std::string;
 using std::vector;
 
-#include "nvpr_init.h"
 #include "sRGB_math.h"
 #include "countof.h"
 #include "request_vsync.h"
@@ -52,7 +51,6 @@ using std::vector;
 bool stroking = true;
 bool filling = true;
 int underline = 0;
-int regular_aspect = 1;
 int fill_gradient = 0;
 int use_sRGB = 0;
 int hasPathRendering = 0;
@@ -63,6 +61,8 @@ float angle = 0;
 bool animating = false;
 bool enable_vsync = true;
 int canvas_width = 640, canvas_height = 480;
+
+FPScontext gl_fps_context;
 
 /* Scaling and rotation state. */
 float anchor_x = 0,
@@ -78,12 +78,6 @@ float slide_x = 0,
 int sliding = 0;  /* Are we sliding currently? */
 
 float3x3 model, view;
-
-void initglext(void)
-{
-  hasPathRendering = glutExtensionSupported("GL_NV_path_rendering");
-  hasFramebufferSRGB = glutExtensionSupported("GL_EXT_framebuffer_sRGB");
-}
 
 /* Global variables */
 int background = 2;
@@ -220,12 +214,10 @@ void configureProjection()
   win2obj = mul(iproj, viewport);
 }
 
-int iheight;
-
 void reshape(int w, int h)
 {
+  reshapeFPScontext(&gl_fps_context, w, h);
   glViewport(0,0,w,h);
-  iheight = h-1;
   window_width = w;
   window_height = h;
   aspect_ratio = window_height/window_width;
@@ -250,7 +242,7 @@ display(void)
   }
 
   glDisable(GL_STENCIL_TEST);
-  handleFPS();
+  handleFPS(&gl_fps_context);
 
   glutSwapBuffers();
 }
@@ -374,10 +366,6 @@ keyboard(unsigned char c, int x, int y)
     break;
   case 13:  /* Enter redisplays */
     break;
-  case 'a':
-    regular_aspect = !regular_aspect;
-    configureProjection();
-    break;
   case 's':
     stroking = !stroking;
     for (size_t i=0; i<msg_list.size(); i++) {
@@ -417,6 +405,7 @@ main(int argc, char **argv)
 {
   GLenum status;
   GLboolean hasDSA;
+  GLboolean has_NV_path_rendering;
   int samples = 0;
 
   glutInitWindowSize(canvas_width, canvas_height);
@@ -475,12 +464,14 @@ main(int argc, char **argv)
     fatalError("OpenGL implementation doesn't support GL_EXT_direct_state_access (you should be using NVIDIA GPUs...)");
   }
 
-  initializeNVPR(programName);
+  has_NV_path_rendering = glutExtensionSupported("GL_NV_path_rendering");
   if (!has_NV_path_rendering) {
     fatalError("required NV_path_rendering OpenGL extension is not present");
   }
   initGraphics(emScale);
   disableFPS();
+
+  initFPScontext(&gl_fps_context, FPS_USAGE_TEXTURE);
 
   glutMainLoop();
   return 0;

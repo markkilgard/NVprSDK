@@ -31,13 +31,13 @@ using namespace Cg;
 using std::cout;
 using std::endl;
 
-#include "nvpr_init.h"
+#include "nvpr_glew_init.h"
 #include "tiger.h"
 #include "request_vsync.h"
 #include "showfps.h"
 #include "cg4cpp_xform.hpp"
 
-const char *programName = "nvpr_warp_tiger";
+const char *program_name = "nvpr_warp_tiger";
 int stroking = 1,
     filling = 1;
 
@@ -65,9 +65,11 @@ float2 corners[4];
 float2 moved_corners[4];
 float3x3 model, view, inverse_view;
 
+FPScontext gl_fps_context;
+
 static void fatalError(const char *message)
 {
-  fprintf(stderr, "%s: %s\n", programName, message);
+  fprintf(stderr, "%s: %s\n", program_name, message);
   exit(1);
 }
 
@@ -181,7 +183,7 @@ void display(void)
       } glEnd();
     } glMatrixPopEXT(GL_MODELVIEW);
   }
-  handleFPS();
+  handleFPS(&gl_fps_context);
 
   glutSwapBuffers();
 }
@@ -209,6 +211,7 @@ int iheight;
 
 void reshape(int w, int h)
 {
+  reshapeFPScontext(&gl_fps_context, w, h);
   glViewport(0,0,w,h);
   iheight = h-1;
   window_width = w;
@@ -474,7 +477,7 @@ main(int argc, char **argv)
       }
     }
     fprintf(stderr, "usage: %s [-#]\n       where # is the number of samples/pixel\n",
-      programName);
+      program_name);
     exit(1);
   }
 
@@ -538,7 +541,7 @@ main(int argc, char **argv)
     fatalError("OpenGL implementation doesn't support GL_EXT_direct_state_access (you should be using NVIDIA GPUs...)");
   }
 
-  initializeNVPR(programName);
+  initialize_NVPR_GLEW_emulation(stdout, program_name, 0);
   if (!has_NV_path_rendering) {
     fatalError("required NV_path_rendering OpenGL extension is not present");
   }
@@ -549,6 +552,8 @@ main(int argc, char **argv)
   disableFPS();
 
   path_count = getTigerPathCount();
+
+  initFPScontext(&gl_fps_context, FPS_USAGE_TEXTURE);
 
   glutMainLoop();
   return 0;

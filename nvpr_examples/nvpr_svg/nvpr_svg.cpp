@@ -63,6 +63,7 @@
 
 #define STBI_HEADER_FILE_ONLY
 #include "stb/stb_image.h"
+#include "stb/stb_image_write.h"
 
 //// Various spported renderers
 // GPU-accelerated two-step "stencil, then cover" OpenGL renderer
@@ -112,6 +113,7 @@ int show_control_points;
 int show_warp_points;
 int show_reference_points;
 int show_clip_scissor;
+bool haveDepthBuffer = false;
 bool antiAliasedCurveEdges = 0;
 int noSampleShading = 0;
 unsigned int current_path_object;
@@ -216,6 +218,8 @@ const char *fragment_profile_name = NULL,  // names of requested Cg profiles
            *vertex_profile_name = NULL;
 
 float pixels_per_millimeter;  // used by svg_loader.cpp for units
+
+FPScontext gl_fps_context;
 
 typedef shared_ptr<struct RenderResult> RenderResultPtr;
 typedef shared_ptr<struct RenderResultDifference> RenderResultDifferencePtr;
@@ -751,12 +755,18 @@ void configureSamples(int count)
     glutDestroyWindow(gl_window);
 
     char display_string[200];
-    sprintf(display_string, "rgb alpha~8 double stencil~8 depth samples=%d acc=16", count);
+    sprintf(display_string, "rgb alpha~8 double stencil~8 %s samples=%d acc=16",
+        haveDepthBuffer ? "depth" : "",
+        count);
     glutInitDisplayString(display_string);
     if (!glutGet(GLUT_DISPLAY_MODE_POSSIBLE)) {
         printf("fallback GLUT display config!\n");
         glutInitDisplayString(NULL);
-        glutInitDisplayMode(GLUT_RGB | GLUT_ALPHA | GLUT_DOUBLE | GLUT_DEPTH | GLUT_STENCIL | GLUT_ACCUM);
+        int displayMode = GLUT_RGB | GLUT_ALPHA | GLUT_DOUBLE | GLUT_STENCIL | GLUT_ACCUM;
+        if (haveDepthBuffer) {
+            displayMode |= GLUT_DEPTH;
+        } 
+        glutInitDisplayMode(displayMode);
     }
 
     gl_window = glutCreateSubWindow(gl_container, 0, 0, gl_window_width, gl_window_height);
@@ -786,6 +796,10 @@ int main(int argc, char **argv)
             printf("-nocontainer so no run-time control of antilaising mode\n");
             use_container = false;
         } else
+        if (!stricmp("-z", argv[i])) {
+            printf("requesting no depth buffer\n");
+            haveDepthBuffer = true;
+        } else            
         if (!strcmp("-vsync", argv[i])) {
             printf("requesting vertical retrace sync\n");
             enable_sync = 1;
@@ -1063,13 +1077,17 @@ int main(int argc, char **argv)
         glutMotionFunc(motion);
     }
 
-    sprintf(display_string, "rgb alpha~8 double stencil~8 depth samples=%d acc=16",
-        requested_samples);
+    sprintf(display_string, "rgb alpha~8 double stencil~8 %s samples=%d acc=16",
+        haveDepthBuffer ? "depth" : "", requested_samples);
     glutInitDisplayString(display_string);
     if (!glutGet(GLUT_DISPLAY_MODE_POSSIBLE)) {
         printf("fallback GLUT display config!\n");
         glutInitDisplayString(NULL);
-        glutInitDisplayMode(GLUT_RGB | GLUT_ALPHA | GLUT_DOUBLE | GLUT_DEPTH | GLUT_STENCIL | GLUT_ACCUM);
+        int displayMode = GLUT_RGB | GLUT_ALPHA | GLUT_DOUBLE | GLUT_STENCIL | GLUT_ACCUM;
+        if (haveDepthBuffer) {
+            displayMode |= GLUT_DEPTH;
+        } 
+        glutInitDisplayMode(displayMode);
     }
 
     if (use_container) {
@@ -1126,6 +1144,9 @@ int main(int argc, char **argv)
         animation_mask = GL_WINDOW;
         glutTimerFunc(sixSeconds, benchmarkReport, 0);
     }
+
+    initFPScontext(&gl_fps_context, FPS_USAGE_TEXTURE);
+    scaleFPS(3);
 
     glutMainLoop();
     return 0;
@@ -2234,7 +2255,7 @@ static void display()
     if (just_clear_and_swap) {
         clear();
         if (animation_mask & GL_WINDOW) {
-            double thisFPS = handleFPS();
+            double thisFPS = handleFPS(&gl_fps_context);
             thisFPS = thisFPS;  // force used
         }
         glutSwapBuffers();
@@ -2245,7 +2266,7 @@ static void display()
             drawMetaScene();
         } glMatrixPopEXT(GL_MODELVIEW);
         if (animation_mask & GL_WINDOW) {
-            thisFPS = handleFPS();
+            thisFPS = handleFPS(&gl_fps_context);
             maxFPS = max(maxFPS, thisFPS);
         }
         if (skip_swap) {
@@ -2291,6 +2312,7 @@ void startSceneSeeding();
 
 static void reshape(int w, int h)
 {
+    reshapeFPScontext(&gl_fps_context, w, h);
     force_stencil_clear = true;
     window_x = glutGet(GLUT_WINDOW_X);
     window_y = glutGet(GLUT_WINDOW_Y);

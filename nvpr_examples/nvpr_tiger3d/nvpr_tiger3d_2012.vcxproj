@@ -169,7 +169,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\common\nvpr_init.c" />
+    <ClCompile Include="..\common\nvpr_glew_init.c" />
     <ClCompile Include="nvpr_tiger3d.cpp" />
     <ClCompile Include="..\common\render_font.cpp" />
     <ClCompile Include="..\common\request_vsync.c" />
@@ -179,7 +179,7 @@
     <ClCompile Include="..\common\cg4cpp_xform.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\common\nvpr_init.h" />
+    <ClInclude Include="..\common\nvpr_glew_init.h" />
     <ClInclude Include="..\common\render_font.hpp" />
     <ClInclude Include="..\common\tiger.h" />
     <ClInclude Include="..\common\tiger_paths.h" />

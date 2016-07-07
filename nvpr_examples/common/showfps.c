@@ -3,11 +3,15 @@
 
 // Copyright (c) NVIDIA Corporation. All rights reserved.
 
+#include <assert.h>
+
+#include <GL/glew.h>
+
 #ifdef _WIN32
 #include <windows.h>  /* for QueryPerformanceCounter */
 #endif
 
-#ifdef __APPLE__
+#if __APPLE__
 #include <GLUT/glut.h>
 #else
 #include <GL/glut.h>
@@ -17,37 +21,365 @@
 #include <string.h>
 #include "showfps.h"
 
+// Pre-defined constant image text_image containing characters "0123456789.fps-m";
+// Enough characters for strings "fps" or "ms" and "--" and all decimal numbers
+#include "fps_text_image.h"
+
 static int reportFPS = 1;
-static GLfloat textColor[3];
+static int displayMS = 0;
+static GLfloat textColor[3] = { 1,1,0 };  // yellow
 static int validFPS = 0;
+static float scale = 1.0;
 
-static void drawFPS(double fpsRate)
+int highlight = 0;  // enable for better contrast with the background
+
+void initFPScontext(FPScontext *ctx, FPSusage usage)
 {
-  GLubyte dummy;
-  char buffer[200], *c;
+    ctx->usage = usage;
+    ctx->width = 0;
+    ctx->height = 0;
+    ctx->count = 0;
+    ctx->last_fpsRate = -666;  // bogus
+    ctx->fps_text_texture = 0;
+    if (usage == FPS_USAGE_TEXTURE) {
+        glGenTextures(1, &ctx->fps_text_texture);
+        assert(ctx->fps_text_texture);
+        glBindTexture(GL_TEXTURE_2D, ctx->fps_text_texture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 256, 16, 0, GL_RGBA, GL_UNSIGNED_BYTE, text_image);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    }
+    glEnableClientState(GL_VERTEX_ARRAY);
+}
 
-  glMatrixMode(GL_MODELVIEW);
-  glPushMatrix();
-    glLoadIdentity();
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
-      glLoadIdentity();
-      glOrtho(0, 1, 1, 0, -1, 1);
-      //glDisable(GL_DEPTH_TEST);
-      glColor3fv(textColor);
-      glRasterPos2f(1,1);
-      glBitmap(0, 0, 0, 0, -10*9, 15, &dummy);
-      if (fpsRate > 0 || !validFPS) {
-        sprintf(buffer, "fps %0.1f", fpsRate);
-      } else {
-        strcpy(buffer, "fps --");
-      }
-      for (c = buffer; *c != '\0'; c++)
-        glutBitmapCharacter(GLUT_BITMAP_9_BY_15, *c);
-      //glEnable(GL_DEPTH_TEST);
-    glPopMatrix();
+void reshapeFPScontext(FPScontext *ctx, int w, int h)
+{
+    ctx->width = w;
+    ctx->height = h;
+}
+
+void releaseFPScontext(FPScontext *ctx)
+{
+    if (ctx->fps_text_texture) {
+        assert(ctx->usage == FPS_USAGE_TEXTURE);
+        assert(glIsTexture(ctx->fps_text_texture));
+        glDeleteTextures(1, &ctx->fps_text_texture);
+    }
+}
+
+static void drawTexturedFPS(FPScontext *ctx, double fpsRate)
+{
+    const int adv = 9;
+    const float advance = adv/256.0f;
+#ifndef NDEBUG
+    GLenum got_error;
+
+    GLint active_texture = -666;
+    glGetIntegerv(GL_ACTIVE_TEXTURE, &active_texture);
+    assert(active_texture == GL_TEXTURE0);
+
+    got_error = glGetError();
+    assert(got_error == GL_NO_ERROR);
+#endif
+
+    assert(!glIsEnabled(GL_DEPTH_TEST));
+    //assert(!glIsEnabled(GL_STENCIL_TEST));
+    //assert(!glIsEnabled(GL_BLEND));
+    assert(!glIsEnabled(GL_SCISSOR_TEST));
+    assert(!glIsEnabled(GL_ALPHA_TEST));
+    assert(!glIsEnabled(GL_TEXTURE_1D));
+    assert(!glIsEnabled(GL_TEXTURE_2D));
+    assert(!glIsEnabled(GL_TEXTURE_3D));
+
+    assert(!glIsEnabled(GL_TEXTURE_GEN_S));
+    assert(!glIsEnabled(GL_TEXTURE_GEN_T));
+    assert(!glIsEnabled(GL_TEXTURE_GEN_R));
+    assert(!glIsEnabled(GL_TEXTURE_GEN_Q));
+
     glMatrixMode(GL_MODELVIEW);
-  glPopMatrix();
+    glPushMatrix(); {
+        glLoadIdentity();
+        glMatrixMode(GL_PROJECTION);
+        glPushMatrix(); {
+            const int w = ctx->width, h = ctx->height;
+
+            assert(w > 0);
+            assert(h > 0);
+            glLoadIdentity();
+            glOrtho(0, w, 0, h, -1, 1);
+
+            glActiveTexture(GL_TEXTURE0);
+            glEnable(GL_TEXTURE_2D);
+            assert(glIsTexture(ctx->fps_text_texture));
+            glBindTexture(GL_TEXTURE_2D, ctx->fps_text_texture);
+            glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+            glColor3fv(textColor);
+            glDisable(GL_BLEND);
+            glDisable(GL_STENCIL_TEST);
+            glEnable(GL_ALPHA_TEST);
+            glAlphaFunc(GL_GREATER, 0);
+
+#define t2f(x,y) *v++ = x, *v++ = y
+#define v2f(x,y) *v++ = x, *v++ = y, count++
+
+            if (fpsRate != ctx->last_fpsRate || scale != ctx->last_scale) {
+                char buffer[MAX_FPS_QUADS-1];
+                GLfloat *v = ctx->varray;
+                float x = w-10*adv*scale, y = 15;
+                int count = 0;
+                int i;
+
+                // Construct "ms" or "fps" quadrilaterals
+                if (displayMS) {
+                    // Milliseconds reports "ms"
+                    const int m_ndx = 15;
+                    const int s_ndx = 13;
+
+                    // "m"
+                    t2f(m_ndx*advance, 0);
+                    v2f(x,y);
+                    t2f(m_ndx*advance+advance, 0);
+                    v2f(x+adv*scale,y);
+                    t2f(m_ndx*advance+advance, 1);
+                    v2f(x+adv*scale,y+16*scale);
+                    t2f(m_ndx*advance, 1);
+                    v2f(x,y+16*scale);
+                    x += adv*scale;
+                    // "s"
+                    t2f(s_ndx*advance, 0);
+                    v2f(x,y);
+                    t2f(s_ndx*advance+advance, 0);
+                    v2f(x+adv*scale,y);
+                    t2f(s_ndx*advance+advance, 1);
+                    v2f(x+adv*scale,y+16*scale);
+                    t2f(s_ndx*advance, 1);
+                    v2f(x,y+16*scale);
+                    x += adv*scale;
+                    x += adv*scale;  // for space
+                } else {
+                    // Frames/second reports "fps"
+                    const int fps_start_ndx = 11;
+                    const int fps_chars = sizeof("fps")-1;
+                    t2f(fps_start_ndx*advance, 0);
+                    v2f(x,y);
+                    t2f(fps_start_ndx*advance+fps_chars*advance, 0);
+                    v2f(x+fps_chars*adv*scale,y);
+                    t2f(fps_start_ndx*advance+fps_chars*advance, 1);
+                    v2f(x+fps_chars*adv*scale,y+16*scale);
+                    t2f(fps_start_ndx*advance, 1);
+                    v2f(x,y+16*scale);
+                    x += (fps_chars+1/*for space*/)*adv*scale;
+                }
+
+                // Is the frames/second measurement valid?
+                if (fpsRate > 0 || !validFPS) { 
+                    // Yes, construct the string for it.
+                    const char *c;
+
+#ifdef _WIN32
+#define snprintf _snprintf
+#endif
+                    double value = displayMS ? 1000.0/fpsRate : fpsRate;
+                    // Is the frames/second fast, meaning more than 10 fps?
+                    if (value > 10) {
+                        // Yes, show less decimal precsion.
+                        snprintf(buffer, sizeof(buffer), "%0.1f", value);
+                    } else if (value > 1) {
+                        // Show medium decimal precision.
+                        snprintf(buffer, sizeof(buffer), "%0.2f", value);
+                    } else {
+                        // Show more decimal precision.
+                        snprintf(buffer, sizeof(buffer), "%0.3f", value);
+                    }
+                    // For each character of the string...
+                    for (c = buffer; *c; c++) {
+                        const int is_digit = *c >= '0' && *c <= '9';
+                        const int decimal_point_ndx = 10;  // 11th offset into texture.
+                        const int ndx = is_digit ? *c-'0' : decimal_point_ndx;
+
+                        // Generate quadrilateral for each digit or decimal point.
+                        t2f(ndx*advance, 0);
+                        v2f(x,y);
+                        t2f(ndx*advance+advance, 0);
+                        v2f(x+adv*scale,y);
+                        t2f(ndx*advance+advance, 1);
+                        v2f(x+adv*scale,y+16*scale);
+                        t2f(ndx*advance, 1);
+                        v2f(x,y+16*scale);
+
+                        x += adv*scale;
+                    }
+                } else {
+                    // No, setup "--" string to indicate indefinite fps for now.
+                    for (i=0; i<2; i++) {
+                        const int dash_ndx = 14;  // 15th offset into texture.
+                        t2f(dash_ndx*advance, 0);
+                        v2f(x,y);
+                        t2f(dash_ndx*advance+advance, 0);
+                        v2f(x+adv*scale,y);
+                        t2f(dash_ndx*advance+advance, 1);
+                        v2f(x+adv*scale,y+16*scale);
+                        t2f(dash_ndx*advance, 1);
+                        v2f(x,y+16*scale);
+                        x += adv*scale;
+                    }
+                }
+                ctx->last_fpsRate = fpsRate;
+                ctx->last_scale = scale;
+                ctx->count = count;
+            }
+
+            assert(ctx->count <= MAX_FPS_QUADS);
+            assert((ctx->count % 4) == 0);
+            assert(!glIsEnabled(GL_TEXTURE_COORD_ARRAY));
+            assert(glIsEnabled(GL_VERTEX_ARRAY));
+            assert(glGetError() == GL_NO_ERROR);
+            //glEnableClientState(GL_VERTEX_ARRAY);
+            glClientActiveTexture(GL_TEXTURE0);
+            glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+            glBindBuffer(GL_ARRAY_BUFFER, 0);  // source client-memory arrays
+            glTexCoordPointer(2, GL_FLOAT, 4*sizeof(GLfloat), ctx->varray);
+            glVertexPointer(2, GL_FLOAT, 4*sizeof(GLfloat), ctx->varray+2);
+            glDrawArrays(GL_QUADS, 0, ctx->count);
+            glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+            assert(glGetError() == GL_NO_ERROR);
+
+            glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+            glDisable(GL_TEXTURE_2D);
+            glDisable(GL_ALPHA_TEST);
+        } glPopMatrix();
+        glMatrixMode(GL_MODELVIEW);
+    } glPopMatrix();
+}
+
+#ifdef _WIN32
+#define snprintf _snprintf
+#endif
+
+static void drawBitmapFPS(double fpsRate)
+{
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix(); {
+        glLoadIdentity();
+        glMatrixMode(GL_PROJECTION);
+        glPushMatrix(); {
+            GLubyte dummy;
+            char buffer[200], *c;
+
+            glLoadIdentity();
+            glOrtho(0, 1, 1, 0, -1, 1);
+            //glDisable(GL_DEPTH_TEST);
+            if (displayMS) {
+                if (fpsRate > 0 || !validFPS) {
+                    double milliseconds = 1000.0/fpsRate;
+                    // Is the frames/second slow, meaning less than 1 fps?
+                    if (milliseconds < 1) {
+                        // Yes, show more decimal precision?
+                        snprintf(buffer, sizeof(buffer), "ms %0.3f", milliseconds);
+                    } else if (milliseconds < 10) {
+                        // Yes, show more decimal precision?
+                        snprintf(buffer, sizeof(buffer), "ms %0.2f", milliseconds);
+                    } else {
+                        snprintf(buffer, sizeof(buffer), "ms %0.1f", milliseconds);
+                    }
+                } else {
+                    strcpy(buffer, "ms --");
+                }
+            } else {
+                if (fpsRate > 0 || !validFPS) {
+                    // Is the frames/second slow, meaning less than 1 fps?
+                    if (fpsRate < 1) {
+                        // Yes, show more decimal precision?
+                        snprintf(buffer, sizeof(buffer), "fps %0.3f", fpsRate);
+                    } else if (fpsRate < 10) {
+                        // Yes, show more decimal precision?
+                        snprintf(buffer, sizeof(buffer), "fps %0.2f", fpsRate);
+                    } else {
+                        snprintf(buffer, sizeof(buffer), "fps %0.1f", fpsRate);
+                    }
+                } else {
+                    strcpy(buffer, "fps --");
+                }
+            }
+            if (highlight) {
+                int i;
+                GLfloat altColor[3] = { textColor[0]-0.66f, textColor[1]-0.66f, textColor[2]-0.66 };
+                for (i = 0; i<3; i++) {
+                    if (altColor[i] < 0) {
+                        altColor[i] = 1;
+                    }
+                }
+                glColor3fv(altColor);
+                // Draw text shifted lower-left by a pixel and upper-right by a pixel.
+                for (i=-1; i<=1; i+=2) {
+                    glRasterPos2f(1,1);
+                    glBitmap(0, 0, 0, 0,
+                        (GLfloat)(-10*9+i), (GLfloat)(15+i), &dummy);
+                    for (c = buffer; *c != '\0'; c++) {
+                        glutBitmapCharacter(GLUT_BITMAP_9_BY_15, *c);
+                    }
+                }
+            }
+            glColor3fv(textColor);
+            glRasterPos2f(1,1);
+            glBitmap(0, 0, 0, 0, -10*9, 15, &dummy);
+            for (c = buffer; *c != '\0'; c++) {
+                glutBitmapCharacter(GLUT_BITMAP_9_BY_15, *c);
+            }
+
+#if 0  // code used to generate fps_text_image.h
+            {
+                char *str = "0123456789.fps-m";
+                const str_len = strlen(str);
+                GLubyte pixels[16*256*4+1];
+                GLubyte *p = pixels;
+                int i, j;
+                assert(str_len <= 16);
+                glColor3f(0,0,0.1);
+                for (i=-1; i<=1; i++) {
+                    for (j=-1; j<=1; j++) {
+                        glWindowPos2i(0,4);
+                        glBitmap(0, 0, 0, 0, i, j, &dummy);
+                        for (c = str; *c != '\0'; c++) {
+                            glutBitmapCharacter(GLUT_BITMAP_9_BY_15, *c);
+                        }
+                    }
+                }
+                glColor3f(1,1,0);
+                glWindowPos2i(0,4);
+                for (c = str; *c != '\0'; c++) {
+                    glutBitmapCharacter(GLUT_BITMAP_9_BY_15, *c);
+                }
+                pixels[16*256*4] = 42;
+                glReadPixels(0,0, 256, 16, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+                assert(pixels[16*256*4] == 42);
+                printf("GLubyte text_image[16*256*4] = {\n");
+                for (i=0; i<16; i++) {
+                    for (j=0; j<256; j++) {
+                        printf(" 0x%x,0x%x,0x%x,0x%x,", p[0], p[1], p[2], p[3]);
+                        p += 4;
+                    }
+                    printf("\n");
+                }
+                printf("};\n");
+                assert(p == &pixels[16*256*4]);
+            }
+#endif
+            //glEnable(GL_DEPTH_TEST);
+        } glPopMatrix();
+        glMatrixMode(GL_MODELVIEW);
+    } glPopMatrix();
+}
+
+static void drawFPS(FPScontext *ctx, double fpsRate)
+{
+    if (ctx->usage == FPS_USAGE_TEXTURE) {
+        drawTexturedFPS(ctx, fpsRate);
+    } else {
+        drawBitmapFPS(fpsRate);
+    }
 }
 
 #ifdef _WIN32
@@ -163,11 +495,11 @@ double just_handleFPS(void)
   return lastFpsRate;
 }
 
-double handleFPS(void)
+double handleFPS(FPScontext *ctx)
 {
   double lastFpsRate = just_handleFPS();
   if (reportFPS) {
-    drawFPS(lastFpsRate);
+    drawFPS(ctx, lastFpsRate);
   }
   return lastFpsRate;
 }
@@ -179,9 +511,29 @@ void colorFPS(float r, float g, float b)
   textColor[2] = b;
 }
 
+void scaleFPS(float new_scale)
+{
+  scale = new_scale;
+}
+
 void toggleFPS(void)
 {
   reportFPS = !reportFPS;
+}
+
+void toggleFPSunits(void)
+{
+  displayMS = !displayMS;
+}
+
+void reportFPSinMS(void)
+{
+    displayMS = 1;
+}
+
+void reportFPSinFPS(void)
+{
+    displayMS = 0;
 }
 
 void enableFPS(void)

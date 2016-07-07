@@ -21,7 +21,7 @@
 
 using namespace Cg;
 
-#include "nvpr_init.h"
+#include "nvpr_glew_init.h"
 #include "tiger.h"
 #include "trackball.h"
 #include "showfps.h"
@@ -29,7 +29,7 @@ using namespace Cg;
 #include "cg4cpp_xform.hpp"
 #include "render_font.hpp"
 
-const char *programName = "nvpr_tiger3d";
+const char *program_name = "nvpr_tiger3d";
 int stroking = 1,
     filling = 1;
 
@@ -67,9 +67,11 @@ GLenum blit_filter = GL_NEAREST;
 GLuint tex_color = 0;
 GLfloat tiger_bounds[4];  // (x1,y1,x2,y2) for lower-left and upper-right of tiger scene
 
+FPScontext gl_fps_context;
+
 static void fatalError(const char *message)
 {
-  fprintf(stderr, "%s: %s\n", programName, message);
+  fprintf(stderr, "%s: %s\n", program_name, message);
   exit(1);
 }
 
@@ -77,6 +79,7 @@ float window_width, window_height;
 
 static void reshape(int w, int h)
 {
+  reshapeFPScontext(&gl_fps_context, w, h);
   glViewport(0,0, w,h);
   window_width = w;
   window_height = h;
@@ -271,11 +274,9 @@ initFBO(Mode fbo_mode, int width, int height, int num_samples)
       GL_COLOR_ATTACHMENT0,
       GL_TEXTURE_2D, tex_color, 0);
 
-#if 1
     glBlitFramebuffer(0, 0, width, height,  // source (x,y,w,h)
                       0, 0, tex_width, tex_height,  // destination (x,y,w,h)
                       GL_COLOR_BUFFER_BIT, GL_NEAREST);
-#endif
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glDeleteFramebuffers(1, &fbo_texture);
   } 
@@ -380,7 +381,6 @@ display(void)
   } else {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   }
-#if 1
   if (newModel) {
     recalcModelView();
   }
@@ -404,33 +404,12 @@ display(void)
         msg->render();
       } glMatrixPopEXT(GL_MODELVIEW);
     } glMatrixPopEXT(GL_PROJECTION);
+  } else {
+    glDisable(GL_DEPTH_TEST);  // handleFPS expects this disabled.
   }
-#else
-  glDisable(GL_STENCIL_TEST);
-  glDisable(GL_DEPTH_TEST);
-  glMatrixLoadIdentityEXT(GL_PROJECTION);
-  glMatrixLoadIdentityEXT(GL_MODELVIEW);
-  glBindTexture(GL_TEXTURE_2D, tex_color);
-  glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-  glEnable(GL_TEXTURE_2D);
-  glBegin(GL_TRIANGLE_FAN); {
-    glColor3f(1,0,0);
-    glTexCoord2f(0,1);
-    glVertex2f(-1,-1);
-    glColor3f(0,1,0);
-    glTexCoord2f(1,1);
-    glVertex2f(1,-1);
-    glColor3f(0,0,1);
-    glTexCoord2f(1,0);
-    glVertex2f(1,1);
-    glColor3f(1,1,0);
-    glTexCoord2f(0,0);
-    glVertex2f(-1,1);
-  } glEnd();
-#endif
 
   glDisable(GL_STENCIL_TEST);
-  handleFPS();
+  handleFPS(&gl_fps_context);
   glutSwapBuffers();
 }
 
@@ -642,7 +621,7 @@ main(int argc, char **argv)
       }
     }
     fprintf(stderr, "usage: %s [-#]\n       where # is the number of samples/pixel\n",
-      programName);
+      program_name);
     exit(1);
   }
 
@@ -714,13 +693,14 @@ main(int argc, char **argv)
     fatalError("OpenGL implementation doesn't support GL_EXT_direct_state_access (you should be using NVIDIA GPUs...)");
   }
 
-  initializeNVPR(programName);
+  initialize_NVPR_GLEW_emulation(stdout, program_name, 0);
   if (!has_NV_path_rendering) {
     fatalError("required NV_path_rendering OpenGL extension is not present");
   }
   initGraphics();
   initFBO(fbo_mode, fbo_width, fbo_height, renderbuffer_samples);
   restoreClear();
+  initFPScontext(&gl_fps_context, FPS_USAGE_TEXTURE);
   colorFPS(0,1,0);
 
   glutMainLoop();

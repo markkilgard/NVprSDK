@@ -14,6 +14,7 @@ void GLBlitRenderer::swapBuffers()
 
 void GLBlitRenderer::reportFPS()
 {
-    double thisFPS = handleFPS();
+    extern FPScontext gl_fps_context;
+    double thisFPS = handleFPS(&gl_fps_context);
     thisFPS = thisFPS; // force used
 }

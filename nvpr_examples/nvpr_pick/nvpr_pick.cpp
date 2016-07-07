@@ -35,12 +35,12 @@ using std::cout;
 using std::endl;
 using std::vector;
 
-#include "nvpr_init.h"
+#include "nvpr_glew_init.h"
 #include "request_vsync.h"
 #include "showfps.h"
 #include "cg4cpp_xform.hpp"
 
-const char *programName = "nv_pick";
+const char *program_name = "nv_pick";
 int stroking = 1,
     filling = 1;
 
@@ -68,6 +68,8 @@ float2 corners[4];
 float2 moved_corners[4];
 float3x3 model, view, inverse_view;
 
+FPScontext gl_fps_context;
+
 struct Result {
     bool in_fill;
     bool in_stroke;
@@ -94,7 +96,7 @@ vector<Result> result_list;
 
 static void fatalError(const char *message)
 {
-  fprintf(stderr, "%s: %s\n", programName, message);
+  fprintf(stderr, "%s: %s\n", program_name, message);
   exit(1);
 }
 
@@ -282,7 +284,7 @@ void display(void)
           } glEnd();
       } glMatrixPopEXT(GL_MODELVIEW);
   }
-  handleFPS();
+  handleFPS(&gl_fps_context);
 
   glutSwapBuffers();
 }
@@ -310,6 +312,7 @@ int iheight;
 
 void reshape(int w, int h)
 {
+  reshapeFPScontext(&gl_fps_context, w, h);
   glViewport(0,0,w,h);
   iheight = h-1;
   window_width = w;
@@ -659,7 +662,7 @@ main(int argc, char **argv)
       }
     }
     fprintf(stderr, "usage: %s [-#]\n       where # is the number of samples/pixel\n",
-      programName);
+      program_name);
     exit(1);
   }
 
@@ -719,12 +722,13 @@ main(int argc, char **argv)
     fatalError("OpenGL implementation doesn't support GL_EXT_direct_state_access (you should be using NVIDIA GPUs...)");
   }
 
-  initializeNVPR(programName);
+  initialize_NVPR_GLEW_emulation(stdout, program_name, 0);
   if (!has_NV_path_rendering) {
     fatalError("required NV_path_rendering OpenGL extension is not present");
   }
   initGraphics();
   requestSynchornizedSwapBuffers(enable_vsync);
+  initFPScontext(&gl_fps_context, FPS_USAGE_TEXTURE);
   colorFPS(0,1,0);
   disableFPS();
 

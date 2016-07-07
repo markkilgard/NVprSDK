@@ -319,6 +319,7 @@ copy zlib1.dll $(OutDir)</Command>
     <ClCompile Include="renderer.cpp" />
     <ClCompile Include="scene.cpp" />
     <ClCompile Include="sRGB_vector.cpp" />
+    <ClCompile Include="stb\stb_image.c" />
     <ClCompile Include="svg_files.cpp" />
     <ClCompile Include="svg_loader.cpp" />
     <ClCompile Include="tinyxml\tinystr.cpp" />
@@ -357,7 +358,6 @@ copy zlib1.dll $(OutDir)</Command>
     <ClCompile Include="d2d\init_d2d.cpp" />
     <ClCompile Include="d2d\renderer_d2d.cpp" />
     <ClCompile Include="d2d\scene_d2d.cpp" />
-    <ClCompile Include="stb\stb_image.c" />
     <ClCompile Include="nvpr\renderer_nvpr.cpp" />
     <ClCompile Include="nvpr\renderer_nvpr_path.cpp" />
     <ClCompile Include="nvpr\renderer_nvpr_shader.cpp" />
@@ -385,6 +385,8 @@ copy zlib1.dll $(OutDir)</Command>
     <ClInclude Include="renderer.hpp" />
     <ClInclude Include="scene.hpp" />
     <ClInclude Include="sRGB_vector.hpp" />
+    <ClInclude Include="stb\stb_image.h" />
+    <ClInclude Include="stb\stb_image_write.h" />
     <ClInclude Include="svg_files.hpp" />
     <ClInclude Include="svg_loader.hpp" />
     <ClInclude Include="cairo\renderer_cairo.hpp" />
@@ -403,7 +405,6 @@ copy zlib1.dll $(OutDir)</Command>
     <ClInclude Include="d2d\init_d2d_private.hpp" />
     <ClInclude Include="d2d\renderer_d2d.hpp" />
     <ClInclude Include="d2d\scene_d2d.hpp" />
-    <ClInclude Include="stb\stb_image.h" />
     <ClInclude Include="nvpr\renderer_nvpr.hpp" />
     <ClInclude Include="skia\renderer_skia.hpp" />
     <ClInclude Include="skia\scene_skia.hpp" />
@@ -507,6 +508,9 @@ copy zlib1.dll $(OutDir)</Command>
     <ProjectReference Include="..\skia\out\gyp\skgr_2012.vcxproj">
       <Project>{3a0016aa-ac89-6cc6-3ef1-afe5dcd5b8e6}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="stb\ReadMe.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

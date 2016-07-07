@@ -1,5 +1,6 @@
 
 http://nothings.org/stb_image.c
+http://nothings.org/stb_image_write.h
 
 Comment from Sean Barrett' http://nothings.org/
 
