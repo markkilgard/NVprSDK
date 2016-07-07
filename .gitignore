@@ -23,3 +23,5 @@ x64_2012
 *.vcproj.*
 *.vcxproj.*
 *.suo
+*.sdf
+*.opensdf
