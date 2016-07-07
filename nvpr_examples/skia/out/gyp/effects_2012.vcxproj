@@ -47,10 +47,10 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <ExecutablePath>$(ExecutablePath);$(MSBuildProjectDirectory)\..\..\gyp\bin\;$(MSBuildProjectDirectory)\..\..\gyp\bin\</ExecutablePath>
-    <IntDir>$(Platform)__2012$(Configuration)\$(ProjectName)\</IntDir>
+    <IntDir>$(Platform)_2012\$(Configuration)\$(ProjectName)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
-    <OutDir>$(Platform)__2012$(Configuration)\</OutDir>
+    <OutDir>$(Platform)_2012\$(Configuration)\</OutDir>
     <TargetName>$(ProjectName)</TargetName>
     <TargetPath>$(OutDir)\lib\$(ProjectName).lib</TargetPath>
   </PropertyGroup>
