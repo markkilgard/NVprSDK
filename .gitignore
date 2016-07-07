@@ -25,3 +25,6 @@ x64_2012
 *.suo
 *.sdf
 *.opensdf
+
+# vi swap files
+*.swp
