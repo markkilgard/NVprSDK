@@ -165,15 +165,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\common\nvpr_init.c" />
+    <ClCompile Include="..\common\nvpr_glew_init.c" />
     <ClCompile Include="nvpr_pick.cpp" />
     <ClCompile Include="..\common\request_vsync.c" />
     <ClCompile Include="..\common\showfps.c" />
     <ClCompile Include="..\common\cg4cpp_xform.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\common\nvpr_init.h" />
     <ClInclude Include="..\common\cg4cpp_xform.hpp" />
+    <ClInclude Include="..\common\nvpr_glew_init.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\cg4cpp\src\cg4cpp_2010.vcxproj">

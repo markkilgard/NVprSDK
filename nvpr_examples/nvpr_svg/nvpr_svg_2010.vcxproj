@@ -305,6 +305,7 @@ copy zlib1.dll $(OutDir)</Command>
     <ClCompile Include="renderer.cpp" />
     <ClCompile Include="scene.cpp" />
     <ClCompile Include="sRGB_vector.cpp" />
+    <ClCompile Include="stb\stb_image_write.c" />
     <ClCompile Include="svg_files.cpp" />
     <ClCompile Include="svg_loader.cpp" />
     <ClCompile Include="tinyxml\tinystr.cpp" />
@@ -371,6 +372,7 @@ copy zlib1.dll $(OutDir)</Command>
     <ClInclude Include="renderer.hpp" />
     <ClInclude Include="scene.hpp" />
     <ClInclude Include="sRGB_vector.hpp" />
+    <ClInclude Include="stb\stb_image_write.h" />
     <ClInclude Include="svg_files.hpp" />
     <ClInclude Include="svg_loader.hpp" />
     <ClInclude Include="cairo\renderer_cairo.hpp" />
