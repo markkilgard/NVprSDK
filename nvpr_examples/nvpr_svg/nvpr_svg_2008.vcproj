@@ -805,6 +805,10 @@
 					RelativePath=".\stb\stb_image.h"
 					>
 				</File>
+				<File
+					RelativePath=".\stb\stb_image_write.c"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="nvpr"

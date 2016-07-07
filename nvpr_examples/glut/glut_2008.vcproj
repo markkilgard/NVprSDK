@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="9.00"
 	Name="glutstatic"
-	ProjectGUID="{84CD2543-D9A4-4E57-97C6-176C2C78B50E}"
+	ProjectGUID="{47C9817F-F497-45BF-90E6-5857F3128042}"
 	RootNamespace="glut"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="0"
