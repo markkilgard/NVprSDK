@@ -14,6 +14,11 @@
 
 namespace Cg {
 
+#if defined(_MSC_VER) && !defined(__EDG__)  // Visual C++ but not EDG fakery
+#pragma warning(push)
+#pragma warning(disable:4127)  // conditional expression is constant
+#endif
+
 #if defined(__GNUC__) && (__GNUC__>3 || (__GNUC__==3 && __GNUC_MINOR__>=3))
 #define __CGmay_alias __attribute__((__may_alias__))
 #else
@@ -231,6 +236,10 @@ typedef __CGcustom_fixed_storageS1_10 cgFixedStorage;
 // Cg data type for OpenGL texenv profile
 //typedef __CGcustom_fixedU0_8 fixed;
 //typedef __CGcustom_fixed_storageU0_8 cgFixedStorage;
+
+#if defined(_MSC_VER) && !defined(__EDG__)  // Visual C++ but not EDG fakery
+#pragma warning(pop)
+#endif
 
 } // namespace Cg
 

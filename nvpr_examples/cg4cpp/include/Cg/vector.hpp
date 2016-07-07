@@ -1,5 +1,5 @@
 /* 
- * Copyright 2005-2006 by NVIDIA Corporation.  All rights reserved.  All
+ * Copyright 2005-2006,2010-2012,2016 by NVIDIA Corporation.  All rights reserved.  All
  * information contained herein is proprietary and confidential to NVIDIA
  * Corporation.  Any use, reproduction, or disclosure without the written
  * permission of NVIDIA Corporation is prohibited.
@@ -53,6 +53,14 @@
  */
 
 namespace Cg {
+
+#if defined(_MSC_VER) && !defined(__EDG__)  // Visual C++ but not EDG fakery
+#pragma warning(push)
+#pragma warning(disable:4800)  // forcing value to bool 'true' or 'false' (performance warning)
+#pragma warning(disable:4512)  // assignment operator could not be generated
+#pragma warning(disable:4510)  // default constructor could not be generated
+#pragma warning(disable:4610)  // union can never be instantiated - user defined constructor required
+#endif
 
 // FUNDAMENTAL BASE CLASS
 
@@ -342,7 +350,7 @@ public:
     } 
     inline __CGvector_usage & operator >>= (const T & s) {
         for (int i=0; i<N; i++)
-	    (*this)[i] >>= s;
+            (*this)[i] >>= s;
         return *this;
     }
     inline __CGvector_usage & operator ++ () { /* prefix */
@@ -406,7 +414,15 @@ public:
     }
 };
 
-#if defined(__GNUC__) && (__GNUC__>3 || (__GNUC__==3 && __GNUC_MINOR__>=3))
+// Omit the may_alias attribute when compiling with gcc 4.6 to work around gcc
+// bug 49377.
+// This compiler bug causes methods with certain attributes to not match up
+// with their prototypes, which means that gcc 4.6 fails to compile this code.
+// The workaround is to simply omit the attribute; when this is done, gcc
+// compiles the code fine.  This workaround is only valid when this code is
+// build with -fno-strict-aliasing.  Fortunately, the OpenGL build on UNIX
+// platforms does so.
+#if defined(__GNUC__) && (__GNUC__>3 || (__GNUC__==3 && __GNUC_MINOR__>=3)) && !(__GNUC__ == 4 && __GNUC_MINOR__ == 6)
 #define __CGmay_alias __attribute__((__may_alias__))
 #else
 #define __CGmay_alias 
@@ -1092,6 +1108,10 @@ public:
         __CGvector_storage<T,N>::operator=(ind);
         return *this;
     }
+    inline __CGvector & operator = (const __CGvector<T,N> & ind) { // For MSVC 14.0
+        __CGvector_storage<T,N>::operator=(ind);
+        return *this;
+    }
     inline __CGvector & operator = (const T v) {
         __CGvector_storage<T,N>::operator=(v);
         return *this;
@@ -1131,6 +1151,10 @@ public:
     // ASSIGNMENT OPERATORS
     template <typename T2, typename T2store>
     inline __CGvector & operator = (const __CGvector_usage<T2,N,T2store> & ind) {
+        __CGvector_storage<T,N>::operator=(ind);
+        return *this;
+    }
+    inline __CGvector & operator = (const __CGvector<T,N> & ind) { // For MSVC 14.0
         __CGvector_storage<T,N>::operator=(ind);
         return *this;
     }
@@ -1183,6 +1207,10 @@ public:
     // ASSIGNMENT OPERATORS
     template <typename T2, typename T2store>
     inline __CGvector & operator = (const __CGvector_usage<T2,N,T2store> & ind) {
+        __CGvector_storage<T,N>::operator=(ind);
+        return *this;
+    }
+    inline __CGvector & operator = (const __CGvector<T,N> & ind) { // For MSVC 14.0
         __CGvector_storage<T,N>::operator=(ind);
         return *this;
     }
@@ -1273,6 +1301,10 @@ public:
     // ASSIGNMENT OPERATORS
     template <typename T2, typename T2store>
     inline __CGvector & operator = (const __CGvector_usage<T2,N,T2store> & ind) {
+        __CGvector_storage<T,N>::operator=(ind);
+        return *this;
+    }
+    inline __CGvector & operator = (const __CGvector<T,N> & ind) { // For MSVC 14.0
         __CGvector_storage<T,N>::operator=(ind);
         return *this;
     }
@@ -1841,11 +1873,6 @@ inline __CGvector<typename __CGtype_trait<T1,T2>::intType,N> operator >> (const 
         r[i] = ResultType(a[0]) >> ResultType(b[i]);
     return r;
 }
-
-#if defined(_MSC_VER) && !defined(__EDG__)  // Visual C++ but not EDG fakery
-#pragma warning(push)
-#pragma warning(disable:4800)  // forcing value to bool 'true' or 'false' (performance warning)
-#endif
 
 // BINARY LESS THAN (<)
 template <typename T1, typename T2, int N, typename T1store, typename T2store> 

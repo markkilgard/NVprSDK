@@ -61,7 +61,7 @@ static inline __CGvector<typename __CGtype_trait<T>::realType,N> abs(const __CGv
 template <typename T>
 static inline __CGvector<typename __CGtype_trait<T>::realType,1> abs(const T & v)
 {
-    __CGvector<typename __CGtype_trait<T>::realType,1> rv(::fabs(static_cast<T>(v)));
+    __CGvector<typename __CGtype_trait<T>::realType,1> rv(T(::fabs(static_cast<T>(v))));
     return rv;
 }
 

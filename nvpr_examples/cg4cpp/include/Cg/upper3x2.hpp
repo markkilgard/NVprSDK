@@ -21,7 +21,7 @@ __CGmatrix<T,3,2> upper3x2(const __CGmatrix<T,M,N> &m)
 {
     const int COLS = 3,
               ROWS = 2;
-    __CGmatrix<T,COLS,ROWS> rv;
+    __CGmatrix<T,COLS,ROWS> rv(0);
     for (int i=0; i<COLS; i++) {
         for (int j=0; j<ROWS; j++) {
             if (i<M && j<N) {

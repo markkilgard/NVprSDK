@@ -21,7 +21,7 @@ __CGmatrix<T,1,4> upper1x4(const __CGmatrix<T,M,N> &m)
 {
     const int COLS = 1,
               ROWS = 4;
-    __CGmatrix<T,COLS,ROWS> rv;
+    __CGmatrix<T,COLS,ROWS> rv(0);
     for (int i=0; i<COLS; i++) {
         for (int j=0; j<ROWS; j++) {
             if (i<M && j<N) {

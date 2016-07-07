@@ -10,6 +10,11 @@
 
 namespace Cg {
 
+#if defined(_MSC_VER) && !defined(__EDG__)  // Visual C++ but not EDG fakery
+#pragma warning(push)
+#pragma warning(disable:4127)  // conditional expression is constant
+#endif
+
 #if defined(__GNUC__) && (__GNUC__>3 || (__GNUC__==3 && __GNUC_MINOR__>=3))
 #define __CGmay_alias __attribute__((__may_alias__))
 #else
@@ -336,6 +341,10 @@ typedef __CGcustom_float_storageS10E5 __CGhalf_storage;
 
 // Undefine helper #defines
 #undef __CGmay_alias
+
+#if defined(_MSC_VER) && !defined(__EDG__)  // Visual C++ but not EDG fakery
+#pragma warning(pop)
+#endif
 
 } // namespace Cg
 
