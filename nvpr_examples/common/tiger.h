@@ -14,6 +14,9 @@ extern unsigned int getTigerPathCount();
 extern GLuint getTigerBasePath();
 extern void getTigerBounds(GLfloat bounds[4], int filling, int stroking);
 
+typedef void (*SendColorFunc)(GLuint color);
+extern void setTigerSendColorFunc(SendColorFunc func);
+
 #ifdef __cplusplus
 }
 #endif

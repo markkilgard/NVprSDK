@@ -4,17 +4,22 @@
 # broadcast making a specified target to all SUBDIRS
 
 SUBDIRS =\
+  fms_shape \
   nvpr_basic \
+  nvpr_cmyk \
   nvpr_cursive \
   nvpr_font_file \
+  nvpr_glsl \
   nvpr_gradient \
   nvpr_hello_world \
   nvpr_korean \
+  nvpr_morph \
   nvpr_pick \
   nvpr_shaders \
   nvpr_svg \
   nvpr_text_wheel \
   nvpr_tiger \
+  nvpr_tiger_fms \
   nvpr_tiger3d \
   nvpr_warp_tiger \
   nvpr_welsh_dragon \

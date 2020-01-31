@@ -322,16 +322,16 @@
 	</Configurations>
 	<References>
 		<ProjectReference
-			ReferencedProjectIdentifier="{84CD2543-D9A4-4E57-97C6-176C2C78B50E}"
-			RelativePathToProject=".\glut\glut_2008.vcproj"
-		/>
-		<ProjectReference
 			ReferencedProjectIdentifier="{05FFADE4-2B93-C899-00CA-AA717CA7A077}"
 			RelativePathToProject=".\glew\glewlib_2008.vcproj"
 		/>
 		<ProjectReference
 			ReferencedProjectIdentifier="{DD69089E-81D7-4BB2-8A3D-CBE3C94A8684}"
 			RelativePathToProject=".\cg4cpp\src\cg4cpp_2008.vcproj"
+		/>
+		<ProjectReference
+			ReferencedProjectIdentifier="{47C9817F-F497-45BF-90E6-5857F3128042}"
+			RelativePathToProject=".\glut\glut_2008.vcproj"
 		/>
 	</References>
 	<Files>

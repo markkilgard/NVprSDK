@@ -320,6 +320,7 @@ copy zlib1.dll $(OutDir)</Command>
     <ClCompile Include="scene.cpp" />
     <ClCompile Include="sRGB_vector.cpp" />
     <ClCompile Include="stb\stb_image.c" />
+    <ClCompile Include="stb\stb_image_write.c" />
     <ClCompile Include="svg_files.cpp" />
     <ClCompile Include="svg_loader.cpp" />
     <ClCompile Include="tinyxml\tinystr.cpp" />

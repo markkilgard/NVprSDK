@@ -50,6 +50,15 @@ static void sendColor(GLuint color)
   glColor3ub(red, green, blue);
 }
 
+typedef void (*SendColorFunc)(GLuint color);
+
+static SendColorFunc sendColorFunc = sendColor;
+
+void setTigerSendColorFunc(SendColorFunc func)
+{
+  sendColorFunc = func;
+}
+
 static void drawTigerLayer(int layer, int filling, int stroking)
 {
   const struct TigerStyle *style = &tiger_style[layer];
@@ -59,9 +68,8 @@ static void drawTigerLayer(int layer, int filling, int stroking)
 
   // Should this path be filled?
   if (filling && stroke_width >= 0) {
-    sendColor(fill_color);
-    glStencilFillPathNV(tiger_path_base+layer, GL_COUNT_UP_NV, 0x1F);
-    glCoverFillPathNV(tiger_path_base+layer, GL_BOUNDING_BOX_NV);
+    sendColorFunc(fill_color);
+    glStencilThenCoverFillPathNV(tiger_path_base+layer, GL_COUNT_UP_NV, 0x1F, GL_BOUNDING_BOX_NV);
   } else {
     // Negative stroke_width means "stroke only" (no fill)
   }
@@ -69,9 +77,8 @@ static void drawTigerLayer(int layer, int filling, int stroking)
   // Should this path be stroked?
   if (stroking && stroke_width != 0) {
     const GLint reference = 0x1;
-    sendColor(stroke_color);
-    glStencilStrokePathNV(tiger_path_base+layer, reference, 0x1F);
-    glCoverStrokePathNV(tiger_path_base+layer, GL_BOUNDING_BOX_NV);
+    sendColorFunc(stroke_color);
+    glStencilThenCoverStrokePathNV(tiger_path_base+layer, reference, 0x1F, GL_BOUNDING_BOX_NV);
   } else {
     // Zero stroke widths means "fill only" (no stroke)
   }

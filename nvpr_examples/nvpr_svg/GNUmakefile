@@ -17,6 +17,7 @@ BOOST   := ../boost-1.38.0
 GS_SIMPLE_C = \
   ../common/showfps.c \
   stb/stb_image.c \
+  stb/stb_image_write.c \
   ../glew/src/glew.c \
   ../common/nvpr_init.c \
   ../common/sRGB_math.c \
