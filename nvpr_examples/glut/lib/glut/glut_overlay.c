@@ -14,10 +14,16 @@
 # include <X11/Xlib.h>
 # include <X11/Xutil.h>
 # include <X11/Xatom.h>  /* for XA_RGB_DEFAULT_MAP atom */
-# if defined (__vms)
-#  include <Xmu/StdCmap.h>  /* for XmuLookupStandardColormap */
+# if PRIVATE_XMU
+   /* #define Xmu color map routines to __glutXmu names to not conflict with conventional Xmu */
+#  define XmuLookupStandardColormap __glutXmuLookupStandardColormap
+#  include "../Xmu/include/X11/Xmu/StdCmap.h"  /* for XmuLookupStandardColormap */
 # else
-#  include <X11/Xmu/StdCmap.h>  /* for XmuLookupStandardColormap */
+#  if defined (__vms)
+#   include <Xmu/StdCmap.h>  /* for XmuLookupStandardColormap */
+#  else
+#   include <X11/Xmu/StdCmap.h>  /* for XmuLookupStandardColormap */
+#  endif
 # endif
 #endif /* !_WIN32 */
 

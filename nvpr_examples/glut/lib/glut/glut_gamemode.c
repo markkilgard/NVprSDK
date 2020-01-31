@@ -74,6 +74,10 @@ initGameModeSupport(void)
   DWORD mode;
   int i;
 
+  // initialize the DEVMODE structure
+  ZeroMemory(&dm, sizeof(dm));
+  dm.dmSize = sizeof(dm);
+
   if (ndmodes >= 0) {
     /* ndmodes is initially -1 to indicate no
        dmodes allocated yet. */
@@ -95,13 +99,17 @@ initGameModeSupport(void)
   /* Allocate memory for a list of all the display modes. */
   dmodes = (DisplayMode*)
     malloc(ndmodes * sizeof(DisplayMode));
+  if (!dmodes) {
+      __glutFatalError("out of memory.");
+      return;
+  }
 
   /* Now that we know how many display modes to expect,
      enumerate them again and save the information in
      the list we allocated above. */
   i = 0;
   mode = 0;
-  while (EnumDisplaySettings(NULL, mode, &dm)) {
+  while (i<ndmodes && EnumDisplaySettings(NULL, mode, &dm)) {
     /* Try to reject any display settings that seem unplausible. */
     if (dm.dmPelsWidth >= MIN_WIDTH &&
       (dm.dmDisplayFrequency == 0 ||

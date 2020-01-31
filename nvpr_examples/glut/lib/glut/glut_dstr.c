@@ -141,6 +141,7 @@ getMesaVisualList(int *n)
   vlist = (XVisualInfo **) malloc((32 + 16) * sizeof(XVisualInfo *));
   if (!vlist) {
     __glutFatalError("out of memory.");
+    return NULL;
   }
 
   cnt = 0;
@@ -312,6 +313,7 @@ loadVisuals(int *nitems_return)
     vlist = (XVisualInfo **) malloc(n * sizeof(XVisualInfo *));
     if (!vlist) {
       __glutFatalError("out of memory.");
+      return NULL;
     }
     for (i = 0; i < n; i++) {
       vlist[i] = &vinfo[i];
@@ -321,6 +323,7 @@ loadVisuals(int *nitems_return)
   fbmodes = (FrameBufferMode *) malloc(n * sizeof(FrameBufferMode));
   if (!fbmodes) {
     __glutFatalError("out of memory.");
+    return NULL;
   }
   for (i = 0; i < n; i++) {
     mode = &fbmodes[i];
@@ -692,6 +695,7 @@ findMatch(FrameBufferMode * fbmodes, int nfbmodes,
   bestScore = (int *) malloc(ncriteria * sizeof(int));
   if (!bestScore) {
     __glutFatalError("out of memory.");
+    return NULL;
   }
   for (j = 0; j < ncriteria; j++) {
     /* Very negative number. */
@@ -702,6 +706,8 @@ findMatch(FrameBufferMode * fbmodes, int nfbmodes,
   thisScore = (int *) malloc(ncriteria * sizeof(int));
   if (!thisScore) {
     __glutFatalError("out of memory.");
+    free(bestScore);
+    return NULL;
   }
 
   for (i = 0; i < nfbmodes; i++) {
@@ -1265,6 +1271,7 @@ parseModeString(char *mode, int *ncriteria, Bool * allowDoubleAsSingle,
   Criterion *criteria = NULL;
   int n, mask, parsed, i;
   char *copy, *word;
+  const int slop = 54;
 
   *allowDoubleAsSingle = False;
   copy = __glutStrdup(mode);
@@ -1279,9 +1286,10 @@ parseModeString(char *mode, int *ncriteria, Bool * allowDoubleAsSingle,
   /* Overestimate by 4 times ("rgba" might add four criteria
      entries) plus add in possible defaults plus space for
      required criteria. */
-  criteria = (Criterion *) malloc((4 * n + 30 + nRequired) * sizeof(Criterion));
+  criteria = (Criterion *) malloc((4 * n + slop + nRequired) * sizeof(Criterion));
   if (!criteria) {
     __glutFatalError("out of memory.");
+    return NULL;
   }
 
   /* Re-copy the copy of the mode string. */
@@ -1471,11 +1479,13 @@ parseModeString(char *mode, int *ncriteria, Bool * allowDoubleAsSingle,
   if (n) {
     /* Since over-estimated the size needed; squeeze it down to
        reality. */
-    criteria = (Criterion *) realloc(criteria, n * sizeof(Criterion));
-    if (!criteria) {
+    Criterion *new_criteria = (Criterion *) realloc(criteria, n * sizeof(Criterion));
+    if (!new_criteria) {
       /* Should never happen since should be shrinking down! */
       __glutFatalError("out of memory.");
+      return NULL;
     }
+    criteria = new_criteria;
   } else {
     /* For portability, avoid "realloc(ptr,0)" call. */
     free(criteria);

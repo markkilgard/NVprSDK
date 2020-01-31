@@ -1346,31 +1346,34 @@ processWindowWorkList(GLUTwindow * window)
   }
   /* Combine workMask with window->workMask to determine what
      finish and debug work there is. */
-  workMask |= window->workMask;
+  if (window) {
+    workMask |= window->workMask;
 
-  if (workMask & GLUT_FINISH_WORK) {
-    /* Finish work makes sure a glFinish gets done to indirect
-       rendering contexts.  Indirect contexts tend to have much 
-       longer latency because lots of OpenGL extension requests 
-       can queue up in the X protocol stream. __glutSetWindow
-       is where the finish works gets queued for indirect
-       contexts. */
-    __glutSetWindow(window);
-    glFinish();
+    if (workMask & GLUT_FINISH_WORK) {
+      /* Finish work makes sure a glFinish gets done to indirect
+         rendering contexts.  Indirect contexts tend to have much 
+         longer latency because lots of OpenGL extension requests 
+         can queue up in the X protocol stream. __glutSetWindow
+         is where the finish works gets queued for indirect
+         contexts. */
+      __glutSetWindow(window);
+      glFinish();
+    }
+    if (workMask & GLUT_DEBUG_WORK) {
+      __glutSetWindow(window);
+      glutReportErrors();
+    }
+    /* Strip out dummy, finish, and debug work bits. */
+    window->workMask &= ~(GLUT_DUMMY_WORK | GLUT_FINISH_WORK | GLUT_DEBUG_WORK);
+    if (window->workMask) {
+      /* Leave on work list. */
+      return window;
+    } else {
+      /* Remove current window from work list. */
+      return window->prevWorkWin;
+    }
   }
-  if (workMask & GLUT_DEBUG_WORK) {
-    __glutSetWindow(window);
-    glutReportErrors();
-  }
-  /* Strip out dummy, finish, and debug work bits. */
-  window->workMask &= ~(GLUT_DUMMY_WORK | GLUT_FINISH_WORK | GLUT_DEBUG_WORK);
-  if (window->workMask) {
-    /* Leave on work list. */
-    return window;
-  } else {
-    /* Remove current window from work list. */
-    return window->prevWorkWin;
-  }
+  return NULL;
 }
 
 #ifndef _WIN32

@@ -372,11 +372,13 @@ glutInit(int *argcp, char **argv)
   __glutArgv = (char **) malloc(__glutArgc * sizeof(char *));
   if (!__glutArgv) {
     __glutFatalError("out of memory.");
+    return;
   }
   for (i = 0; i < __glutArgc; i++) {
     __glutArgv[i] = __glutStrdup(argv[i]);
     if (!__glutArgv[i]) {
       __glutFatalError("out of memory.");
+      return;
     }
   }
 
@@ -397,6 +399,7 @@ glutInit(int *argcp, char **argv)
       if (++i >= __glutArgc) {
         __glutFatalError(
           "follow -display option with X display name.");
+        return;
       }
       display = __glutArgv[i];
       removeArgs(argcp, &argv[1], 2);
@@ -404,6 +407,7 @@ glutInit(int *argcp, char **argv)
       if (++i >= __glutArgc) {
         __glutFatalError(
           "follow -geometry option with geometry parameter.");
+        return;
       }
       geometry = __glutArgv[i];
       removeArgs(argcp, &argv[1], 2);

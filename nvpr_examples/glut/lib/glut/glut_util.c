@@ -53,7 +53,20 @@ glutReportErrors(void)
 }
 /* ENDCENTRY */
 
-void
+#ifndef	NORETURN
+# if defined(__clang__) || defined(__GNUC__)
+   /* The `volatile' keyword tells GCC that a function never returns.  */
+#  define NORETURN void __attribute__((noreturn))
+# else /* Not GCC.  */
+#  if defined(_MSC_VER) && _MSC_VER >= 1310
+#   define NORETURN __declspec(noreturn) void
+#  else
+#   define NORETURN void
+#  endif
+# endif /* GCC.  */
+#endif /* __NORETURN not defined.  */
+
+NORETURN
 __glutFatalError(char *format,...)
 {
   va_list args;
@@ -72,7 +85,7 @@ __glutFatalError(char *format,...)
   exit(1);
 }
 
-void
+NORETURN
 __glutFatalUsage(char *format,...)
 {
   va_list args;

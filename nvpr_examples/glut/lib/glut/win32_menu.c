@@ -183,8 +183,12 @@ getUnusedMenuSlot(void)
   /* Allocate a new slot. */
   menuListSize++;
   if (menuList) {
-    menuList = (GLUTmenu **)
+    GLUTmenu ** new_list = (GLUTmenu **)
       realloc(menuList, menuListSize * sizeof(GLUTmenu *));
+    if (!new_list) {
+      free(menuList);
+    } 
+    menuList = new_list;
   } else {
     /* XXX Some realloc's do not correctly perform a malloc
        when asked to perform a realloc on a NULL pointer,
@@ -193,6 +197,7 @@ getUnusedMenuSlot(void)
   }
   if (!menuList) {
     __glutFatalError("out of memory.");
+    return -1;
   }
   menuList[menuListSize - 1] = NULL;
   return menuListSize - 1;

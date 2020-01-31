@@ -212,9 +212,13 @@ getUnusedWindowSlot(void)
   /* Allocate a new slot. */
   __glutWindowListSize++;
   if (__glutWindowList) {
-    __glutWindowList = (GLUTwindow **)
+    GLUTwindow **new_list = (GLUTwindow **)
       realloc(__glutWindowList,
-      __glutWindowListSize * sizeof(GLUTwindow *));
+        __glutWindowListSize * sizeof(GLUTwindow *));
+    if (!new_list) {
+      free(__glutWindowList);
+    }
+    __glutWindowList = new_list;
   } else {
     /* XXX Some realloc's do not correctly perform a malloc
        when asked to perform a realloc on a NULL pointer,
@@ -224,6 +228,7 @@ getUnusedWindowSlot(void)
   }
   if (!__glutWindowList) {
     __glutFatalError("out of memory.");
+    return -1;
   }
   __glutWindowList[__glutWindowListSize - 1] = NULL;
   return __glutWindowListSize - 1;

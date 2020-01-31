@@ -13,10 +13,27 @@
 # include <X11/Xlib.h>
 # include <X11/Xutil.h>
 # include <X11/Xatom.h>  /* for XA_RGB_DEFAULT_MAP atom */
-# ifdef __vms
-#  include <Xmu/StdCmap.h>  /* for XmuLookupStandardColormap */
+# if PRIVATE_XMU
+
+   /* #define Xmu color map routines to __glutXmu names to not conflict with conventional Xmu */
+#  define XmuCreateColormap __glutXmuCreateColormap
+#  define XmuDeleteStandardColormap __glutXmuDeleteStandardColormap
+#  define XmuGetColormapAllocation __glutXmuGetColormapAllocation
+#  define XmuLookupStandardColormap __glutXmuLookupStandardColormap
+#  define XmuStandardColormap __glutXmuStandardColormap
+
+#  include "../Xmu/include/X11/Xmu/StdCmap.h"  /* for XmuLookupStandardColormap */
+#  include "../Xmu/src/CmapAlloc.c"
+#  include "../Xmu/src/CrCmap.c"
+#  include "../Xmu/src/DelCmap.c"
+#  include "../Xmu/src/LookupCmap.c"
+#  include "../Xmu/src/StdCmap.c"
 # else
-#  include <X11/Xmu/StdCmap.h>  /* for XmuLookupStandardColormap */
+#  ifdef __vms
+#   include <Xmu/StdCmap.h>  /* for XmuLookupStandardColormap */
+#  else
+#   include <X11/Xmu/StdCmap.h>  /* for XmuLookupStandardColormap */
+#  endif
 # endif
 #endif
 
@@ -43,6 +60,7 @@ __glutAssociateNewColormap(XVisualInfo * vis)
   cmap = (GLUTcolormap *) malloc(sizeof(GLUTcolormap));
   if (!cmap) {
     __glutFatalError("out of memory.");
+    return NULL;
   }
 #if defined(_WIN32)
   pixels[0] = 0;        /* avoid compilation warnings on win32 */

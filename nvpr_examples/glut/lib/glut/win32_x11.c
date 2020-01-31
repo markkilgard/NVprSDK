@@ -25,12 +25,20 @@ XGetVisualInfo(Display* display, long mask, XVisualInfo* template, int* nitems)
   assert(XHDC);
 
   n = DescribePixelFormat(XHDC, 0, 0, NULL);
-  xvis = (XVisualInfo*)malloc(sizeof(XVisualInfo) * n);
-  memset(xvis, 0, sizeof(XVisualInfo) * n);
+  if (n > 0) {
+    xvis = (XVisualInfo*)malloc(sizeof(XVisualInfo) * n);
+    if (!xvis) {
+      __glutFatalError("out of memory.");
+      return NULL;
+    }
+    memset(xvis, 0, sizeof(XVisualInfo) * n);
   
-  for (i = 0; i < n; i++) {
-    xvis[i].num = i+1;
-    DescribePixelFormat(XHDC, i + 1, sizeof(PIXELFORMATDESCRIPTOR), &xvis[i].pfd);
+    for (i = 0; i < n; i++) {
+      xvis[i].num = i+1;
+      DescribePixelFormat(XHDC, i + 1, sizeof(PIXELFORMATDESCRIPTOR), &xvis[i].pfd);
+    }
+  } else {
+    xvis = NULL;
   }
 
   *nitems = n;
@@ -65,6 +73,10 @@ XCreateColormap(Display* display, Window root, Visual* visual, int alloc)
      colors in a Win32 palette */
   logical = (LOGPALETTE*)malloc(sizeof(LOGPALETTE) +
                                 sizeof(PALETTEENTRY) * n);
+  if (!logical) {
+    __glutFatalError("out of memory.");
+    return NULL;
+  }
   memset(logical, 0, sizeof(LOGPALETTE) + sizeof(PALETTEENTRY) * n);
 
   /* set the entries in the logical palette */

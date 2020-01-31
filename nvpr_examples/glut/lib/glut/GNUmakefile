@@ -88,6 +88,10 @@ LDIRT = *~ $(OTHERGENS) strokegen *.bak hardcopy glutsrc.ps capturexfont *.pure 
 
 CFLAGS += $(LCOPTS)
 CFLAGS += -O2
+CFLAGS += -DPRIVATE_XMU -I../Xmu/include
+# allow the command line to specify ABI_OPT to something such as "-m32"
+# to build for specific ABI
+CFLAGS += $(ABI_OPT)
 
 default: $(TARGETS)
 

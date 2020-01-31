@@ -748,11 +748,24 @@ extern void __glutFinishMenu(Window win, int x, int y);
 #endif
 extern void __glutSetMenu(GLUTmenu * menu);
 
+#ifndef	NORETURN
+# if defined(__clang__) || defined(__GNUC__)
+/* The `volatile' keyword tells GCC that a function never returns.  */
+#  define NORETURN void __attribute__((noreturn))
+# else /* Not GCC.  */
+#  if defined(_MSC_VER) && _MSC_VER >= 1310
+#   define NORETURN __declspec(noreturn) void
+#  else
+#   define NORETURN void
+#  endif
+# endif /* GCC.  */
+#endif /* __NORETURN not defined.  */
+
 /* private routines from glut_util.c */
 extern char * __glutStrdup(const char *string);
 extern void __glutWarning(char *format,...);
-extern void __glutFatalError(char *format,...);
-extern void __glutFatalUsage(char *format,...);
+extern NORETURN __glutFatalError(char *format,...);
+extern NORETURN __glutFatalUsage(char *format,...);
 
 /* private routines from glut_win.c */
 extern GLUTwindow *__glutGetWindow(Window win);
