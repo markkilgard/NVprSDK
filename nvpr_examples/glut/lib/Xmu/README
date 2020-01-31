@@ -1,0 +1,13 @@
+
+GLUT's color map creation code depends on XmuLookupStandardColormap.
+Unfortunately many X distributions no longer chip with the Xmu library.
+
+Therefore provide a "mini" version of the Xmu source files needed
+so glut_cmap.c can include the files it needs.  When PRIVATE_XMU is
+defined (enabled by default in GNUmakefile), this code is included.
+
+mini version of X interface library for miscellaneous utilities not part
+of the Xlib standard based on libXmu-1.1.2.
+
+See COPYING for license details.
+
