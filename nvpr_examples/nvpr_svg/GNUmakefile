@@ -104,6 +104,10 @@ endif
 DEPEND_FILES = $(OBJS:%.o=%.d)
 DEPEND_OPTS = -MMD
 
+SKIA_LIB_NAMES = core effects gr opts opts_ssse3 ports skgr utils core
+SKIA_LIB_OPTS = $(SKIA_LIB_NAMES:%=-l%)
+SKIA_LIB_OPTS += -L../skia/out/Debug/obj.target/gyp/
+
 ifeq ($(UNAME), Darwin)
   #CLINKFLAGS += -L/usr/X11/lib
   CLINKFLAGS += -L/Developer/SDKs/MacOSX10.5.sdk/usr/X11/lib
@@ -136,24 +140,26 @@ else
   else
     ifeq ($(UNAME), SunOS)
       CLINKFLAGS += -L"$(SKIA)/out"
-      CLINKFLAGS += -lskia
+      CLINKFLAGS += $(SKIA_LIB_OPTS)
       CLINKFLAGS += -lcairo
       CLINKFLAGS += -lfreetype
       CLINKFLAGS += -lCgGL -lCg
+      CLINKFLAGS += -L../glut/lib/glut
       CLINKFLAGS += -L/usr/X11R6/lib64 -L/usr/X11R6/lib
-      CLINKFLAGS += -lglut -lXi -lXmu -lX11 -lm
+      CLINKFLAGS += -lglut -lXi -lX11 -lm
       CLINKFLAGS += -lGLU -lGL
       CLINKFLAGS += -lpthread
       CXXFLAGS   += -I/usr/include/cairo
     else
       CLINKFLAGS += -L"$(SKIA)/out"
-      CLINKFLAGS += -lskia
+      CLINKFLAGS += $(SKIA_LIB_OPTS)
       CLINKFLAGS += -lcairo
 #      CLINKFLAGS += -lQtGui -lQtCore
       CLINKFLAGS += -lfreetype
       CLINKFLAGS += -lCgGL -lCg
+      CLINKFLAGS += -L../glut/lib/glut
       CLINKFLAGS += -L/usr/X11R6/lib64 -L/usr/X11R6/lib
-      CLINKFLAGS += -lglut -lXi -lXmu -lX11 -lm
+      CLINKFLAGS += -lglut -lXi -lX11 -lm
       CLINKFLAGS += -lGLU -lGL
       CLINKFLAGS += -lpthread
       CFLAGS     += $(DEPEND_OPTS)

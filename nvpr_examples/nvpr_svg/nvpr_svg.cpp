@@ -15,8 +15,12 @@
 #include <string>
 #include <string.h>
 
-#include <boost/shared_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
+#if __cplusplus >= 201103L  // supports C++11^M
+# include <memory>
+#else
+# include <boost/shared_ptr.hpp>
+# include <boost/enable_shared_from_this.hpp>
+#endif
 #include <boost/lexical_cast.hpp>
 
 #include <stdio.h>    /* for printf and NULL */

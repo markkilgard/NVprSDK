@@ -14,9 +14,13 @@
 #include <stack>
 #include <string>
 
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
+#if __cplusplus >= 201103L  // supports C++11^M
+# include <memory>
+#else
+# include <boost/shared_ptr.hpp>
+# include <boost/weak_ptr.hpp>
+# include <boost/enable_shared_from_this.hpp>
+#endif
 #include <boost/lexical_cast.hpp>
 
 #include <stdio.h>    /* for printf and NULL */
@@ -56,10 +60,16 @@
 #undef min
 #undef max
 
+#if __cplusplus >= 201103L  // supports C++11^M
+using std::shared_ptr;
+using std::dynamic_pointer_cast;
+using std::static_pointer_cast;
+#else
 // Use Boost shared pointer template names.
 using boost::shared_ptr;
 using boost::dynamic_pointer_cast;
 using boost::static_pointer_cast;
+#endif
 
 using std::string;
 using std::vector;

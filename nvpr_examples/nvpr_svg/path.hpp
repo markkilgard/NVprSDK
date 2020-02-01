@@ -16,8 +16,12 @@
 #include <vector>
 #include <string>
 
-#include <boost/shared_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
+#if __cplusplus >= 201103L  // supports C++11^M
+# include <memory>
+#else
+# include <boost/shared_ptr.hpp>
+# include <boost/enable_shared_from_this.hpp>
+#endif
 #include <boost/lexical_cast.hpp>
 
 #include <stdio.h>    // for printf and NULL
@@ -46,10 +50,16 @@
 
 using namespace Cg;
 
+#if __cplusplus >= 201103L  // supports C++11^M
+using std::shared_ptr;
+using std::enable_shared_from_this;
+using std::weak_ptr;
+#else
 // Use Boost shared pointer template names.
 using boost::shared_ptr;
 using boost::enable_shared_from_this;
 using boost::weak_ptr;
+#endif
 using boost::lexical_cast;
 
 using std::string;

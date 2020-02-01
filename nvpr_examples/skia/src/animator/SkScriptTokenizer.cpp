@@ -1316,7 +1316,7 @@ static const SkScriptNAnswer2 scriptTests[]  = {
 #endif
     testInt(0x123),
     testInt(0XABC),
-    testInt(0xdeadBEEF),
+    testInt(int(0xdeadBEEF)),
     {    "'123'+\"456\"", SkOperand2::kString, 0, 0, "123456" },
     {    "123+\"456\"", SkOperand2::kString, 0, 0, "123456" },
     {    "'123'+456", SkOperand2::kString, 0, 0, "123456" },

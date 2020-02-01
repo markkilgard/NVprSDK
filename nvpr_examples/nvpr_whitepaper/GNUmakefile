@@ -28,8 +28,9 @@ else
     CLINKFLAGS += -lglut32 -lglu32 -lopengl32
     EXE = .exe
   else
+    CLINKFLAGS += -L../glut/lib/glut
     CLINKFLAGS += -L/usr/X11R6/lib64 -L/usr/X11R6/lib
-    CLINKFLAGS += -lglut -lGLU -lGL -lXi -lXmu -lX11 -lm -lpthread
+    CLINKFLAGS += -lglut -lGLU -lGL -lXi -lX11 -lm -lpthread
   endif
 endif
 

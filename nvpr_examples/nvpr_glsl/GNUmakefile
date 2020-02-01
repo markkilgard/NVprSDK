@@ -11,6 +11,7 @@ CSRCS = \
   $(NULL)
 CPPSRCS = $(TARGET:=.cpp) \
   ../common/cg4cpp_xform.cpp \
+  ../common/nv_dds.cpp \
   ../common/read_file.cpp \
   ../cg4cpp/src/inverse.cpp \
   $(NULL)

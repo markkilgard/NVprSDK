@@ -15,9 +15,6 @@
 
 using namespace Cg;
 
-// Use Boost shared pointer template names.
-using boost::shared_ptr;
-
 using std::string;
 using std::vector;
 

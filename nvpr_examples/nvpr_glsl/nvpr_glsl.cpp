@@ -55,7 +55,6 @@ float slide_x = 0,
       slide_y = 0;  /* Prior (x,y) location for sliding. */
 int sliding = 0;  /* Are we sliding currently? */
 
-float time = 0.05;
 float last_time;
 bool show_text = true; // otherwise show rounded rectangle
 
@@ -523,15 +522,14 @@ void updateFractalProgram(GLuint program)
 
 static void updateFractal()
 {
-    offsetY += 0.4 * MYscale;
-    offsetX += 0.2 * MYscale;
-    updateFractalProgram(fractal_program);
+  offsetY += 0.4 * MYscale;
+  offsetX += 0.2 * MYscale;
+  updateFractalProgram(fractal_program);
 }
 
 static void idle()
 {
-  float now = glutGet(GLUT_ELAPSED_TIME);
-  time += (now - last_time) / 1000.0 * (3.1419/2);
+  const float now = glutGet(GLUT_ELAPSED_TIME);
   last_time = now;
 
   updateFractal();

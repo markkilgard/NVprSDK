@@ -23,6 +23,7 @@
 
 #include <string>
 #include <map>
+#include <algorithm>  // for std::remove
 
 using std::map;
 

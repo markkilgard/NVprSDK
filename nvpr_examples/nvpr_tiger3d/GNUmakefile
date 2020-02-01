@@ -44,7 +44,7 @@ else
   else
     CLINKFLAGS += -L$(GLUT_DIR)
     CLINKFLAGS += -L/usr/X11R6/lib64 -L/usr/X11R6/lib
-    CLINKFLAGS += -lglut -lGLU -lGL -lXi -lXmu -lX11 -lm -lpthread
+    CLINKFLAGS += -lglut -lGLU -lGL -lXi -lX11 -lm -lpthread
   endif
 endif
 

@@ -12,9 +12,13 @@
 
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
-#include <boost/weak_ptr.hpp>
+#if __cplusplus >= 201103L  // supports C++11
+# include <memory>
+#else
+# include <boost/shared_ptr.hpp>
+# include <boost/enable_shared_from_this.hpp>
+# include <boost/weak_ptr.hpp>
+#endif
 
 #if __APPLE__
 #include <GLUT/glut.h>
@@ -27,12 +31,20 @@
 
 using std::vector;
 
+#if __cplusplus >= 201103L  // supports C++11
+using std::shared_ptr;
+using std::enable_shared_from_this;
+using std::weak_ptr;
+using std::static_pointer_cast;
+using std::dynamic_pointer_cast;
+#else
 // Use Boost shared pointer template names.
 using boost::shared_ptr;
 using boost::enable_shared_from_this;
 using boost::weak_ptr;
 using boost::static_pointer_cast;
 using boost::dynamic_pointer_cast;
+#endif
 
 // Path scene graph classes to which a Renderer implementation can attach a RenderState
 struct Shape;

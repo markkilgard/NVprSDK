@@ -28,3 +28,10 @@ x64_2012
 
 # vi swap files
 *.swp
+
+# make dependencies
+*.d
+
+# gyp generated makefiles
+*.mk
+*.Makefile
