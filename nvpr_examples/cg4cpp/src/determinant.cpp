@@ -9,7 +9,7 @@
 #include <Cg/matrix/0based.hpp>
 #include <Cg/matrix/rows.hpp>
 #include <Cg/matrix.hpp>
-#include <Cg/stdlib.hpp>
+#include <Cg/dot.hpp>
 
 namespace Cg {
 

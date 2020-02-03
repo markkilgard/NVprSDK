@@ -7,7 +7,7 @@
  */
 
 #ifndef __Cg_inverse_hpp__
-#define __Cg_inveres_hpp__
+#define __Cg_inverse_hpp__
 
 #ifdef __Cg_stdlib_hpp__
 #pragma message("error: include this header file (" __FILE__ ") before <Cg/stdlib.hpp>")

@@ -1,10 +1,10 @@
 
-/* nvpr_svg.c - GPU-accelerated Scalable Vector Graphics (SVG) demo. */
+// nvpr_svg.c - GPU-accelerated Scalable Vector Graphics (SVG) demo.
 
 // Copyright (c) NVIDIA Corporation. All rights reserved.
 
-/* Requires the OpenGL Utility Toolkit (GLUT) and Cg runtime (version
-   2.0 or higher). */
+// Requires the OpenGL Utility Toolkit (GLUT) and Cg runtime (version
+// 2.0 or higher).
 
 #include "nvpr_svg_config.h"  // configure path renderers to use
 
@@ -15,12 +15,6 @@
 #include <string>
 #include <string.h>
 
-#if __cplusplus >= 201103L  // supports C++11^M
-# include <memory>
-#else
-# include <boost/shared_ptr.hpp>
-# include <boost/enable_shared_from_this.hpp>
-#endif
 #include <boost/lexical_cast.hpp>
 
 #include <stdio.h>    /* for printf and NULL */
@@ -1625,7 +1619,7 @@ static void forceOffRenderTopToBottom()
 static void jitterMenu(int item)
 {
     assert(item >= 0);
-    assert(item < int(countof(jitter_config)));
+    assert(item < icountof(jitter_config));
     xsteps = jitter_config[item].xsteps;
     ysteps = jitter_config[item].ysteps;
     stipple = jitter_config[item].stipple;
@@ -1836,7 +1830,7 @@ static void initMenu()
     }
 
     int jitter_config_menu = glutCreateMenu(jitterMenu);
-    const int jitter_configs = countof(jitter_config);
+    const int jitter_configs = icountof(jitter_config);
     for (int i=0; i<jitter_configs; i++) {
         glutAddMenuEntry(jitter_config[i].name, i);
     }

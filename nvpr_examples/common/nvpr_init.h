@@ -81,6 +81,11 @@ GLAPI void GLAPIENTRY glCoverFillPathNV (GLuint path, GLenum coverMode);
 GLAPI void GLAPIENTRY glCoverStrokePathNV (GLuint path, GLenum coverMode);
 GLAPI void GLAPIENTRY glCoverFillPathInstancedNV (GLsizei numPaths, GLenum pathNameType, const GLvoid *paths, GLuint pathBase, GLenum coverMode, GLenum transformType, const GLfloat *transformValues);
 GLAPI void GLAPIENTRY glCoverStrokePathInstancedNV (GLsizei numPaths, GLenum pathNameType, const GLvoid *paths, GLuint pathBase, GLenum coverMode, GLenum transformType, const GLfloat *transformValues);
+GLAPI void GLAPIENTRY glStencilThenCoverFillPathNV (GLuint path, GLenum fillMode, GLuint mask, GLenum coverMode);
+GLAPI void GLAPIENTRY glStencilThenCoverStrokePathNV (GLuint path, GLint reference, GLuint mask, GLenum coverMode);
+GLAPI void GLAPIENTRY glStencilThenCoverFillPathInstancedNV (GLsizei numPaths, GLenum pathNameType, const GLvoid *paths, GLuint pathBase, GLenum fillMode, GLuint mask, GLenum coverMode, GLenum transformType, const GLfloat *transformValues);
+GLAPI void GLAPIENTRY glStencilThenCoverStrokePathInstancedNV (GLsizei numPaths, GLenum pathNameType, const GLvoid *paths, GLuint pathBase, GLint reference, GLuint mask, GLenum coverMode, GLenum transformType, const GLfloat *transformValues);
+GLAPI void GLAPIENTRY glProgramPathFragmentInputGenNV (GLuint program, GLint location, GLenum genMode, GLint components, const GLfloat *coeffs);
 GLAPI void GLAPIENTRY glGetPathParameterivNV (GLuint path, GLenum pname, GLint *value);
 GLAPI void GLAPIENTRY glGetPathParameterfvNV (GLuint path, GLenum pname, GLfloat *value);
 GLAPI void GLAPIENTRY glGetPathCommandsNV (GLuint path, GLubyte *commands);
@@ -97,6 +102,13 @@ GLAPI GLboolean GLAPIENTRY glIsPointInFillPathNV (GLuint path, GLuint mask, GLfl
 GLAPI GLboolean GLAPIENTRY glIsPointInStrokePathNV (GLuint path, GLfloat x, GLfloat y);
 GLAPI GLfloat GLAPIENTRY glGetPathLengthNV (GLuint path, GLsizei startSegment, GLsizei numSegments);
 GLAPI GLboolean GLAPIENTRY glPointAlongPathNV (GLuint path, GLsizei startSegment, GLsizei numSegments, GLfloat distance, GLfloat *x, GLfloat *y, GLfloat *tangentX, GLfloat *tangentY);
+GLAPI void GLAPIENTRY glMatrixLoad3x2fNV (GLenum mode, const GLfloat *m);
+GLAPI void GLAPIENTRY glMatrixLoad3x3fNV (GLenum mode, const GLfloat *m);
+GLAPI void GLAPIENTRY glMatrixLoadTranspose3x3fNV (GLenum mode, const GLfloat *m);
+GLAPI void GLAPIENTRY glMatrixMult3x2fNV (GLenum mode, const GLfloat *m);
+GLAPI void GLAPIENTRY glMatrixMult3x3fNV (GLenum mode, const GLfloat *m);
+GLAPI void GLAPIENTRY glMatrixMultTranspose3x3fNV (GLenum mode, const GLfloat *m);
+GLAPI void GLAPIENTRY glGetProgramResourcefvNV (GLuint program, GLenum iface, GLuint index, GLsizei propCount, const GLenum *props, GLsizei bufSize, GLsizei *length, GLfloat *params);
 #endif /* GL_GLEXT_PROTOTYPES */
 typedef GLuint (GLAPIENTRYP PFNGLGENPATHSNVPROC) (GLsizei range);
 typedef void (GLAPIENTRYP PFNGLDELETEPATHSNVPROC) (GLuint path, GLsizei range);
@@ -131,6 +143,11 @@ typedef void (GLAPIENTRYP PFNGLCOVERFILLPATHNVPROC) (GLuint path, GLenum coverMo
 typedef void (GLAPIENTRYP PFNGLCOVERSTROKEPATHNVPROC) (GLuint path, GLenum coverMode);
 typedef void (GLAPIENTRYP PFNGLCOVERFILLPATHINSTANCEDNVPROC) (GLsizei numPaths, GLenum pathNameType, const GLvoid *paths, GLuint pathBase, GLenum coverMode, GLenum transformType, const GLfloat *transformValues);
 typedef void (GLAPIENTRYP PFNGLCOVERSTROKEPATHINSTANCEDNVPROC) (GLsizei numPaths, GLenum pathNameType, const GLvoid *paths, GLuint pathBase, GLenum coverMode, GLenum transformType, const GLfloat *transformValues);
+typedef void (GLAPIENTRYP PFNGLSTENCILTHENCOVERFILLPATHNVPROC) (GLuint path, GLenum fillMode, GLuint mask, GLenum coverMode);
+typedef void (GLAPIENTRYP PFNGLSTENCILTHENCOVERSTROKEPATHNVPROC) (GLuint path, GLint reference, GLuint mask, GLenum coverMode);
+typedef void (GLAPIENTRYP PFNGLSTENCILTHENCOVERFILLPATHINSTANCEDNVPROC) (GLsizei numPaths, GLenum pathNameType, const GLvoid *paths, GLuint pathBase, GLenum fillMode, GLuint mask, GLenum coverMode, GLenum transformType, const GLfloat *transformValues);
+typedef void (GLAPIENTRYP PFNGLSTENCILTHENCOVERSTROKEPATHINSTANCEDNVPROC) (GLsizei numPaths, GLenum pathNameType, const GLvoid *paths, GLuint pathBase, GLint reference, GLuint mask, GLenum coverMode, GLenum transformType, const GLfloat *transformValues);
+typedef void (GLAPIENTRYP PFNGLPROGRAMPATHFRAGMENTINPUTGENNVPROC) (GLuint program, GLint location, GLenum genMode, GLint components, const GLfloat *coeffs);
 typedef void (GLAPIENTRYP PFNGLGETPATHPARAMETERIVNVPROC) (GLuint path, GLenum pname, GLint *value);
 typedef void (GLAPIENTRYP PFNGLGETPATHPARAMETERFVNVPROC) (GLuint path, GLenum pname, GLfloat *value);
 typedef void (GLAPIENTRYP PFNGLGETPATHCOMMANDSNVPROC) (GLuint path, GLubyte *commands);
@@ -147,6 +164,13 @@ typedef GLboolean (GLAPIENTRYP PFNGLISPOINTINFILLPATHNVPROC) (GLuint path, GLuin
 typedef GLboolean (GLAPIENTRYP PFNGLISPOINTINSTROKEPATHNVPROC) (GLuint path, GLfloat x, GLfloat y);
 typedef GLfloat (GLAPIENTRYP PFNGLGETPATHLENGTHNVPROC) (GLuint path, GLsizei startSegment, GLsizei numSegments);
 typedef GLboolean (GLAPIENTRYP PFNGLPOINTALONGPATHNVPROC) (GLuint path, GLsizei startSegment, GLsizei numSegments, GLfloat distance, GLfloat *x, GLfloat *y, GLfloat *tangentX, GLfloat *tangentY);
+typedef void (GLAPIENTRYP PFNGLMATRIXLOAD3X2FNVPROC) (GLenum mode, const GLfloat *m);
+typedef void (GLAPIENTRYP PFNGLMATRIXLOAD3X3FNVPROC) (GLenum mode, const GLfloat *m);
+typedef void (GLAPIENTRYP PFNGLMATRIXLOADTRANSPOSE3X3FNVPROC) (GLenum mode, const GLfloat *m);
+typedef void (GLAPIENTRYP PFNGLMATRIXMULT3X2FNVPROC) (GLenum mode, const GLfloat *m);
+typedef void (GLAPIENTRYP PFNGLMATRIXMULT3X3FNVPROC) (GLenum mode, const GLfloat *m);
+typedef void (GLAPIENTRYP PFNGLMATRIXMULTTRANSPOSE3X3FNVPROC) (GLenum mode, const GLfloat *m);
+typedef void (GLAPIENTRYP PFNGLGETPROGRAMRESOURCEFVNVPROC) (GLuint program, GLenum iface, GLuint index, GLsizei propCount, const GLenum *props, GLsizei bufSize, GLsizei *length, GLfloat *params);
 /* Tokens */
 #define GL_CLOSE_PATH_NV                                    0x00
 #define GL_MOVE_TO_NV                                       0x02
@@ -173,6 +197,21 @@ typedef GLboolean (GLAPIENTRYP PFNGLPOINTALONGPATHNVPROC) (GLuint path, GLsizei 
 #define GL_RELATIVE_LARGE_CCW_ARC_TO_NV                     0x17
 #define GL_LARGE_CW_ARC_TO_NV                               0x18
 #define GL_RELATIVE_LARGE_CW_ARC_TO_NV                      0x19
+#define GL_CONIC_CURVE_TO_NV                                0x1A // NVpr 1.2 addition
+#define GL_RELATIVE_CONIC_CURVE_TO_NV                       0x1B // NVpr 1.2 addition
+#define GL_ROUNDED_RECT_NV                                  0xE8 // NVpr 1.2 addition
+#define GL_RELATIVE_ROUNDED_RECT_NV                         0xE9 // NVpr 1.2 addition
+#define GL_ROUNDED_RECT2_NV                                 0xEA // NVpr 1.2 addition
+#define GL_RELATIVE_ROUNDED_RECT2_NV                        0xEB // NVpr 1.2 addition
+#define GL_ROUNDED_RECT4_NV                                 0xEC // NVpr 1.2 addition
+#define GL_RELATIVE_ROUNDED_RECT4_NV                        0xED // NVpr 1.2 addition
+#define GL_ROUNDED_RECT8_NV                                 0xEE // NVpr 1.2 addition
+#define GL_RELATIVE_ROUNDED_RECT8_NV                        0xEF // NVpr 1.2 addition
+#define GL_RESTART_PATH_NV                                  0xF0
+#define GL_DUP_FIRST_CUBIC_CURVE_TO_NV                      0xF2
+#define GL_DUP_LAST_CUBIC_CURVE_TO_NV                       0xF4
+#define GL_RECT_NV                                          0xF6
+#define GL_RELATIVE_RECT_NV                                 0xF7 // NVpr 1.2 addition
 #define GL_CIRCULAR_CCW_ARC_TO_NV                           0xF8
 #define GL_CIRCULAR_CW_ARC_TO_NV                            0xFA
 #define GL_CIRCULAR_TANGENT_ARC_TO_NV                       0xFC
@@ -200,6 +239,7 @@ typedef GLboolean (GLAPIENTRYP PFNGLPOINTALONGPATHNVPROC) (GLuint path, GLsizei 
 #define GL_PATH_STROKE_COVER_MODE_NV                        0x9083
 #define GL_PATH_STROKE_MASK_NV                              0x9084
 #define GL_PATH_SAMPLE_QUALITY_NV                           0x9085
+#define GL_PATH_STROKE_BOUND_NV                             0x9086
 #define GL_COUNT_UP_NV                                      0x9088
 #define GL_COUNT_DOWN_NV                                    0x9089
 #define GL_PATH_OBJECT_BOUNDING_BOX_NV                      0x908A
@@ -259,6 +299,7 @@ typedef GLboolean (GLAPIENTRYP PFNGLPOINTALONGPATHNVPROC) (GLuint path, GLsizei 
 #define GL_FONT_UNDERLINE_POSITION_BIT_NV                   0x04000000
 #define GL_FONT_UNDERLINE_THICKNESS_BIT_NV                  0x08000000
 #define GL_FONT_HAS_KERNING_BIT_NV                          0x10000000
+#define GL_FONT_NUM_GLYPH_INDICES_BIT_NV                    0x20000000 // NVpr 1.2 addition
 #define GL_ACCUM_ADJACENT_PAIRS_NV                          0x90AD
 #define GL_ADJACENT_PAIRS_NV                                0x90AE
 #define GL_FIRST_TO_REST_NV                                 0x90AF
@@ -272,6 +313,62 @@ typedef GLboolean (GLAPIENTRYP PFNGLPOINTALONGPATHNVPROC) (GLuint path, GLsizei 
 #define GL_PATH_STENCIL_DEPTH_OFFSET_FACTOR_NV              0x90BD
 #define GL_PATH_STENCIL_DEPTH_OFFSET_UNITS_NV               0x90BE
 #define GL_PATH_COVER_DEPTH_FUNC_NV                         0x90BF
+// NVpr 1.2 additions
+#define GL_FONT_GLYPHS_AVAILABLE_NV                         0x9368
+#define GL_FONT_TARGET_UNAVAILABLE_NV                       0x9369
+#define GL_FONT_UNAVAILABLE_NV                              0x936A
+#define GL_FONT_UNINTELLIGIBLE_NV                           0x936B
+#define GL_STANDARD_FONT_FORMAT_NV                          0x936C
+#define GL_FRAGMENT_INPUT_NV                                0x936D
+#endif
+
+// GL_NV_path_rendering defined but no NVpr 1.2 tokens?
+#if defined(GL_NV_path_rendering) && !defined(GL_CONIC_CURVE_TO_NV)
+// Yes, add NVpr 1.2 API...
+#ifdef GL_GLEXT_PROTOTYPES
+GLAPI void GLAPIENTRY glStencilThenCoverFillPathNV (GLuint path, GLenum fillMode, GLuint mask, GLenum coverMode);
+GLAPI void GLAPIENTRY glStencilThenCoverStrokePathNV (GLuint path, GLint reference, GLuint mask, GLenum coverMode);
+GLAPI void GLAPIENTRY glStencilThenCoverFillPathInstancedNV (GLsizei numPaths, GLenum pathNameType, const GLvoid *paths, GLuint pathBase, GLenum fillMode, GLuint mask, GLenum coverMode, GLenum transformType, const GLfloat *transformValues);
+GLAPI void GLAPIENTRY glStencilThenCoverStrokePathInstancedNV (GLsizei numPaths, GLenum pathNameType, const GLvoid *paths, GLuint pathBase, GLint reference, GLuint mask, GLenum coverMode, GLenum transformType, const GLfloat *transformValues);
+GLAPI void GLAPIENTRY glProgramPathFragmentInputGenNV (GLuint program, GLint location, GLenum genMode, GLint components, const GLfloat *coeffs);
+GLAPI void GLAPIENTRY glMatrixLoad3x2fNV (GLenum mode, const GLfloat *m);
+GLAPI void GLAPIENTRY glMatrixLoad3x3fNV (GLenum mode, const GLfloat *m);
+GLAPI void GLAPIENTRY glMatrixLoadTranspose3x3fNV (GLenum mode, const GLfloat *m);
+GLAPI void GLAPIENTRY glMatrixMult3x2fNV (GLenum mode, const GLfloat *m);
+GLAPI void GLAPIENTRY glMatrixMult3x3fNV (GLenum mode, const GLfloat *m);
+GLAPI void GLAPIENTRY glMatrixMultTranspose3x3fNV (GLenum mode, const GLfloat *m);
+GLAPI void GLAPIENTRY glGetProgramResourcefvNV (GLuint program, GLenum iface, GLuint index, GLsizei propCount, const GLenum *props, GLsizei bufSize, GLsizei *length, GLfloat *params);
+#endif /* GL_GLEXT_PROTOTYPES */
+typedef void (GLAPIENTRYP PFNGLSTENCILTHENCOVERFILLPATHNVPROC) (GLuint path, GLenum fillMode, GLuint mask, GLenum coverMode);
+typedef void (GLAPIENTRYP PFNGLSTENCILTHENCOVERSTROKEPATHNVPROC) (GLuint path, GLint reference, GLuint mask, GLenum coverMode);
+typedef void (GLAPIENTRYP PFNGLSTENCILTHENCOVERFILLPATHINSTANCEDNVPROC) (GLsizei numPaths, GLenum pathNameType, const GLvoid *paths, GLuint pathBase, GLenum fillMode, GLuint mask, GLenum coverMode, GLenum transformType, const GLfloat *transformValues);
+typedef void (GLAPIENTRYP PFNGLSTENCILTHENCOVERSTROKEPATHINSTANCEDNVPROC) (GLsizei numPaths, GLenum pathNameType, const GLvoid *paths, GLuint pathBase, GLint reference, GLuint mask, GLenum coverMode, GLenum transformType, const GLfloat *transformValues);
+typedef void (GLAPIENTRYP PFNGLPROGRAMPATHFRAGMENTINPUTGENNVPROC) (GLuint program, GLint location, GLenum genMode, GLint components, const GLfloat *coeffs);
+typedef void (GLAPIENTRYP PFNGLMATRIXLOAD3X2FNVPROC) (GLenum mode, const GLfloat *m);
+typedef void (GLAPIENTRYP PFNGLMATRIXLOAD3X3FNVPROC) (GLenum mode, const GLfloat *m);
+typedef void (GLAPIENTRYP PFNGLMATRIXLOADTRANSPOSE3X3FNVPROC) (GLenum mode, const GLfloat *m);
+typedef void (GLAPIENTRYP PFNGLMATRIXMULT3X2FNVPROC) (GLenum mode, const GLfloat *m);
+typedef void (GLAPIENTRYP PFNGLMATRIXMULT3X3FNVPROC) (GLenum mode, const GLfloat *m);
+typedef void (GLAPIENTRYP PFNGLMATRIXMULTTRANSPOSE3X3FNVPROC) (GLenum mode, const GLfloat *m);
+typedef void (GLAPIENTRYP PFNGLGETPROGRAMRESOURCEFVNVPROC) (GLuint program, GLenum iface, GLuint index, GLsizei propCount, const GLenum *props, GLsizei bufSize, GLsizei *length, GLfloat *params);
+// NVpr 1.2 additions
+#define GL_CONIC_CURVE_TO_NV                                0x1A
+#define GL_RELATIVE_CONIC_CURVE_TO_NV                       0x1B
+#define GL_ROUNDED_RECT_NV                                  0xE8
+#define GL_RELATIVE_ROUNDED_RECT_NV                         0xE9
+#define GL_ROUNDED_RECT2_NV                                 0xEA
+#define GL_RELATIVE_ROUNDED_RECT2_NV                        0xEB
+#define GL_ROUNDED_RECT4_NV                                 0xEC
+#define GL_RELATIVE_ROUNDED_RECT4_NV                        0xED
+#define GL_ROUNDED_RECT8_NV                                 0xEE
+#define GL_RELATIVE_ROUNDED_RECT8_NV                        0xEF
+#define GL_RELATIVE_RECT_NV                                 0xF7
+#define GL_FONT_GLYPHS_AVAILABLE_NV                         0x9368
+#define GL_FONT_TARGET_UNAVAILABLE_NV                       0x9369
+#define GL_FONT_UNAVAILABLE_NV                              0x936A
+#define GL_FONT_UNINTELLIGIBLE_NV                           0x936B
+#define GL_STANDARD_FONT_FORMAT_NV                          0x936C
+#define GL_FRAGMENT_INPUT_NV                                0x936D
 #endif
 
 #ifndef __APPLE__
@@ -331,6 +428,19 @@ extern PFNGLGETPATHLENGTHNVPROC FUNC(glGetPathLengthNV);
 extern PFNGLPOINTALONGPATHNVPROC FUNC(glPointAlongPathNV);
 extern PFNGLPATHSTENCILDEPTHOFFSETNVPROC FUNC(glPathStencilDepthOffsetNV);
 extern PFNGLPATHCOVERDEPTHFUNCNVPROC FUNC(glPathCoverDepthFuncNV);
+// NVpr 1.2 additions
+extern PFNGLSTENCILTHENCOVERFILLPATHNVPROC FUNC(glStencilThenCoverFillPathNV);
+extern PFNGLSTENCILTHENCOVERSTROKEPATHNVPROC FUNC(glStencilThenCoverStrokePathNV);
+extern PFNGLSTENCILTHENCOVERFILLPATHINSTANCEDNVPROC FUNC(glStencilThenCoverFillPathInstancedNV);
+extern PFNGLSTENCILTHENCOVERSTROKEPATHINSTANCEDNVPROC FUNC(glStencilThenCoverStrokePathInstancedNV);
+extern PFNGLPROGRAMPATHFRAGMENTINPUTGENNVPROC FUNC(glProgramPathFragmentInputGenNV);
+extern PFNGLMATRIXLOAD3X2FNVPROC FUNC(glMatrixLoad3x2fNV);
+extern PFNGLMATRIXLOAD3X3FNVPROC FUNC(glMatrixLoad3x3fNV);
+extern PFNGLMATRIXLOADTRANSPOSE3X3FNVPROC FUNC(glMatrixLoadTranspose3x3fNV);
+extern PFNGLMATRIXMULT3X2FNVPROC FUNC(glMatrixMult3x2fNV);
+extern PFNGLMATRIXMULT3X3FNVPROC FUNC(glMatrixMult3x3fNV);
+extern PFNGLMATRIXMULTTRANSPOSE3X3FNVPROC FUNC(glMatrixMultTranspose3x3fNV);
+extern PFNGLGETPROGRAMRESOURCEFVNVPROC FUNC(glGetProgramResourcefvNV);
 
 #endif /* __APPLE__ */
 
@@ -383,6 +493,20 @@ extern PFNGLPATHCOVERDEPTHFUNCNVPROC FUNC(glPathCoverDepthFuncNV);
 #define glPointAlongPathNV glPointAlongPathNV_
 #define glPathStencilDepthOffsetNV glPathStencilDepthOffsetNV_
 #define glPathCoverDepthFuncNV glPathCoverDepthFuncNV_
+
+// NVpr 1.2 additions
+#define glStencilThenCoverFillPathNV glStencilThenCoverFillPathNV_
+#define glStencilThenCoverStrokePathNV glStencilThenCoverStrokePathNV_
+#define glStencilThenCoverFillPathInstancedNV glStencilThenCoverFillPathInstancedNV_
+#define glStencilThenCoverStrokePathInstancedNV glStencilThenCoverStrokePathInstancedNV_
+#define glProgramPathFragmentInputGenNV glProgramPathFragmentInputGenNV_
+#define glMatrixLoad3x2fNV glMatrixLoad3x2fNV_
+#define glMatrixLoad3x3fNV glMatrixLoad3x3fNV_
+#define glMatrixLoadTranspose3x3fNV glMatrixLoadTranspose3x3fNV_
+#define glMatrixMult3x2fNV glMatrixMult3x2fNV_
+#define glMatrixMult3x3fNV glMatrixMult3x3fNV_
+#define glMatrixMultTranspose3x3fNV glMatrixMultTranspose3x3fNV_
+#define glGetProgramResourcefvNV glGetProgramResourcefvNV_
 #endif
 
 extern int has_NV_path_rendering;

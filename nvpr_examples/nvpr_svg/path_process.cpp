@@ -418,7 +418,7 @@ void Path::processSegments(PathSegmentProcessor &processor)
 {
     float2 current = float2(0,0),
            initial_point = float2(0,0),
-           prior_curve_point;
+           prior_curve_point = float2(0,0);
     char last_c = 0, c;
     const size_t n = cmd.size();
 
@@ -689,14 +689,14 @@ static void draw_cubic_reference_points(const float2 b[4], const int steps)
         const float t = float(i) / steps;
 
         const float2 p = (1-t)*(1-t)*(1-t)*P0 + 3*(1-t)*(1-t)*t*P1 + 3*(1-t)*t*t*P2+ t*t*t*P3;
-        const float2 dpdt = -3*(1-t)*(1-t)*P0-6*(1-t)*t*P1+3*(1-t)*(1-t)*P1-3*t*t*P2+6*(1-t)*t*P2+3*t*t*P3;
-        const float2 tangent = normalize(dpdt);
-        const float2 normal = 30*float2(-tangent.y, tangent.x);
 
         glColor3f(1,1,1);
         glVertex2f(p.x, p.y);
 
 #if 0  // add offset curve points (for stroking)
+        const float2 dpdt = -3*(1-t)*(1-t)*P0-6*(1-t)*t*P1+3*(1-t)*(1-t)*P1-3*t*t*P2+6*(1-t)*t*P2+3*t*t*P3;
+        const float2 tangent = normalize(dpdt);
+        const float2 normal = 30*float2(-tangent.y, tangent.x);
         glColor3f(1,0,0);
         glVertex2f(p.x + normal.x, p.y + normal.y);
         glColor3f(0,1,0);

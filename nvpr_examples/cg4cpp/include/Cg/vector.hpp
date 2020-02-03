@@ -105,6 +105,15 @@ struct __CGtype_trait<int> {
     typedef resultType numericType;
 };
 template <>
+struct __CGtype_trait<unsigned int> {
+    typedef unsigned int storageType;
+    typedef unsigned int resultType;
+    typedef unsigned int dotType;
+    typedef bool boolType;
+    typedef resultType intType;
+    typedef resultType numericType;
+};
+template <>
 struct __CGtype_trait<bool> {
     typedef bool storageType;
     typedef bool resultType;

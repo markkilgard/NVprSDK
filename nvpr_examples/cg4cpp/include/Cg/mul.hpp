@@ -16,6 +16,11 @@
 
 namespace Cg {
 
+#if defined(_MSC_VER) && !defined(__EDG__)  // Visual C++ but not EDG fakery
+#pragma warning(push)
+#pragma warning(disable:6294)  // Ill-defined for-loop:  initial condition does not satisfy test.  Loop body not executed.
+#endif
+
 // Matrix-by-vector multiplication (assuming a column vector)
 template <typename TA, typename TB, int M, int N>
 static inline __CGvector<typename __CGtype_trait<TA,TB>::numericType,M> mul(const __CGmatrix<TA,M,N> & m,
@@ -26,7 +31,7 @@ static inline __CGvector<typename __CGtype_trait<TA,TB>::numericType,M> mul(cons
     for (int i=0; i<M; i++) {
         dotType sum = dotType(m[i][0]) * v[0];
         for (int j=1; j<N; j++) {
-            sum += m[i][j] * v[j];
+            sum += dotType(m[i][j]) * v[j];
         }
         rv[i] = typename __CGtype_trait<TA,TB>::numericType(sum);
     }
@@ -41,7 +46,7 @@ static inline __CGvector<typename __CGtype_trait<TA,TB>::numericType,M> mul(cons
     for (int i=0; i<M; i++) {
         dotType sum = dotType(m[i][0]) * v[0];
         for (int j=1; j<N; j++) {
-            sum += m[i][j] * v[j];
+            sum += dotType(m[i][j]) * v[j];
         }
         rv[i] = typename __CGtype_trait<TA,TB>::numericType(sum);
     }
@@ -58,7 +63,7 @@ static inline __CGvector<typename __CGtype_trait<TA,TB>::numericType,N> mul(cons
     for (int i=0; i<N; i++) {
         dotType sum = dotType(v[0]) * m[0][i];
         for (int j=1; j<M; j++) {
-            sum += v[j] * m[j][i];
+            sum += dotType(v[j]) * m[j][i];
         }
         rv[i] = typename __CGtype_trait<TA,TB>::numericType(sum);
     }
@@ -73,7 +78,7 @@ static inline __CGvector<typename __CGtype_trait<TA,TB>::numericType,N> mul(cons
     for (int i=0; i<N; i++) {
         dotType sum = dotType(v[0]) * m[0][i];
         for (int j=1; j<M; j++) {
-            sum += v[j] * m[j][i];
+            sum += dotType(v[j]) * m[j][i];
         }
         rv[i] = typename __CGtype_trait<TA,TB>::numericType(sum);
     }
@@ -91,13 +96,17 @@ static inline __CGmatrix<typename __CGtype_trait<TA,TB>::numericType,X,Z> mul(co
         for (int j=0; j<Z; j++) {
             dotType sum = dotType(a[i][0]) * b[0][j];
             for (int k=1; k<Y; k++) {
-                sum += a[i][k] * b[k][j];
+                sum += dotType(a[i][k]) * b[k][j];
             }
             rv[i][j] = typename __CGtype_trait<TA,TB>::numericType(sum);
         }
     }
     return rv;
 }
+
+#if defined(_MSC_VER) && !defined(__EDG__)  // Visual C++ but not EDG fakery
+#pragma warning(pop)
+#endif
 
 } // namespace Cg
 

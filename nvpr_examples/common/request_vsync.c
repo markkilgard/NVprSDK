@@ -22,7 +22,8 @@ typedef int ( * PFNGLXSWAPINTERVALSGIPROC) (int interval);
 void requestSynchornizedSwapBuffers(int enableSync)
 {
 #if defined(__APPLE__)
-#ifdef GL_VERSION_1_2
+#if defined(GL_VERSION_1_2) || defined(CGL_VERSION_1_2)
+  // The long* parameter to CGLSetParameter got changed back to GLint in OS X10.6 SDK...
   const GLint sync = enableSync;
 #else
   const long sync = enableSync;
@@ -39,6 +40,9 @@ void requestSynchornizedSwapBuffers(int enableSync)
   PFNGLXSWAPINTERVALSGIPROC glXSwapIntervalSGI =
     (PFNGLXSWAPINTERVALSGIPROC) glXGetProcAddressARB((const GLubyte*)"glXSwapIntervalSGI");
   if (glXSwapIntervalSGI) {
+#if 1 // XXX hack - certain NVIDIA drivers need this to allow zero to work
+    glXSwapIntervalSGI(1);
+#endif
     glXSwapIntervalSGI(enableSync);
   }
 #endif

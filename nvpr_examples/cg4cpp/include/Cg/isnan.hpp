@@ -12,6 +12,7 @@
 #pragma message("error: include this header file (" __FILE__ ") before <Cg/stdlib.hpp>")
 #endif
 
+#include <math.h>
 #include <Cg/vector.hpp>
 
 #undef isnan  // g++ <math.h> header may have defined this

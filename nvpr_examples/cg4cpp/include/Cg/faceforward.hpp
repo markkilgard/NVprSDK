@@ -16,15 +16,22 @@
 
 namespace Cg {
 
+#if defined(_MSC_VER) && !defined(__EDG__)  // Visual C++ but not EDG fakery
+#pragma warning(push)
+#pragma warning(disable:6294)  // Ill-defined for-loop:  initial condition does not satisfy test.  Loop body not executed.
+#endif
+
 template <typename T, int N>
 static inline __CGvector<typename __CGtype_trait<T>::numericType,N> faceforward(const __CGvector<T,N> & n,
                                                                                 const __CGvector<T,N> & iv,
                                                                                 const __CGvector<T,N> & ng)
 {
     typedef typename __CGtype_trait<T>::resultType ResultType;
-    typename __CGtype_trait<T>::dotType sum = iv[0] * ng[0];
-    for (int i=1; i<N; i++)
-        sum += iv[i] * ng[i];
+    typedef typename __CGtype_trait<T>::dotType dotType;
+    dotType sum = dotType(iv[0]) * ng[0];
+    for (int i=1; i<N; i++) {
+        sum += dotType(iv[i]) * ng[i];
+    }
     return __CGvector<ResultType,N>(sum < 0 ? n : -n);
 }
 template <typename TN, typename TI, typename TNG, int N, typename TNstore, typename TIstore, typename TNGstore>
@@ -33,11 +40,16 @@ static inline __CGvector<typename __CGtype_trait3<TN,TI,TNG>::numericType,N> fac
                                                                                          const __CGvector_usage<TNG,N,TNGstore> & ng)
 {
     typedef typename __CGtype_trait3<TN,TI,TNG>::resultType ResultType;
-    typename __CGtype_trait3<TN,TI,TNG>::dotType sum = iv[0] * ng[0];
+    typedef typename __CGtype_trait3<TN,TI,TNG>::dotType dotType;
+    dotType sum = dotType(iv[0]) * ng[0];
     for (int i=1; i<N; i++)
-        sum += iv[i] * ng[i];
+        sum += dotType(iv[i]) * ng[i];
     return __CGvector<ResultType,N>(sum < 0 ? n : -n);
 }
+
+#if defined(_MSC_VER) && !defined(__EDG__)  // Visual C++ but not EDG fakery
+#pragma warning(pop)
+#endif
 
 } // namespace Cg
 

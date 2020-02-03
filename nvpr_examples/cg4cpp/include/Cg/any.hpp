@@ -16,6 +16,11 @@
 
 namespace Cg {
 
+#if defined(_MSC_VER) && !defined(__EDG__)  // Visual C++ but not EDG fakery
+#pragma warning(push)
+#pragma warning(disable:6294)  // Ill-defined for-loop:  initial condition does not satisfy test.  Loop body not executed.
+#endif
+
 template <int N>
 static inline bool1 any(const __CGvector<bool,N> & v)
 {
@@ -33,6 +38,10 @@ static inline bool1 any(const __CGvector_usage<bool,N,Tstore> & v)
         rv = rv || v[i];
     return rv;
 }
+
+#if defined(_MSC_VER) && !defined(__EDG__)  // Visual C++ but not EDG fakery
+#pragma warning(pop)
+#endif
 
 } // namespace Cg
 

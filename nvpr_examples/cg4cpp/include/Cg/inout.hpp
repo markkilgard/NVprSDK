@@ -10,7 +10,8 @@
 
 #include <Cg/vector.hpp>
 
-#include <cstring>  // for std::memcpy
+#include <stddef.h>  // for size_t
+#include <cstring>   // for std::memcpy
 
 namespace Cg {
 

@@ -1,4 +1,9 @@
 
+// render_font.hpp - interface for simple font rendering with NV_path_rendering
+
+#ifndef __render_font_hpp__
+#define __render_font_hpp__
+
 #include <vector>
 #include <string>
 
@@ -55,3 +60,5 @@ struct Message {
     underline = underline_;
   }
 };
+
+#endif // __render_font_hpp__

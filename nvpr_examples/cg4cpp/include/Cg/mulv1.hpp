@@ -26,7 +26,7 @@ static inline __CGvector<typename __CGtype_trait<TA,TB>::numericType,M> mulv1(co
     for (int i=0; i<M; i++) {
         dotType sum = dotType(m[i][0]) * v[0];
         for (int j=1; j<N-1; j++) {
-            sum += m[i][j] * v[j];
+            sum += dotType(m[i][j]) * v[j];
         }
         sum += m[i][N-1];
         rv[i] = typename __CGtype_trait<TA,TB>::numericType(sum);
@@ -42,7 +42,7 @@ static inline __CGvector<typename __CGtype_trait<TA,TB>::numericType,M> mulv1(co
     for (int i=0; i<M; i++) {
         dotType sum = dotType(m[i][0]) * v[0];
         for (int j=1; j<N-1; j++) {
-            sum += m[i][j] * v[j];
+            sum += dotType(m[i][j]) * v[j];
         }
         sum += m[i][N-1];
         rv[i] = typename __CGtype_trait<TA,TB>::numericType(sum);
@@ -60,7 +60,7 @@ static inline __CGvector<typename __CGtype_trait<TA,TB>::numericType,N> mulv1(co
     for (int i=0; i<N; i++) {
         dotType sum = dotType(v[0]) * m[0][i];
         for (int j=1; j<M-1; j++) {
-            sum += v[j] * m[j][i];
+            sum += dotType(v[j]) * m[j][i];
         }
         sum += m[N-1][i];
         rv[i] = typename __CGtype_trait<TA,TB>::numericType(sum);
@@ -76,7 +76,7 @@ static inline __CGvector<typename __CGtype_trait<TA,TB>::numericType,N> mulv1(co
     for (int i=0; i<N; i++) {
         dotType sum = dotType(v[0]) * m[0][i];
         for (int j=1; j<M-1; j++) {
-            sum += v[j] * m[j][i];
+            sum += dotType(v[j]) * m[j][i];
         }
         sum += m[N-1][i];
         rv[i] = typename __CGtype_trait<TA,TB>::numericType(sum);

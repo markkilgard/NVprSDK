@@ -8,6 +8,7 @@
 #ifndef __Cg_matrix_hpp__
 #define __Cg_matrix_hpp__
 
+#include <stddef.h>  // for size_t
 #include <Cg/vector.hpp>
 
 namespace Cg {
@@ -662,13 +663,13 @@ public:
     // Use reinterpret_cast magic to make indexing of rows work.
     inline __CGvector<T,COLS> & operator [] (int i) {
         storageType *base = reinterpret_cast<storageType*>(this);
-        base += COLS*i;
+        base += size_t(COLS)*i;
         __CGvector<T,COLS> *row = reinterpret_cast<__CGvector<T,COLS>* >(base);
         return *row;
     }
     inline const __CGvector<T,COLS> & operator [] (int i) const { 
         const storageType *base = reinterpret_cast<const storageType*>(this);
-        base += COLS*i;
+        base += size_t(COLS)*i;
         const __CGvector<T,COLS> *row = reinterpret_cast<const __CGvector<T,COLS>* >(base);
         return *row;
     }

@@ -35,7 +35,7 @@ namespace Cg {
 template <unsigned int intBits, unsigned int fracBits, bool sgnBit>
 struct __CGcustom_fixed_storage {
     static const unsigned int bits          = (intBits+fracBits+sgnBit);  // 16 bits for s1.10
-    static const unsigned int bytesPerFixed = (bits + 7) / 8;             // 2 bytes for s1.10
+    static const unsigned int bytesPerFixed = (bits + 7) / 8u;             // 2 bytes for s1.10
 
     unsigned char v[bytesPerFixed];
 } __CGmay_alias;
@@ -65,7 +65,7 @@ public:
     __CGcustom_fixed(float val) {
         int fx = floatToCustomFixed(val);
 
-        for (int i=0; i<__CGcustom_fixed::bytesPerFixed; i++) {
+        for (unsigned int i=0; i<__CGcustom_fixed::bytesPerFixed; i++) {
             __CGcustom_fixed::v[i] = fx & 0xFF;
             fx >>= 8;
         }
@@ -74,7 +74,7 @@ public:
     __CGcustom_fixed(double val) {
         int fx = floatToCustomFixed(float(val));
 
-        for (int i=0; i<__CGcustom_fixed::bytesPerFixed; i++) {
+        for (unsigned int i=0; i<__CGcustom_fixed::bytesPerFixed; i++) {
             __CGcustom_fixed::v[i] = fx & 0xFF;
             fx >>= 8;
         }
@@ -84,7 +84,7 @@ public:
     __CGcustom_fixed(int val) {
         int fx = floatToCustomFixed(float(val));
 
-        for (int i=0; i<__CGcustom_fixed::bytesPerFixed; i++) {
+        for (unsigned int i=0; i<__CGcustom_fixed::bytesPerFixed; i++) {
             __CGcustom_fixed::v[i] = fx & 0xFF;
             fx >>= 8;
         }
@@ -92,7 +92,7 @@ public:
 
     inline __CGcustom_fixed(const __CGcustom_fixed &rhs)
     {
-        for (int i=0; i<__CGcustom_fixed::bytesPerFixed; i++) {
+        for (unsigned int i=0; i<__CGcustom_fixed::bytesPerFixed; i++) {
             __CGcustom_fixed::v[i] = rhs.v[i];
         }
     }
@@ -110,7 +110,7 @@ public:
     }
 
     __CGcustom_fixed & operator = (const __CGcustom_fixed & val) {
-        for (int i=0; i<__CGcustom_fixed::bytesPerFixed; i++) {
+        for (unsigned int i=0; i<__CGcustom_fixed::bytesPerFixed; i++) {
             __CGcustom_fixed::v[i] = val.v[i];
         }
         return *this;
@@ -179,7 +179,7 @@ float __CGcustom_fixed<intBits,fracBits,sgnBit>::customFixedToFloat() const
     static const float oneOverFixedScale = 1.0f / fixedScale;
 
     int fx = 0;
-    for (int i=0; i<__CGcustom_fixed::bytesPerFixed; i++) {
+    for (unsigned int i=0; i<__CGcustom_fixed::bytesPerFixed; i++) {
         fx |= __CGcustom_fixed::v[i] << i*8;
     }
 

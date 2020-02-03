@@ -1,7 +1,5 @@
 
-/* render_font.cpp - class for rendering messia via font with NV_path_rendering */
-
-// Copyright (c) NVIDIA Corporation. All rights reserved.
+// render_font.cpp - class for simple font rendering with NV_path_rendering
 
 #include <string.h>
 
@@ -100,27 +98,15 @@ void Message::render()
   }
 
   if (stroking) {
-    glStencilStrokePathInstancedNV((GLsizei)message_length,
+    glColor3f(0.5,0.5,0.5);  // gray
+    glStencilThenCoverStrokePathInstancedNV((GLsizei)message_length,
       GL_UNSIGNED_BYTE, message.c_str(), font->glyph_base,
       1, ~0,  /* Use all stencil bits */
-      GL_TRANSLATE_X_NV, &xtranslate[0]);
-    glColor3f(0.5,0.5,0.5);  // gray
-    glCoverStrokePathInstancedNV((GLsizei)message_length,
-      GL_UNSIGNED_BYTE, message.c_str(), font->glyph_base,
       GL_BOUNDING_BOX_OF_BOUNDING_BOXES_NV,
       GL_TRANSLATE_X_NV, &xtranslate[0]);
   }
 
   if (filling) {
-    /* STEP 1: stencil message into stencil buffer.  Results in samples
-    within the message's glyphs to have a non-zero stencil value. */
-    glStencilFillPathInstancedNV((GLsizei)message_length,
-      GL_UNSIGNED_BYTE, message.c_str(), font->glyph_base,
-      GL_PATH_FILL_MODE_NV, ~0,  /* Use all stencil bits */
-      GL_TRANSLATE_X_NV, &xtranslate[0]);
-
-    /* STEP 2: cover region of the message; color covered samples (those
-    with a non-zero stencil value) and set their stencil back to zero. */
     switch (fill_gradient) {
     case 0:
       {
@@ -142,8 +128,13 @@ void Message::render()
       break;
     }
 
-    glCoverFillPathInstancedNV((GLsizei)message_length,
+    // STEP 1: stencil message into stencil buffer.  Results in samples
+    // within the message's glyphs to have a non-zero stencil value. */
+    // STEP 2: cover region of the message; color covered samples (those
+    // with a non-zero stencil value) and set their stencil back to zero. */
+    glStencilThenCoverFillPathInstancedNV((GLsizei)message_length,
       GL_UNSIGNED_BYTE, message.c_str(), font->glyph_base,
+      GL_PATH_FILL_MODE_NV, ~0,  /* Use all stencil bits */
       GL_BOUNDING_BOX_OF_BOUNDING_BOXES_NV,
       GL_TRANSLATE_X_NV, &xtranslate[0]);
     if (fill_gradient == 0) {

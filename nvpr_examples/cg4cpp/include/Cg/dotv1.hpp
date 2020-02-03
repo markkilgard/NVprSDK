@@ -22,9 +22,11 @@ template <typename T, int N>
 static inline __CGvector<typename __CGtype_trait<T>::numericType,1> dotv1(const __CGvector<T,N-1> & a, const __CGvector<T,N> & b)
 {
     typedef typename __CGtype_trait<T>::numericType numericType;
-    typename __CGtype_trait<T>::dotType sum = a[0] * b[0];
-    for (int i=1; i<N-1; i++)
-        sum += a[i] * b[i];
+    typedef typename __CGtype_trait<T>::dotType dotType;
+    dotType sum = dotType(a[0]) * b[0];
+    for (int i=1; i<N-1; i++) {
+        sum += dotType(a[i]) * b[i];
+    }
     sum += b[N-1];
     return __CGvector<numericType,1>(numericType(sum));
 }
@@ -33,9 +35,11 @@ static inline __CGvector<typename __CGtype_trait<TA,TB>::numericType,1> dotv1(co
                                                                               const __CGvector_usage<TB,N,TBstore> & b)
 {
     typedef typename __CGtype_trait<TA,TB>::numericType numericType;
-    typename __CGtype_trait<TA,TB>::dotType sum = a[0] * b[0];
-    for (int i=1; i<N-1; i++)
-        sum += a[i] * b[i];
+    typedef typename __CGtype_trait<TA,TB>::dotType dotType;
+    dotType sum = dotType(a[0]) * b[0];
+    for (int i=1; i<N-1; i++) {
+        sum += dotType(a[i]) * b[i];
+    }
     sum += b[N-1];
     return __CGvector<numericType,1>(numericType(sum));
 }
@@ -46,9 +50,11 @@ template <typename T, int N>
 static inline __CGvector<typename __CGtype_trait<T>::numericType,1> dotv1(const __CGvector<T,N> & a, const __CGvector<T,N-1> & b)
 {
     typedef typename __CGtype_trait<T>::numericType numericType;
-    typename __CGtype_trait<T>::dotType sum = a[0] * b[0];
-    for (int i=1; i<N-1; i++)
-        sum += a[i] * b[i];
+    typedef typename __CGtype_trait<T>::dotType dotType;
+    dotType sum = dotType(a[0]) * b[0];
+    for (int i=1; i<N-1; i++) {
+        sum += dotType(a[i]) * b[i];
+    }
     sum += a[N-1];
     return __CGvector<numericType,1>(numericType(sum));
 }
@@ -57,9 +63,11 @@ static inline __CGvector<typename __CGtype_trait<TA,TB>::numericType,1> dotv1(co
                                                                               const __CGvector_usage<TB,N-1,TBstore> & b)
 {
     typedef typename __CGtype_trait<TA,TB>::numericType numericType;
-    typename __CGtype_trait<TA,TB>::dotType sum = a[0] * b[0];
-    for (int i=1; i<N-1; i++)
-        sum += a[i] * b[i];
+    typedef typename __CGtype_trait<TA,TB>::dotType dotType;
+    dotType sum = dotType(a[0]) * b[0];
+    for (int i=1; i<N-1; i++) {
+        sum += dotType(a[i]) * b[i];
+    }
     sum += a[N-1];
     return __CGvector<numericType,1>(numericType(sum));
 }

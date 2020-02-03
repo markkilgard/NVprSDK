@@ -30,8 +30,8 @@ namespace Cg {
 // sgnBit is whether or not a sign bit is provided
 template <unsigned int manBits, unsigned int expBits, bool sgnBit>
 struct __CGcustom_float_storage {
-    static const int bits = manBits + expBits + sgnBit;
-    static const int bytesPerFloat = (bits + 7) / 8;
+    static const unsigned int bits = manBits + expBits + sgnBit;
+    static const unsigned int bytesPerFloat = (bits + 7) / 8u;
 
     unsigned char v[bytesPerFloat];
 } __CGmay_alias;
@@ -84,7 +84,7 @@ public:
     __CGcustom_float(float val) {
         unsigned int ui = floatToCustomFloat(val);
 
-        for (int i=0; i<__CGcustom_float::bytesPerFloat; i++) {
+        for (unsigned int i=0; i<__CGcustom_float::bytesPerFloat; i++) {
             __CGcustom_float::v[i] = ui & 0xFF;
             ui >>= 8;
         }
@@ -93,7 +93,7 @@ public:
     __CGcustom_float(double val) {
         unsigned int ui = floatToCustomFloat(float(val));
 
-        for (int i=0; i<__CGcustom_float::bytesPerFloat; i++) {
+        for (unsigned int i=0; i<__CGcustom_float::bytesPerFloat; i++) {
             __CGcustom_float::v[i] = ui & 0xFF;
             ui >>= 8;
         }
@@ -103,14 +103,14 @@ public:
     __CGcustom_float(int val) {
         unsigned int ui = floatToCustomFloat(float(val));
 
-        for (int i=0; i<__CGcustom_float::bytesPerFloat; i++) {
+        for (unsigned int i=0; i<__CGcustom_float::bytesPerFloat; i++) {
             __CGcustom_float::v[i] = ui & 0xFF;
             ui >>= 8;
         }
     }
     inline __CGcustom_float(const __CGcustom_float &rhs)
     {
-        for (int i=0; i<__CGcustom_float::bytesPerFloat; i++) {
+        for (unsigned int i=0; i<__CGcustom_float::bytesPerFloat; i++) {
             __CGcustom_float::v[i] = rhs.v[i];
         }
     }
@@ -152,7 +152,7 @@ public:
 #endif
 
     inline __CGcustom_float & operator = (const __CGcustom_float & val) {
-        for (int i=0; i<__CGcustom_float::bytesPerFloat; i++) {
+        for (unsigned int i=0; i<__CGcustom_float::bytesPerFloat; i++) {
             __CGcustom_float::v[i] = val.v[i];
         }
         return *this;
@@ -221,7 +221,7 @@ unsigned int __CGcustom_float<manBits,expBits,sgnBit,satToMaxFloat>::custom_floa
     unsigned int f = 0;
     unsigned int manexp, data;
 
-    for (int i=0; i<__CGcustom_float::bytesPerFloat; i++) {
+    for (unsigned int i=0; i<__CGcustom_float::bytesPerFloat; i++) {
         f |= __CGcustom_float::v[i] << i*8;
     }
 

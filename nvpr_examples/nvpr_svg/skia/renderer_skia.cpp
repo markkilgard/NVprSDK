@@ -9,6 +9,7 @@
 
 #if USE_SKIA
 
+#include <SkTypes.h>
 #include "renderer_skia.hpp"
 #include "scene.hpp"
 #include "path.hpp"

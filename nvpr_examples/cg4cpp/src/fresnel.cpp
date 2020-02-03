@@ -60,7 +60,7 @@ static inline __CGvector<typename __CGtype_trait<T>::realType,1> __CGfresnel(
     tOut = __CGvector<T,3>(t);
     rOut = reflect(i, n);
 
-    return __CGvector<T,1>(result);
+    return __CGvector<T,1>(T(result));
 }
 
 float1 fresnel(float3 i, float3 n, float eta, Out<float> kt, Out<float3> r, Out<float3> t)

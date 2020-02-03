@@ -18,22 +18,35 @@
 
 namespace Cg {
 
+#if defined(_MSC_VER) && !defined(__EDG__)  // Visual C++ but not EDG fakery
+#pragma warning(push)
+#pragma warning(disable:6294)  // Ill-defined for-loop:  initial condition does not satisfy test.  Loop body not executed.
+#endif
+
 template <typename T, int N>
 static inline __CGvector<typename __CGtype_trait<T>::realType,N> normalize(const __CGvector<T,N> & v)
 {
-    typename __CGtype_trait<T>::dotType sum = v[0] * v[0];
-    for (int i=1; i<N; i++)
-        sum += v[i] * v[i];
+    typedef typename __CGtype_trait<T>::dotType dotType;
+    dotType sum = dotType(v[0]) * v[0];
+    for (int i=1; i<N; i++) {
+        sum += dotType(v[i]) * v[i];
+    }
     return __CGvector<T,N>(v / ::sqrt(sum));
 }
 template <typename T, int N, typename Tstore>
 static inline __CGvector<typename __CGtype_trait<T>::realType,N> normalize(const __CGvector_usage<T,N,Tstore> & v)
 {
-    typename __CGtype_trait<T>::dotType sum = v[0] * v[0];
-    for (int i=1; i<N; i++)
-        sum += v[i] * v[i];
+    typedef typename __CGtype_trait<T>::dotType dotType;
+    dotType sum = dotType(v[0]) * v[0];
+    for (int i=1; i<N; i++) {
+        sum += dotType(v[i]) * v[i];
+    }
     return __CGvector<T,N>(v / ::sqrt(sum));
 }
+
+#if defined(_MSC_VER) && !defined(__EDG__)  // Visual C++ but not EDG fakery
+#pragma warning(pop)
+#endif
 
 } // namespace Cg
 
