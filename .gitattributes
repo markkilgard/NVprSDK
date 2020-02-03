@@ -4,3 +4,6 @@
 *.sln             -text diff
 *.vcxproj         -text diff
 *.vcxproj.filters -text diff
+*.dds             binary
+*.png             binary
+*.jpg             binary
