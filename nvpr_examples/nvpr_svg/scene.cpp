@@ -1,5 +1,5 @@
 
-/* scene.c - scene management for nvpr_svg. */
+/* scene.cpp - scene management for nvpr_svg. */
 
 // Copyright (c) NVIDIA Corporation. All rights reserved.
 

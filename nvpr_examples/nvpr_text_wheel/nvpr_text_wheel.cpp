@@ -400,6 +400,26 @@ keyboard(unsigned char c, int x, int y)
   glutPostRedisplay();
 }
 
+static void menu(int item)
+{
+  keyboard((unsigned char)item, 0, 0);
+}
+
+void initMenus()
+{
+  glutCreateMenu(menu);
+  glutAddMenuEntry("[ ] Toggle animation", ' ');
+  glutAddMenuEntry("[b] Cycle background color", 'b');
+  glutAddMenuEntry("[f] Toggle filling", 'f');
+  glutAddMenuEntry("[s] Toggle stroking", 's');
+  glutAddMenuEntry("[u] Toggle underlining", 'u');
+  glutAddMenuEntry("[v] Toggle frame sync", 'v');
+  glutAddMenuEntry("[F] Toggle frames/second", 'F');
+  glutAddMenuEntry("[r] Reset view", 'r');
+  glutAddMenuEntry("[Esc] Quit", 27);
+  glutAttachMenu(GLUT_RIGHT_BUTTON);
+}
+
 int
 main(int argc, char **argv)
 {
@@ -472,6 +492,7 @@ main(int argc, char **argv)
   disableFPS();
 
   initFPScontext(&gl_fps_context, FPS_USAGE_TEXTURE);
+  initMenus();
 
   glutMainLoop();
   return 0;

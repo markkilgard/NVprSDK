@@ -164,7 +164,7 @@ PFNGLMATRIXROTATEFEXTPROC glMatrixRotatefEXT = NULL;
 #define LOAD_PROC(type, name) \
   name = (type) GET_PROC_ADDRESS(name); \
   if (!name) { \
-    fprintf(stderr, "%s: failed to GetProcAddress for %s\n", programName, #name); \
+    fprintf(stderr, "%s: failed to GetProcAddress for %s\n", program_name, #name); \
     exit(1); \
   }
 #endif
@@ -183,7 +183,7 @@ int sceneInitMode = 0;  // how "star and heart" path object is initialized
 int animating = 0;  // Should text spin?
 float angle = 0;    // in degrees
 
-const char *programName = "nvpr_whitepaper";
+const char *program_name = "nvpr_whitepaper";
 
 // Initialize OpenGL functions needed by this example
 void initglext(void)
@@ -619,7 +619,7 @@ int main(int argc, char **argv)
       }
     }
     fprintf(stderr, "usage: %s [-#]\n       where # is the number of samples/pixel\n",
-      programName);
+      program_name);
     exit(1);
   }
 
@@ -649,11 +649,11 @@ int main(int argc, char **argv)
   // Initialize OpenGL extensions and check for required functionality
   initglext();
   if (!hasPathRendering) {
-    fprintf(stderr, "%s: required NV_path_rendering OpenGL extension is not present\n", programName);
+    fprintf(stderr, "%s: required NV_path_rendering OpenGL extension is not present\n", program_name);
     exit(1);
   }
   if (!hasDirectStateAccess) {
-    fprintf(stderr, "%s: required EXT_direct_state_access OpenGL extension is not present\n", programName);
+    fprintf(stderr, "%s: required EXT_direct_state_access OpenGL extension is not present\n", program_name);
     exit(1);
   }
   initGraphics(emScale);

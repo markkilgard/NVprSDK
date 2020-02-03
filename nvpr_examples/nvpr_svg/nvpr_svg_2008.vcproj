@@ -50,7 +50,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="&quot;../cairo-1.9.6&quot;;&quot;../cairo-1.9.6/src&quot;;.;include;tinyxml;&quot;../boost-1.50.0&quot;;../cg4cpp/include;&quot;$(CG_INC_PATH)&quot;;&quot;c:\Program Files\NVIDIA Corporation\Cg\include&quot;;&quot;C:\Program Files\GnuWin32\include&quot;;..\qt\include;..\glew\include;..\qt\include\QtGui;&quot;..\openvg-1_1-ri\ri_package\ri\include&quot;;..\skia\include\core;..\skia\include\config;..\skia\include\effects;&quot;$(DXSDK_DIR)\Include&quot;;..\common"
-				PreprocessorDefinitions="TIXML_USE_STL;_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;CAIRO_WIN32_STATIC_BUILD;GLEW_STATIC;GLUT_STATIC_LIB;BOOST_SP_DISABLE_THREADS"
+				PreprocessorDefinitions="BOOST_ERROR_CODE_HEADER_ONLY;TIXML_USE_STL;_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;CAIRO_WIN32_STATIC_BUILD;GLEW_STATIC;GLUT_STATIC_LIB;BOOST_SP_DISABLE_THREADS;BOOST_ALL_NO_LIB"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -148,7 +148,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="&quot;../cairo-1.9.6&quot;;&quot;../cairo-1.9.6/src&quot;;.;include;tinyxml;&quot;../boost-1.50.0&quot;;../cg4cpp/include;&quot;$(CG_INC_PATH)&quot;;&quot;c:\Program Files\NVIDIA Corporation\Cg\include&quot;;&quot;C:\Program Files\GnuWin32\include&quot;;..\qt\include;..\glew\include;..\qt\include\QtGui;&quot;..\openvg-1_1-ri\ri_package\ri\include&quot;;..\skia\include\core;..\skia\include\config;..\skia\include\effects;&quot;$(DXSDK_DIR)\Include&quot;;..\common"
-				PreprocessorDefinitions="TIXML_USE_STL;_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;CAIRO_WIN32_STATIC_BUILD;GLEW_STATIC;GLUT_STATIC_LIB;BOOST_SP_DISABLE_THREADS"
+				PreprocessorDefinitions="BOOST_ERROR_CODE_HEADER_ONLY;TIXML_USE_STL;_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;CAIRO_WIN32_STATIC_BUILD;GLEW_STATIC;GLUT_STATIC_LIB;BOOST_SP_DISABLE_THREADS;BOOST_ALL_NO_LIB"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -237,8 +237,8 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;../cairo-1.9.6&quot;;&quot;../cairo-1.9.6/src&quot;;.;include;tinyxml;&quot;../boost-1.50.0&quot;;../cg4cpp/include;&quot;$(CG_INC_PATH)&quot;;&quot;c:\Program Files\NVIDIA Corporation\Cg\include&quot;;&quot;C:\Program Files\GnuWin32\include&quot;;..\qt\include;..\glew\include;..\qt\include\QtGui;&quot;..\openvg-1_1-ri\ri_package\ri\include&quot;;..\skia\include\core;..\skia\include\config;..\skia\include\effects;&quot;$(DXSDK_DIR)\Include&quot;;..\common"
-				PreprocessorDefinitions="TIXML_USE_STL;_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;CAIRO_WIN32_STATIC_BUILD;GLEW_STATIC;GLUT_STATIC_LIB;BOOST_SP_DISABLE_THREADS"
+				AdditionalIncludeDirectories="&quot;../cairo-1.9.6&quot;;&quot;../cairo-1.9.6/src&quot;;.;include;tinyxml;../glut/include;&quot;../boost-1.50.0&quot;;../cg4cpp/include;&quot;$(CG_INC_PATH)&quot;;&quot;c:\Program Files\NVIDIA Corporation\Cg\include&quot;;&quot;C:\Program Files\GnuWin32\include&quot;;..\qt\include;..\glew\include;..\qt\include\QtGui;&quot;..\openvg-1_1-ri\ri_package\ri\include&quot;;..\skia\include\core;..\skia\include\config;..\skia\include\effects;&quot;$(DXSDK_DIR)\Include&quot;;..\common"
+				PreprocessorDefinitions="BOOST_ERROR_CODE_HEADER_ONLY;TIXML_USE_STL;_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;CAIRO_WIN32_STATIC_BUILD;GLEW_STATIC;GLUT_STATIC_LIB;BOOST_SP_DISABLE_THREADS;BOOST_ALL_NO_LIB"
 				GeneratePreprocessedFile="0"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -334,7 +334,7 @@
 				AdditionalOptions="/MP"
 				Optimization="0"
 				AdditionalIncludeDirectories="&quot;../cairo-1.9.6&quot;;&quot;../cairo-1.9.6/src&quot;;.;include;tinyxml;&quot;../boost-1.50.0&quot;;../cg4cpp/include;&quot;$(CG_INC_PATH)&quot;;&quot;c:\Program Files\NVIDIA Corporation\Cg\include&quot;;&quot;C:\Program Files\GnuWin32\include&quot;;..\qt\include;..\glew\include;..\qt\include\QtGui;&quot;..\openvg-1_1-ri\ri_package\ri\include&quot;;..\skia\include\core;..\skia\include\config;..\skia\include\effects;&quot;$(DXSDK_DIR)\Include&quot;;..\common"
-				PreprocessorDefinitions="TIXML_USE_STL;_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;CAIRO_WIN32_STATIC_BUILD;GLEW_STATIC;GLUT_STATIC_LIB;BOOST_SP_DISABLE_THREADS"
+				PreprocessorDefinitions="BOOST_ERROR_CODE_HEADER_ONLY;TIXML_USE_STL;_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;CAIRO_WIN32_STATIC_BUILD;GLEW_STATIC;GLUT_STATIC_LIB;BOOST_SP_DISABLE_THREADS;BOOST_ALL_NO_LIB"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="0"
@@ -396,6 +396,14 @@
 		</Configuration>
 	</Configurations>
 	<References>
+		<ProjectReference
+			ReferencedProjectIdentifier="{05FFADE4-2B93-C899-00CA-AA717CA7A077}"
+			RelativePathToProject=".\glew\glewlib_2008.vcproj"
+		/>
+		<ProjectReference
+			ReferencedProjectIdentifier="{47C9817F-F497-45BF-90E6-5857F3128042}"
+			RelativePathToProject=".\glut\glut_2008.vcproj"
+		/>
 	</References>
 	<Files>
 		<Filter
@@ -710,11 +718,11 @@
 					>
 				</File>
 				<File
-					RelativePath="..\common\nvpr_init.c"
+					RelativePath="..\common\nvpr_glew_init.c"
 					>
 				</File>
 				<File
-					RelativePath="..\common\nvpr_init.h"
+					RelativePath="..\common\nvpr_glew_init.h"
 					>
 				</File>
 				<File

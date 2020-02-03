@@ -20,7 +20,7 @@
 # endif
 #endif
 
-#include "nvpr_init.h"
+#include "nvpr_glew_init.h"
 #include "sRGB_math.h"
 #include "xform.h"
 
@@ -32,7 +32,7 @@ int fill_gradient = 2;
 int use_sRGB = 0;
 int hasFramebufferSRGB = 0;
 GLint sRGB_capable = 0;
-const char *programName = "nvpr_font_file";
+const char *program_name = "nvpr_font_file";
 
 /* Scaling and rotation state. */
 float anchor_x = 0,
@@ -80,6 +80,8 @@ void setBackground()
         g = 0.3;
         b = 0.6;
         break;
+    default:
+        assert(!"unexpected background");
     case 3:
         r = g = b = 0.5;
         break;
@@ -100,7 +102,7 @@ int emScale = 2048;
 
 static void fatalError(const char *message)
 {
-  fprintf(stderr, "%s: %s\n", programName, message);
+  fprintf(stderr, "%s: %s\n", program_name, message);
   exit(1);
 }
 
@@ -165,7 +167,7 @@ initGraphics(int emScale)
   messageLen = strlen(message);
   xtranslate = (GLfloat*) malloc(sizeof(GLfloat)*messageLen);
   if (!xtranslate) {
-    fprintf(stderr, "%s: malloc of xtranslate failed\n", programName);
+    fprintf(stderr, "%s: malloc of xtranslate failed\n", program_name);
     exit(1);
   }
   xtranslate[0] = 0.0;  /* Initial xtranslate is zero. */
@@ -484,7 +486,7 @@ main(int argc, char **argv)
         continue;
       } else {
         printf("%s: -emscale must be followed by value\n",
-            programName);
+          program_name);
         exit(1);
       }
     } else if (argv[i][0] == '-') {
@@ -497,9 +499,9 @@ main(int argc, char **argv)
     }
     /* Unrecognized option so print usage message and exit. */
     fprintf(stderr, "usage: %s [-#] [-emscale n]\n"
-                    "where # is the number of samples/pixel\n",
+                    "where # is the number of samples/pixel\n"
                     "where n is the em scale (default is 2048)\n",
-      programName);
+      program_name);
     exit(1);
   }
 
@@ -540,7 +542,7 @@ main(int argc, char **argv)
     fatalError("OpenGL implementation doesn't support GL_EXT_direct_state_access (you should be using NVIDIA GPUs...)");
   }
 
-  initializeNVPR(programName);
+  initialize_NVPR_GLEW_emulation(stdout, program_name, 0);
   if (!has_NV_path_rendering) {
     fatalError("required NV_path_rendering OpenGL extension is not present");
   }

@@ -13,12 +13,12 @@
 #include <GL/glut.h>
 #endif
 
-#include "nvpr_init.h"
+#include "nvpr_glew_init.h"
 #include "xform.h"
 
 #include "mjkimage.h"
 
-const char *programName = "nvpr_gradient";
+const char *program_name = "nvpr_gradient";
 int stroking = 1,
     filling = 1,
     do_grid = 1;
@@ -46,7 +46,7 @@ enum {
 
 static void fatalError(const char *message)
 {
-  fprintf(stderr, "%s: %s\n", programName, message);
+  fprintf(stderr, "%s: %s\n", program_name, message);
   exit(1);
 }
 
@@ -431,7 +431,7 @@ main(int argc, char **argv)
       }
     }
     fprintf(stderr, "usage: %s [-#]\n       where # is the number of samples/pixel\n",
-      programName);
+      program_name);
     exit(1);
   }
 
@@ -487,7 +487,7 @@ main(int argc, char **argv)
     fatalError("OpenGL implementation doesn't support GL_EXT_direct_state_access (you should be using NVIDIA GPUs...)");
   }
 
-  initializeNVPR(programName);
+  initialize_NVPR_GLEW_emulation(stdout, program_name, 0);
   if (!has_NV_path_rendering) {
     fatalError("required NV_path_rendering OpenGL extension is not present");
   }

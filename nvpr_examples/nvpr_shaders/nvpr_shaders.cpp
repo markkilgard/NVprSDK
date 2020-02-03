@@ -25,19 +25,18 @@
 #include <Cg/cg.h>    /* Can't include this?  Is Cg Toolkit installed! */
 #include <Cg/cgGL.h>
 
-#include "nvpr_init.h"
+#include "nvpr_glew_init.h"
 #include "sRGB_math.h"
 #include "xform.h"
 
 int stroking = 1;
 int filling = 1;
 int underline = 2;
-int regular_aspect = 1;
 int use_sRGB = 0;
 int hasPathRendering = 0;
 int hasFramebufferSRGB = 0;
 GLint sRGB_capable = 0;
-const char *programName = "nvpr_shaders";
+const char *program_name = "nvpr_shaders";
 
 static const char myProgramName[] = "nvpr_shaders";
 static const char myFragmentProgramFileName[] = "bumpmap.cg";
@@ -54,8 +53,8 @@ float anchor_x = 0,
       anchor_y = 0;  /* Anchor for rotation and scaling. */
 int scale_y = 0, 
     rotate_x = 0;  /* Prior (x,y) location for scaling (vertical) or rotation (horizontal)? */
-int zooming = 0;  /* Are we zooming currently? */
-int scaling = 0;  /* Are we scaling (zooming) currently? */
+int rotating = 0;  /* Are we rotating currently? */
+int scaling = 0;  /* Are we scaling (rotating) currently? */
 
 /* Sliding (translation) state. */
 float slide_x = 0,
@@ -124,36 +123,36 @@ int background = 2;
 
 void setBackground()
 {
-    float r, g, b, a;
+  float r, g, b, a;
 
-    switch (background) {
+  switch (background) {
     case 0:
-        r = g = b = 0.0;
-        break;
+      r = g = b = 0.0;
+      break;
     case 1:
-        r = g = b = 1.0;
-        break;
+      r = g = b = 1.0;
+      break;
     case 2:
-        r = 0.1;
-        g = 0.3;
-        b = 0.6;
-        break;
+      r = 0.1;
+      g = 0.3;
+      b = 0.6;
+      break;
     case 3:
-        r = g = b = 0.5;
-        break;
-    }
-    if (sRGB_capable) {
-        r = convertSRGBColorComponentToLinearf(r);
-        g = convertSRGBColorComponentToLinearf(g);
-        b = convertSRGBColorComponentToLinearf(b);
-    }
-    a = 1.0;
-    glClearColor(r,g,b,a);
+      r = g = b = 0.5;
+      break;
+  }
+  if (sRGB_capable) {
+    r = convertSRGBColorComponentToLinearf(r);
+    g = convertSRGBColorComponentToLinearf(g);
+    b = convertSRGBColorComponentToLinearf(b);
+  }
+  a = 1.0;
+  glClearColor(r,g,b,a);
 }
 
 static void fatalError(const char *message)
 {
-  fprintf(stderr, "%s: %s\n", programName, message);
+  fprintf(stderr, "%s: %s\n", program_name, message);
   exit(1);
 }
 
@@ -210,18 +209,18 @@ initGraphics(int emScale)
   messageLen = strlen(message);
   xtranslate = (GLfloat*) malloc(sizeof(GLfloat)*messageLen);
   if (!xtranslate) {
-    fprintf(stderr, "%s: malloc of xtranslate failed\n", programName);
+    fprintf(stderr, "%s: malloc of xtranslate failed\n", program_name);
     exit(1);
   }
   xtranslate[0] = 0.0;  /* Initial xtranslate is zero. */
   {
     /* Use 100% spacing; use 0.9 for both for 90% spacing. */
-    GLfloat advanceScale = 1.0,
-            kerningScale = 1.0; /* Set this to zero to ignore kerning. */
+    const GLfloat advanceScale = 1.0,
+                  kerningScale = 1.0; /* Set this to zero to ignore kerning. */
     glGetPathSpacingNV(GL_ACCUM_ADJACENT_PAIRS_NV,
                        (GLsizei)messageLen, GL_UNSIGNED_BYTE, message,
                        glyphBase,
-                       advanceScale,kerningScale,
+                       advanceScale, kerningScale,
                        GL_TRANSLATE_X_NV,
                        &xtranslate[1]);  /* messageLen-1 accumulated translates are written here. */
   }
@@ -262,38 +261,30 @@ doGraphics(void)
 
   if (stroking) {
     /* Add stroking "behind" the filled characters. */
-    glStencilStrokePathInstancedNV((GLsizei)messageLen,
+    glColor3f(1,1,0.5);  // gray
+    const GLint stencil_value = 1;
+    const GLuint write_mask = ~0;  // Use all stencil bits
+    glStencilThenCoverStrokePathInstancedNV((GLsizei)messageLen,
       GL_UNSIGNED_BYTE, message, glyphBase,
-      1, ~0,  /* Use all stencil bits */
-      GL_TRANSLATE_X_NV, xtranslate);
-    glColor3f(1,1,0.5);  // gray   
-    glCoverStrokePathInstancedNV((GLsizei)messageLen,
-      GL_UNSIGNED_BYTE, message, glyphBase,
+      stencil_value, write_mask,
       GL_BOUNDING_BOX_OF_BOUNDING_BOXES_NV,
       GL_TRANSLATE_X_NV, xtranslate);
   }
 
   if (filling) {
-    /* STEP 1: stencil message into stencil buffer.  Results in samples
-       within the message's glyphs to have a non-zero stencil value. */
-glStencilFillPathInstancedNV((GLsizei)messageLen,
-                             GL_UNSIGNED_BYTE, message, glyphBase,
-                             GL_PATH_FILL_MODE_NV, ~0,  /* Use all stencil bits */
-                             GL_TRANSLATE_X_NV, xtranslate);
+    const GLfloat coeffs[2*3] = { 10,0,0, 0,1,0 };
+    glPathTexGenNV(GL_TEXTURE0, GL_PATH_OBJECT_BOUNDING_BOX_NV, 2, coeffs);
 
-const GLfloat coeffs[2*3] = { 10,0,0, 0,1,0 };
-glPathTexGenNV(GL_TEXTURE0, GL_PATH_OBJECT_BOUNDING_BOX_NV, 2, coeffs);
-
-cgGLBindProgram(myCgFragmentProgram);
-cgGLEnableTextureParameter(myCgFragmentParam_normalMap);
-cgGLEnableProfile(myCgFragmentProfile);
-
-glCoverFillPathInstancedNV((GLsizei)messageLen,
-                           GL_UNSIGNED_BYTE, message, glyphBase,
-                           GL_BOUNDING_BOX_OF_BOUNDING_BOXES_NV,
-                           GL_TRANSLATE_X_NV, xtranslate);
-
-cgGLDisableProfile(myCgFragmentProfile);
+    cgGLBindProgram(myCgFragmentProgram);
+    cgGLEnableTextureParameter(myCgFragmentParam_normalMap);
+    cgGLEnableProfile(myCgFragmentProfile); {
+      const GLuint write_mask = ~0;  // Use all stencil bits
+      glStencilThenCoverFillPathInstancedNV((GLsizei)messageLen,
+        GL_UNSIGNED_BYTE, message, glyphBase,
+        GL_PATH_FILL_MODE_NV, write_mask,
+        GL_BOUNDING_BOX_OF_BOUNDING_BOXES_NV,
+        GL_TRANSLATE_X_NV, xtranslate);
+    } cgGLDisableProfile(myCgFragmentProfile);
   }
 
   if (draw_light) {
@@ -325,31 +316,28 @@ void configureProjection()
   ortho(viewport, 0,window_width, 0,window_height);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  if (regular_aspect) {
-    float w = totalAdvance,
-          h = yMax-yMin;
-    if (h < w) {
-      left = -xBorder;
-      right = totalAdvance+xBorder;
-      top = -0.5*totalAdvance*aspect_ratio + (yMax+yMin)/2;
-      bottom = 0.5*totalAdvance*aspect_ratio + (yMax+yMin)/2;
-      /* Configure canvas so text is centered nicely with spacing on sides. */
-    } else {
-      left = -0.5*h*aspect_ratio + totalAdvance/2;
-      right = 0.5*h*aspect_ratio + totalAdvance/2;
-      top = yMin;
-      bottom = yMax;
-      /* Configure canvas so text is centered nicely with spacing on sides. */
-    }
+  float w = totalAdvance,
+        h = yMax-yMin;
+  if (h < w) {
+    left = -xBorder;
+    right = totalAdvance+xBorder;
+    top = (yMax+yMin)/2 - (right-left)/2;
+    bottom = (yMax+yMin)/2 + (right-left)/2;
   } else {
-    left = 0;
-    right = totalAdvance;
-    top = yMin;
-    bottom = yMax;
-    /* Configure canvas coordinate system from (0,yMin) to (totalAdvance,yMax). */
+    float yBorder = 0;  // Zero border since yMin and yMax have sufficient space.
+    top = yMin - yBorder;
+    bottom = yMax + yBorder;
+    left = totalAdvance/2 - (bottom-top)/2;
+    right = totalAdvance/2 + (bottom-top)/2;
   }
-  glOrtho(left, right, top, bottom,
-    -50000, 50000);
+  if (aspect_ratio < 1) {
+    glScalef(aspect_ratio,1,1);
+  } else {
+    glScalef(1,1/aspect_ratio,1);
+  }
+  const float nere = -5000;  // Avoid Windows "near" keyword.
+  const float fer = 5000;    // Avoid Windows "far" keyword.
+  glOrtho(left, right, top, bottom, nere, fer);
   inverse_ortho(iproj, left, right, top, bottom);
   view_width = right - left;
   view_height = bottom - top;
@@ -407,12 +395,12 @@ mouse(int button, int state, int mouse_space_x, int mouse_space_y)
         scaling = 0;
       }
       if (!(glutGetModifiers() & GLUT_ACTIVE_SHIFT)) {
-        zooming = 1;
+        rotating = 1;
       } else {
-        zooming = 0;
+        rotating = 0;
       }
     } else {
-      zooming = 0;
+      rotating = 0;
       scaling = 0;
     }
   }
@@ -432,14 +420,14 @@ motion(int mouse_space_x, int mouse_space_y)
 {
   mouse_space_y = iheight - mouse_space_y;
 
-  if (zooming || scaling) {
+  if (rotating || scaling) {
     Transform3x2 t, r, s, m;
     float angle = 0;
     float zoom = 1;
     if (scaling) {
       angle = 0.3 * (mouse_space_x - rotate_x) * 640.0/window_width;
     }
-    if (zooming) {
+    if (rotating) {
       zoom = pow(1.003, (scale_y - mouse_space_y) * 480.0/window_height);
     }
 
@@ -451,6 +439,12 @@ motion(int mouse_space_x, int mouse_space_y)
     translate(t, -anchor_x, -anchor_y);
     mul(m, m, t);
     mul(view, m, view);
+#if 0
+    MatrixPrint("s", s);
+    MatrixPrint("r", r);
+    MatrixPrint("t", t);
+    MatrixPrint("view", view);
+#endif
     rotate_x = mouse_space_x;
     scale_y = mouse_space_y;
     glutPostRedisplay();
@@ -510,37 +504,37 @@ void
 keyboard(unsigned char c, int x, int y)
 {
   switch (c) {
-  case 27:  /* Esc quits */
+  case 27:  // Esc quits
     exit(0);
     return;
-  case 13:  /* Enter redisplays */
+  case 13:  // Enter redisplays
     break;
   case 's':
     stroking = !stroking;
     break;
-  case 'r':
-    regular_aspect = !regular_aspect;
+  case 'r':  // Reset to original view
+    initModelAndViewMatrices();
     configureProjection();
     break;
-  case 'f':
+  case 'f':  // Toggle filling
     filling = !filling;
     break;
   case 'i':
     initGraphics(emScale);
     break;
-  case 'u':
+  case 'u':  // Cycle underline modes
     underline = (underline+1)%3;
     break;
-  case 'b':
+  case 'b':  // Toggle clear color backgrounds
     background = (background+1)%4;
     setBackground();
     break;
-  case ' ':
+  case ' ':  // Toggle animation
     animation = !animation;
     last_time = glutGet(GLUT_ELAPSED_TIME);
     doAnimation();
     return;
-  case 'l':
+  case 'l':  // Toggle rendering light source position
     draw_light = !draw_light;
     break;
   case 'a':
@@ -632,7 +626,7 @@ main(int argc, char **argv)
       }
     }
     fprintf(stderr, "usage: %s [-#]\n       where # is the number of samples/pixel\n",
-      programName);
+      program_name);
     exit(1);
   }
 
@@ -673,7 +667,7 @@ main(int argc, char **argv)
     fatalError("OpenGL implementation doesn't support GL_EXT_direct_state_access (you should be using NVIDIA GPUs...)");
   }
 
-  initializeNVPR(programName);
+  initialize_NVPR_GLEW_emulation(stdout, program_name, 0);
   if (!has_NV_path_rendering) {
     fatalError("required NV_path_rendering OpenGL extension is not present");
   }

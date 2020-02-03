@@ -10,23 +10,19 @@
 # pragma once
 #endif
 
-#if __cplusplus >= 201103L  // supports C++11^M
+#if __cplusplus >= 201103L  // supports C++11
 # include <memory>
+using std::shared_ptr;
 #else
 # include <boost/shared_ptr.hpp>
+// Use Boost shared pointer template names.
+using boost::shared_ptr;
 #endif
 
 #include <Cg/double.hpp>
 #include <Cg/vector/xyzw.hpp>
 #include <Cg/vector.hpp>
 #include <Cg/matrix.hpp>
-
-#if __cplusplus >= 201103L  // supports C++11^M
-using std::shared_ptr;
-#else
-// Use Boost shared pointer template names.
-using boost::shared_ptr;
-#endif
 
 using namespace Cg;
 

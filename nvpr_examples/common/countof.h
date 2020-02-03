@@ -21,14 +21,19 @@
 #endif
 #if !defined(countof)
 # if !defined(__cplusplus)
-#  define _countof(_Array) (sizeof(_Array) / sizeof(_Array[0]))
+#  define countof(_Array) (sizeof(_Array) / sizeof(_Array[0]))
+#  define icountof(_Array) ((int)countof(_Array))
+#  define uicountof(_Array) ((unsigned int)countof(_Array))
 # else
+#  include <cstddef>  // for size_t in C++
 // Safe C++ countof macro
 extern "C++"
 {
 template <typename CountofType, size_t SizeOfArray>
 char (*countof_helper(UNALIGNED CountofType (&Array)[SizeOfArray]))[SizeOfArray];
 #  define countof(Array) sizeof(*countof_helper(Array))
+#  define icountof(_Array) (static_cast<int>(countof(_Array)))
+#  define uicountof(_Array) (static_cast<int>(countof(_Array)))
 }
 # endif
 #endif

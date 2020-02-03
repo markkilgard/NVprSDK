@@ -21,7 +21,7 @@
 
 #include "sRGB_math.h"
 
-#ifndef GLAPIENTRY
+#ifndef GLAPIENTRYP
 # ifdef _WIN32
 #  define GLAPIENTRYP __stdcall *
 # else
@@ -122,7 +122,7 @@ PFNGLPATHCOLORGENNVPROC glPathColorGenNV = NULL;
 #define LOAD_PROC(type, name) \
   name = (type) GET_PROC_ADDRESS(name); \
   if (!name) { \
-    fprintf(stderr, "%s: failed to GetProcAddress for %s\n", programName, #name); \
+    fprintf(stderr, "%s: failed to GetProcAddress for %s\n", program_name, #name); \
     exit(1); \
   }
 #endif
@@ -136,7 +136,7 @@ int use_sRGB = 0;
 int hasPathRendering = 0;
 int hasFramebufferSRGB = 0;
 GLint sRGB_capable = 0;
-const char *programName = "nvpr_hello_world";
+const char *program_name = "nvpr_hello_world";
 
 void initglext(void)
 {
@@ -233,7 +233,6 @@ initGraphics(int emScale)
   /* Choose a bold sans-serif font face, preferring Veranda over Arial; if
      neither font is available as a system font, settle for the "Sans" standard
      (built-in) font. */
-#if 0
   glPathGlyphRangeNV(glyphBase, 
                      GL_SYSTEM_FONT_NAME_NV, "Liberation Sans", GL_BOLD_BIT_NV,
                      0, numChars,
@@ -244,7 +243,6 @@ initGraphics(int emScale)
                      0, numChars,
                      GL_USE_MISSING_GLYPH_NV, pathTemplate,
                      emScale);
-#endif
   glPathGlyphRangeNV(glyphBase, 
                      GL_SYSTEM_FONT_NAME_NV, "Arial", GL_BOLD_BIT_NV,
                      0, numChars,
@@ -278,7 +276,7 @@ initGraphics(int emScale)
   free(xtranslate);
   xtranslate = (GLfloat*) malloc(2*sizeof(GLfloat)*messageLen);
   if (!xtranslate) {
-    fprintf(stderr, "%s: malloc of spacing failed\n", programName);
+    fprintf(stderr, "%s: malloc of spacing failed\n", program_name);
     exit(1);
   }
   xtranslate[0] = 0;
@@ -475,7 +473,7 @@ main(int argc, char **argv)
       }
     }
     fprintf(stderr, "usage: %s [-#]\n       where # is the number of samples/pixel\n",
-      programName);
+      program_name);
     exit(1);
   }
 
@@ -505,7 +503,7 @@ main(int argc, char **argv)
 
   initglext();
   if (!hasPathRendering) {
-    fprintf(stderr, "%s: required NV_path_rendering OpenGL extension is not present\n", programName);
+    fprintf(stderr, "%s: required NV_path_rendering OpenGL extension is not present\n", program_name);
     exit(1);
   }
   initGraphics(emScale);

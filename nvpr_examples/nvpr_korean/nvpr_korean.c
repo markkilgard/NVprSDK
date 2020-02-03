@@ -84,13 +84,13 @@ PFNGLGETPATHMETRICSNVPROC glGetPathMetricsNV = NULL;
 #define LOAD_PROC(type, name) \
   name = (type) GET_PROC_ADDRESS(name); \
   if (!name) { \
-    fprintf(stderr, "%s: failed to GetProcAddress for %s\n", programName, #name); \
+    fprintf(stderr, "%s: failed to GetProcAddress for %s\n", program_name, #name); \
     exit(1); \
   }
 #endif
 
 int hasPathRendering = 0;
-const char *programName = "nvpr_korean";
+const char *program_name = "nvpr_korean";
 
 void initglext(void)
 {
@@ -197,7 +197,7 @@ initGraphics(void)
      and glCoverFillPathInstancedNV. */
   xoffset = (GLfloat*) malloc(sizeof(GLfloat)*numUTF8chars);
   if (!xoffset) {
-    fprintf(stderr, "%s: malloc of transformValues failed\n", programName);
+    fprintf(stderr, "%s: malloc of transformValues failed\n", program_name);
     exit(1);
   }
   xoffset[0] = 0;
@@ -283,7 +283,7 @@ main(int argc, char **argv)
       }
     }
     fprintf(stderr, "usage: %s [-#]\n       where # is the number of samples/pixel\n",
-      programName);
+      program_name);
     exit(1);
   }
 
@@ -313,7 +313,7 @@ main(int argc, char **argv)
 
   initglext();
   if (!hasPathRendering) {
-    fprintf(stderr, "%s: required NV_path_rendering OpenGL extension is not present\n", programName);
+    fprintf(stderr, "%s: required NV_path_rendering OpenGL extension is not present\n", program_name);
     exit(1);
   }
   initGraphics();

@@ -14,12 +14,19 @@
 #include <stack>
 #include <string>
 
-#if __cplusplus >= 201103L  // supports C++11^M
+#if __cplusplus >= 201103L  // supports C++11
 # include <memory>
+using std::shared_ptr;
+using std::dynamic_pointer_cast;
+using std::static_pointer_cast;
 #else
 # include <boost/shared_ptr.hpp>
 # include <boost/weak_ptr.hpp>
 # include <boost/enable_shared_from_this.hpp>
+// Use Boost shared pointer template names.
+using boost::shared_ptr;
+using boost::dynamic_pointer_cast;
+using boost::static_pointer_cast;
 #endif
 #include <boost/lexical_cast.hpp>
 
@@ -59,17 +66,6 @@
 // Grumble, Microsoft (and probably others) define these as macros
 #undef min
 #undef max
-
-#if __cplusplus >= 201103L  // supports C++11^M
-using std::shared_ptr;
-using std::dynamic_pointer_cast;
-using std::static_pointer_cast;
-#else
-// Use Boost shared pointer template names.
-using boost::shared_ptr;
-using boost::dynamic_pointer_cast;
-using boost::static_pointer_cast;
-#endif
 
 using std::string;
 using std::vector;

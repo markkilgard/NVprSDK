@@ -537,9 +537,9 @@ draw3D()
   } glMatrixPopEXT(GL_MODELVIEW);
 }
 
-static GLfloat red[4] = {0.8, 0.1, 0.0, 1.0};
-static GLfloat green[4] = {0.0, 0.8, 0.2, 1.0};
-static GLfloat blue[4] = {0.2, 0.2, 1.0, 1.0};
+static GLfloat red[4] = {0.8f, 0.1f, 0.0, 1.0f};
+static GLfloat green[4] = {0.0f, 0.8f, 0.2f, 1.0f};
+static GLfloat blue[4] = {0.2f, 0.2f, 1.0f, 1.0f};
 
 bool stroking = true;
 
@@ -733,9 +733,9 @@ static void updateRenderMode()
 }
 
 const GearData gear_data[3] = {
-  { 1.0, 4.0, 1.0, 20, 0.7 },
-  { 0.5, 2.0, 2.0, 10, 0.7 },
-  { 1.3, 2.0, 0.5, 10, 0.7 },
+  { 1.0f, 4.0f, 1.0f, 20, 0.7f },
+  { 0.5f, 2.0f, 2.0f, 10, 0.7f },
+  { 1.3f, 2.0f, 0.5f, 10, 0.7f },
 };
 
 static void init_gear_paths()

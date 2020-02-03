@@ -329,11 +329,11 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\common\nvpr_init.c"
+				RelativePath="..\common\nvpr_glew_init.c"
 				>
 			</File>
 			<File
-				RelativePath="..\common\nvpr_init.h"
+				RelativePath="..\common\nvpr_glew_init.h"
 				>
 			</File>
 			<File

@@ -380,7 +380,7 @@ struct GetBoundsPathSegmentProcessor : PathSegmentProcessor {
         addPointToBounds(plist[3]);
     }
     inline double wrapAngle(double theta) {
-        if (isfinite(theta) && fabs(theta) < 4 * 2*M_PI) {
+        if (::isfinite(theta) && fabs(theta) < 4 * 2*M_PI) {
             // XXX fmod is slow, but it may already to this optimization
             // we may want to do a perf test and see if this is worth it ...
             while (theta >= 2*M_PI) {

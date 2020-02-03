@@ -30,6 +30,7 @@ static int displayMS = 0;
 static GLfloat textColor[3] = { 1,1,0 };  // yellow
 static int validFPS = 0;
 static float scale = 1.0;
+static FPSorigin origin = FPS_LOWER_RIGHT;
 
 int highlight = 0;  // enable for better contrast with the background
 
@@ -56,8 +57,11 @@ void initFPScontext(FPScontext *ctx, FPSusage usage)
 
 void reshapeFPScontext(FPScontext *ctx, int w, int h)
 {
-    ctx->width = w;
-    ctx->height = h;
+    if (w != ctx->width || h != ctx->height) {
+        validFPS = 0;
+        ctx->width = w;
+        ctx->height = h;
+    }
 }
 
 void releaseFPScontext(FPScontext *ctx)
@@ -69,10 +73,41 @@ void releaseFPScontext(FPScontext *ctx)
     }
 }
 
+#define adv 9
+static const float advance = adv/256.0f;
+
+static void computeLocation(FPScontext *ctx, float *x, float *y)
+{
+    const int w = ctx->width, h = ctx->height;
+
+    switch (origin) {
+    case FPS_LOWER_RIGHT:
+        *x = w-10*adv*scale;
+        *y = 15;
+        break;
+    case FPS_LOWER_LEFT:
+        *x = 15;
+        *y = 15;
+        break;
+    case FPS_UPPER_RIGHT:
+        *x = w-10*adv*scale;
+        *y = h-15-16*scale;
+        break;
+    default:
+        assert(!"bogus origin");
+        // Fallthrough...
+    case FPS_UPPER_LEFT:
+        *x = 15;
+        *y = h-15-16*scale;
+        break;
+    }
+}
+
 static void drawTexturedFPS(FPScontext *ctx, double fpsRate)
 {
-    const int adv = 9;
-    const float advance = adv/256.0f;
+#if __APPLE__  // XXX to avoid assertion below
+    glActiveTexture(GL_TEXTURE0);
+#endif
 #ifndef NDEBUG
     GLenum got_error;
 
@@ -127,13 +162,17 @@ static void drawTexturedFPS(FPScontext *ctx, double fpsRate)
             if (fpsRate != ctx->last_fpsRate || scale != ctx->last_scale) {
                 char buffer[MAX_FPS_QUADS-1];
                 GLfloat *v = ctx->varray;
-                float x = w-10*adv*scale, y = 15;
+                float x, y;
                 int count = 0;
                 int i;
+
+                computeLocation(ctx, &x, &y);
 
                 // Construct "ms" or "fps" quadrilaterals
                 if (displayMS) {
                     // Milliseconds reports "ms"
+                    // drawn as two textured rectangle
+                    // one for "m", one for "s"
                     const int m_ndx = 15;
                     const int s_ndx = 13;
 
@@ -160,6 +199,7 @@ static void drawTexturedFPS(FPScontext *ctx, double fpsRate)
                     x += adv*scale;  // for space
                 } else {
                     // Frames/second reports "fps"
+                    // drawn as one textured rectangle
                     const int fps_start_ndx = 11;
                     const int fps_chars = sizeof("fps")-1;
                     t2f(fps_start_ndx*advance, 0);
@@ -258,6 +298,38 @@ static void drawTexturedFPS(FPScontext *ctx, double fpsRate)
 #define snprintf _snprintf
 #endif
 
+static void setBitmapOrigin(int offset)
+{
+    GLubyte dummy;
+    GLfloat x, y;
+
+    switch (origin) {
+    case FPS_LOWER_RIGHT:
+        glRasterPos2f(1,1);
+        x = -10*9;
+        y = 15;
+        break;
+    case FPS_LOWER_LEFT:
+        glRasterPos2f(0,1);
+        x = 9;
+        y = 15;
+        break;
+    case FPS_UPPER_RIGHT:
+        glRasterPos2f(1,0);
+        x = -10*9;
+        y = -20;
+        break;
+    default:
+        assert(!"bogus origin");
+    case FPS_UPPER_LEFT:
+        glRasterPos2f(0,0);
+        x = 9;
+        y = -20;
+        break;
+    }
+    glBitmap(0, 0, 0, 0, x+offset, y+offset, &dummy);
+}
+
 static void drawBitmapFPS(double fpsRate)
 {
     glMatrixMode(GL_MODELVIEW);
@@ -265,7 +337,6 @@ static void drawBitmapFPS(double fpsRate)
         glLoadIdentity();
         glMatrixMode(GL_PROJECTION);
         glPushMatrix(); {
-            GLubyte dummy;
             char buffer[200], *c;
 
             glLoadIdentity();
@@ -314,17 +385,14 @@ static void drawBitmapFPS(double fpsRate)
                 glColor3fv(altColor);
                 // Draw text shifted lower-left by a pixel and upper-right by a pixel.
                 for (i=-1; i<=1; i+=2) {
-                    glRasterPos2f(1,1);
-                    glBitmap(0, 0, 0, 0,
-                        (GLfloat)(-10*9+i), (GLfloat)(15+i), &dummy);
+                    setBitmapOrigin(i);
                     for (c = buffer; *c != '\0'; c++) {
                         glutBitmapCharacter(GLUT_BITMAP_9_BY_15, *c);
                     }
                 }
             }
             glColor3fv(textColor);
-            glRasterPos2f(1,1);
-            glBitmap(0, 0, 0, 0, -10*9, 15, &dummy);
+            setBitmapOrigin(0);
             for (c = buffer; *c != '\0'; c++) {
                 glutBitmapCharacter(GLUT_BITMAP_9_BY_15, *c);
             }
@@ -528,7 +596,12 @@ void toggleFPSunits(void)
 
 void reportFPSinMS(void)
 {
-    displayMS = 1;
+  displayMS = 1;
+}
+
+int showingFPSinMS(void)
+{
+    return displayMS;
 }
 
 void reportFPSinFPS(void)
@@ -544,4 +617,9 @@ void enableFPS(void)
 void disableFPS(void)
 {
   reportFPS = 0;
+}
+
+void setFPSorigin(FPSorigin new_origin)
+{
+    origin = new_origin;
 }

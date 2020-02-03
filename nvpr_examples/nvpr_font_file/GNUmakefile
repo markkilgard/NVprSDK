@@ -5,7 +5,7 @@ UNAME := $(shell uname)
 
 CSRCS = $(TARGET:=.c) \
   ../common/sRGB_math.c \
-  ../common/nvpr_init.c \
+  ../common/nvpr_glew_init.c \
   ../common/xform.c \
   ../glew/src/glew.c \
   $(NULL)

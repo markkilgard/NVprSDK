@@ -4,7 +4,7 @@ TARGET = nvpr_gradient
 UNAME := $(shell uname)
 
 CSRCS = $(TARGET:=.c) \
-  ../common/nvpr_init.c \
+  ../common/nvpr_glew_init.c \
   ../common/mjkimage.c \
   ../common/xform.c \
   ../glew/src/glew.c \

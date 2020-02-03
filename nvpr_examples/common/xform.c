@@ -135,3 +135,12 @@ void MatrixLoadToGL(Transform3x2 m)
 
   glMatrixLoadfEXT(GL_MODELVIEW, &mm[0]);
 }
+
+#include <stdio.h>
+
+void MatrixPrint(const char *msg, Transform3x2 m)
+{
+  printf("Transform3x2: %s\n", msg);
+  printf("  [ %g, %g, %g ]\n", m[0][0], m[0][1], m[0][2]);
+  printf("  [ %g, %g, %g ]\n", m[1][0], m[1][1], m[1][2]);
+}

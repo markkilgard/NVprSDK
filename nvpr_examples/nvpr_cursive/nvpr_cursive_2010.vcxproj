@@ -165,13 +165,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\common\nvpr_glew_init.c" />
     <ClCompile Include="nvpr_cursive.c" />
-    <ClCompile Include="..\common\nvpr_init.c" />
     <ClCompile Include="this_is_crazy.c" />
     <ClCompile Include="..\common\xform.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\common\nvpr_init.h" />
+    <ClInclude Include="..\common\nvpr_glew_init.h" />
     <ClInclude Include="..\common\xform.h" />
   </ItemGroup>
   <ItemGroup>

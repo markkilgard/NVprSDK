@@ -43,7 +43,7 @@ bool path_depth_offset = true;
 
 float curquat[4];
 /* Initial slight rotation */
-float lastquat[4] = { 1.78721e-006, -0.00139029, 3.47222e-005, 0.999999 };
+float lastquat[4] = { 1.78721e-006f, -0.00139029f, 3.47222e-005f, 0.999999f };
 GLfloat m[4][4];
 int spinning = 0, moving = 0;
 int beginx, beginy;

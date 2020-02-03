@@ -1,7 +1,7 @@
 
-// sRGB.c - sRGB color space conversion utilities
+/* sRGB.c - sRGB color space conversion utilities */
 
-// Copyright (c) NVIDIA Corporation. All rights reserved.
+/* Copyright (c) NVIDIA Corporation. All rights reserved. */
 
 #include <math.h>
 

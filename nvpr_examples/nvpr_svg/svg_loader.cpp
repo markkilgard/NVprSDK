@@ -2401,7 +2401,10 @@ public:
         char align[9];
         char meetOrSlice[9];
 #if defined(_MSC_VER) && _MSC_VER >= 1400
-        int count = sscanf_s(s, " %s %s ", align, sizeof(align), meetOrSlice, sizeof(meetOrSlice));
+        // MSDN sez:
+        // "The size parameter is of type unsigned, not size_t. When compiling for 64-bit targets,
+        // use a static cast to convert _countof or sizeof results to the correct size."
+        int count = sscanf_s(s, " %s %s ", align, (unsigned)sizeof(align), meetOrSlice, (unsigned)sizeof(meetOrSlice));
 #else
         int count = sscanf(s, " %s %s ", align, meetOrSlice);
 #endif
@@ -2445,7 +2448,7 @@ public:
         // The (x,y) align is any permutation of [min,mid,max] x [min,mid,max] (i.e xMidYMax)
         char align[2][4];
 #if defined(_MSC_VER) && _MSC_VER >= 1400
-        int count = sscanf_s(s, "x%[^Y]Y%s", align[0], sizeof(align[0]), align[1], sizeof(align[1]));
+        int count = sscanf_s(s, "x%[^Y]Y%s", align[0], (unsigned)sizeof(align[0]), align[1], (unsigned)sizeof(align[1]));
 #else
         int count = sscanf(s, "x%[^Y]Y%s", align[0], align[1]);
 #endif
@@ -2535,30 +2538,86 @@ public:
         size_t size = 1 + strlen(s);
         unsigned char *data = new unsigned char[size];
         char img_type[32];
+        int offset = 0;
 #if defined(_MSC_VER) && _MSC_VER >= 1400
-        int matches = sscanf_s(s, " data : image/%[^\\;] ; base64, %[a-zA-Z0-9+/= \\n\\t]", img_type, sizeof(img_type), data, size);
+        int matches = sscanf_s(s, " data : image/%[^\\;] ; base64, %n", img_type, (unsigned)sizeof(img_type), &offset);
 #else
-        int matches = sscanf(s, " data : image/%[^\\;] ; base64, %[a-zA-Z0-9+/= \\n\\t]", img_type, data);
+        int matches = sscanf(s, " data : image/%[^\\;] ; base64, %n", img_type, &offset);
 #endif
-        if (matches == 2) {
+        if (matches == 1) {
+            strcpy((char*)data, s + offset);
             int buf_size = base64Decode(data);
             RasterImageProviderPtr provider(new RasterImageProvider);
             int bpp;
             provider->image->pixels = (RasterImage::Pixel *)
                 stbi_load_from_memory((stbi_uc *)data, buf_size, &provider->image->width, &provider->image->height, &bpp, 4);
-            delete[] data;
 
+            if (verbose) {
+                printf("From memory, Loaded %dx%d image (original BPP=%d)\n",
+                    provider->image->width, provider->image->height, bpp);
+            }
             if (provider->image->pixels) {
-                assert(bpp == 4);
+                delete[] data;
+                if (verbose) {
+                    if (bpp != 4) {
+                        printf("image promoted from %d componets to RGBA\n", bpp);
+                    }
+                }
                 return provider;
             } else {
+#if USE_LIBJPEG
+                // Is it JPEG?
+                if (!strcmp("jpeg", img_type)) {
+                    // Yes, try libjpeg...
+                    JSAMPARRAY buffer;
+                    struct jpeg_decompress_struct cinfo;
+                    struct jpeg_error_mgr jerr;
+
+                    cinfo.err = jpeg_std_error(&jerr);
+                    jpeg_create_decompress(&cinfo);
+                    my_jpeg_mem_src(&cinfo, data, buf_size);
+                    jpeg_read_header(&cinfo, /*require_image*/FALSE);
+                    jpeg_start_decompress(&cinfo);
+                    provider->image->width = cinfo.output_width;
+                    provider->image->height = cinfo.output_height;
+                    int components = cinfo.output_components;
+                    assert(components >= 3);
+
+                    size_t bytes = 4 * cinfo.output_width*cinfo.output_height;
+                    provider->image->pixels = (RasterImage::Pixel *) new char[bytes];
+                    if (provider->image->pixels) {
+                        RasterImage::Pixel *p = provider->image->pixels;
+                        JDIMENSION row_stride = cinfo.output_width * cinfo.output_components;
+                        buffer = (*cinfo.mem->alloc_sarray)
+                            ((j_common_ptr)&cinfo, JPOOL_IMAGE, row_stride, 1);
+                        while (cinfo.output_scanline < cinfo.output_height) {
+                            (void)jpeg_read_scanlines(&cinfo, buffer, 1);
+
+                            for (JDIMENSION i = 0; i<cinfo.output_width; i++) {
+                                p[i].r = buffer[0][components*i + 0];
+                                p[i].g = buffer[0][components*i + 1];
+                                p[i].b = buffer[0][components*i + 2];
+                                p[i].a = 255;
+                            }
+                            p += cinfo.output_width;
+                        }
+                    }
+                    delete[] data;
+                    printf("done!\n\r");
+                    jpeg_finish_decompress(&cinfo);
+                    printf("finished decompress!\n\r");
+                    jpeg_destroy_decompress(&cinfo);
+                    return provider;
+                }
+#endif
+
                 printf("STBI: stbi_load_from_memory failure reason: %s\n", stbi_failure_reason());
             }
+            delete[] data;
         }
-        
+
         return RasterImageProviderPtr();
     }
-
 
 protected:
     virtual RectBounds getViewBox()

@@ -165,12 +165,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\common\nvpr_init.c" />
+    <ClCompile Include="..\common\nvpr_glew_init.c" />
     <ClCompile Include="nvpr_welsh_dragon.c" />
     <ClCompile Include="..\common\welsh_dragon.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\common\nvpr_init.h" />
+    <ClInclude Include="..\common\nvpr_glew_init.h" />
     <ClInclude Include="..\common\welsh_dragon.h" />
     <ClInclude Include="..\common\welsh_dragon_colors.h" />
     <ClInclude Include="..\common\welsh_dragon_paths.h" />

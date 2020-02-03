@@ -33,7 +33,7 @@
 
 #if USE_NVPR
 
-#include "nvpr_init.h"
+#include "nvpr_glew_init.h"
 
 using std::cout;
 using std::endl;
@@ -143,7 +143,7 @@ NVprRenderer::NVprRenderer(bool noDSA,
     }
 
     initExtensions(noDSA);
-    initializeNVPR("nvpr_svg");
+    initialize_NVPR_GLEW_emulation(stdout, "nvpr_svg", 0);
 
     interrogateFramebuffer();
 
@@ -732,7 +732,7 @@ void NVprImagePaintRendererState::validate()
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, getRenderer()->min_filter);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, getRenderer()->mag_filter);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, getRenderer()->max_anisotropy);
     }
 }

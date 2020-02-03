@@ -19,7 +19,7 @@ GS_SIMPLE_C = \
   stb/stb_image.c \
   stb/stb_image_write.c \
   ../glew/src/glew.c \
-  ../common/nvpr_init.c \
+  ../common/nvpr_glew_init.c \
   ../common/sRGB_math.c \
   ../common/request_vsync.c \
   $(NULL)

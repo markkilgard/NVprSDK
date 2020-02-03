@@ -17,7 +17,7 @@
 # endif
 #endif
 
-#ifndef GLAPIENTRY
+#ifndef GLAPIENTRYP
 # ifdef _WIN32
 #  define GLAPIENTRYP __stdcall *
 # else
@@ -88,14 +88,14 @@ PFNGLMATRIXORTHOEXTPROC glMatrixOrthoEXT = NULL;
 #define LOAD_PROC(type, name) \
   name = (type) GET_PROC_ADDRESS(name); \
   if (!name) { \
-    fprintf(stderr, "%s: failed to GetProcAddress for %s\n", programName, #name); \
+    fprintf(stderr, "%s: failed to GetProcAddress for %s\n", program_name, #name); \
     exit(1); \
   }
 #endif
 
 int hasPathRendering = 0;
 int hasDirectStateAccess = 0;
-const char *programName = "nvpr_basic";
+const char *program_name = "nvpr_basic";
 GLuint pathObj = 42;
 int path_specification_mode = 0;
 int filling = 1;
@@ -207,7 +207,6 @@ doGraphics(void)
     /* Before rendering to a window with a stencil buffer, clear the stencil
     buffer to zero and the color buffer to black: */
 
-    glDisable(GL_STENCIL_TEST);
     glClearStencil(0);
     glClearColor(0,0,0,0);
     glStencilMask(~0);
@@ -221,11 +220,16 @@ doGraphics(void)
     glMatrixLoadIdentityEXT(GL_MODELVIEW);
     glMatrixOrthoEXT(GL_MODELVIEW, 0, 500, 0, 400, -1, 1);
 
+    /* NV_path_rendering stencil and cover operations rely on stencil
+    testing being enabled.  (If you do non-stencil rendering, be sure
+    to disable stencil testing and re-enable it for NV_path_rendering
+    stencil and cover operations.) */
+    glEnable(GL_STENCIL_TEST);
+
     if (filling) {
 
         /* Stencil the path: */
 
-        glDisable(GL_STENCIL_TEST);
         glStencilFillPathNV(pathObj, GL_COUNT_UP_NV, 0x1F);
 
         /* The 0x1F mask means the counting uses modulo-32 arithmetic. In
@@ -239,7 +243,6 @@ doGraphics(void)
         (indicated by the GL_NOTEQUAL stencil function with a zero reference
         value): */
 
-        glEnable(GL_STENCIL_TEST);
         if (even_odd) {
             glStencilFunc(GL_NOTEQUAL, 0, 0x1);
         } else {
@@ -347,7 +350,7 @@ main(int argc, char **argv)
             }
         }
         fprintf(stderr, "usage: %s [-#]\n       where # is the number of samples/pixel\n",
-            programName);
+            program_name);
         exit(1);
     }
 
@@ -381,11 +384,11 @@ main(int argc, char **argv)
 
     initglext();
     if (!hasPathRendering) {
-        fprintf(stderr, "%s: required NV_path_rendering OpenGL extension is not present\n", programName);
+        fprintf(stderr, "%s: required NV_path_rendering OpenGL extension is not present\n", program_name);
         exit(1);
     }
     if (!hasDirectStateAccess) {
-        fprintf(stderr, "%s: required EXT_direct_state_access OpenGL extension is not present\n", programName);
+        fprintf(stderr, "%s: required EXT_direct_state_access OpenGL extension is not present\n", program_name);
         exit(1);
     }
     initGraphics();

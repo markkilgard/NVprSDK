@@ -45,7 +45,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="pixman"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;PACKAGE=pixman-1;PACKAGE_VERSION=&quot;&quot;;PACKAGE_BUGREPORT=&quot;&quot;;USE_MMX;USE_SSE2"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;PACKAGE=pixman-1;PACKAGE_VERSION=&quot;&quot;;PACKAGE_BUGREPORT=&quot;&quot;;USE_MMX"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -84,8 +84,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory="$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
+			OutputDirectory="$(PlatformName)_2008\$(ConfigurationName)"
+			IntermediateDirectory="$(PlatformName)_2008\$(ConfigurationName)"
 			ConfigurationType="4"
 			CharacterSet="1"
 			>
@@ -109,7 +109,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="pixman"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;PACKAGE=pixman-1;PACKAGE_VERSION=&quot;&quot;;PACKAGE_BUGREPORT=&quot;&quot;;USE_MMX;USE_SSE2;_M_AMD64"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;PACKAGE=pixman-1;PACKAGE_VERSION=&quot;&quot;;PACKAGE_BUGREPORT=&quot;&quot;;_M_AMD64"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -175,7 +175,7 @@
 				EnableIntrinsicFunctions="true"
 				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories="pixman"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;PACKAGE=pixman-1;PACKAGE_VERSION=&quot;&quot;;PACKAGE_BUGREPORT=&quot;&quot;;USE_MMX;USE_SSE2"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;PACKAGE=pixman-1;PACKAGE_VERSION=&quot;&quot;;PACKAGE_BUGREPORT=&quot;&quot;;USE_MMX"
 				RuntimeLibrary="0"
 				BufferSecurityCheck="false"
 				EnableFunctionLevelLinking="true"
@@ -214,8 +214,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory="$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
+			OutputDirectory="$(PlatformName)_2008\$(ConfigurationName)"
+			IntermediateDirectory="$(PlatformName)_2008\$(ConfigurationName)"
 			ConfigurationType="4"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
@@ -242,7 +242,7 @@
 				EnableIntrinsicFunctions="true"
 				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories="pixman"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;PACKAGE=pixman-1;PACKAGE_VERSION=&quot;&quot;;PACKAGE_BUGREPORT=&quot;&quot;;USE_MMX;USE_SSE2;_M_AMD64"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;PACKAGE=pixman-1;PACKAGE_VERSION=&quot;&quot;;PACKAGE_BUGREPORT=&quot;&quot;;_M_AMD64"
 				RuntimeLibrary="0"
 				BufferSecurityCheck="false"
 				EnableFunctionLevelLinking="true"
@@ -375,6 +375,20 @@
 			<File
 				RelativePath=".\pixman\pixman-mmx.c"
 				>
+				<FileConfiguration
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\pixman\pixman-private.h"

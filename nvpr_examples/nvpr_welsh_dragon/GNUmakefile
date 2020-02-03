@@ -4,7 +4,7 @@ TARGET = nvpr_welsh_dragon
 UNAME := $(shell uname)
 
 CSRCS = $(TARGET:=.c) \
-  ../common/nvpr_init.c \
+  ../common/nvpr_glew_init.c \
   ../common/welsh_dragon.c \
   ../glew/src/glew.c \
   $(NULL)

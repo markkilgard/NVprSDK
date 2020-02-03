@@ -176,7 +176,7 @@ static const ColorName color_names[] = {
 bool parse_color_name(const char *name, float4 &color)
 {
     int first = 0,
-        last = countof(color_names);
+        last = icountof(color_names);
 
     while (first <= last) {
         int mid = (first + last) / 2;  // compute mid point.

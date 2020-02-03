@@ -210,7 +210,7 @@ FT_Face get_font(int font)
 
 int num_fonts()
 {
-    return countof(font_list);
+    return icountof(font_list);
 }
 
 const char *font_name(int i)
@@ -261,8 +261,10 @@ PathPtr load_freetype2_glyph(unsigned int font, unsigned char c)
 
     FT_BBox exact_bounding_box;
     FT_Outline_Get_BBox(&outline, &exact_bounding_box);
+#if 0  // Maybe in the future
     float4 logical_bbox = float4(exact_bounding_box.xMin, exact_bounding_box.yMin,
                                  exact_bounding_box.xMax, exact_bounding_box.yMax);
+#endif
     float4 face_bbox = float4(face->bbox.xMin, face->bbox.yMin,
                               face->bbox.xMax, face->bbox.yMax);
 

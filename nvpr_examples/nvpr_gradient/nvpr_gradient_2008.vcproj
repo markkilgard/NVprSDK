@@ -333,15 +333,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\common\nvpr_glew_init.c"
+				>
+			</File>
+			<File
+				RelativePath="..\common\nvpr_glew_init.h"
+				>
+			</File>
+			<File
 				RelativePath=".\nvpr_gradient.c"
-				>
-			</File>
-			<File
-				RelativePath="..\common\nvpr_init.c"
-				>
-			</File>
-			<File
-				RelativePath="..\common\nvpr_init.h"
 				>
 			</File>
 			<File

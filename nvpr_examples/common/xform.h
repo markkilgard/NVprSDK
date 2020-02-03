@@ -20,6 +20,7 @@ extern void inverse_ortho(Transform3x2 dst, float l, float r, float b, float t);
 extern void xform(float dst[2], Transform3x2 a, const float v[2]);
 
 extern void MatrixLoadToGL(Transform3x2 m);
+extern void MatrixPrint(const char *msg, Transform3x2 m);
 
 #ifdef __cplusplus
 }

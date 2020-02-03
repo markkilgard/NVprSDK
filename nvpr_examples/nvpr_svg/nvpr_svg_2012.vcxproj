@@ -298,6 +298,7 @@ copy zlib1.dll $(OutDir)</Command>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\common\nvpr_glew_init.c" />
     <ClCompile Include="ActiveControlPoint.cpp" />
     <ClCompile Include="color_names.cpp" />
     <ClCompile Include="freetype2_loader.cpp" />
@@ -350,7 +351,6 @@ copy zlib1.dll $(OutDir)</Command>
     <ClCompile Include="qt\renderer_qt.cpp" />
     <ClCompile Include="qt\scene_qt.cpp" />
     <ClCompile Include="..\common\dsa_emulate.c" />
-    <ClCompile Include="..\common\nvpr_init.c" />
     <ClCompile Include="..\common\request_vsync.c" />
     <ClCompile Include="..\common\showfps.c" />
     <ClCompile Include="..\common\sRGB_math.c" />
@@ -371,6 +371,7 @@ copy zlib1.dll $(OutDir)</Command>
     <ClInclude Include="..\boost-1.50.0\boost\enable_shared_from_this.hpp" />
     <ClInclude Include="..\boost-1.50.0\boost\lexical_cast.hpp" />
     <ClInclude Include="..\boost-1.50.0\boost\scoped_ptr.hpp" />
+    <ClInclude Include="..\common\nvpr_glew_init.h" />
     <ClInclude Include="ActiveControlPoint.hpp" />
     <ClInclude Include="boar_paths.h" />
     <ClInclude Include="color_names.hpp" />
@@ -396,7 +397,6 @@ copy zlib1.dll $(OutDir)</Command>
     <ClInclude Include="qt\scene_qt.hpp" />
     <ClInclude Include="..\common\countof.h" />
     <ClInclude Include="..\common\dsa_emulate.h" />
-    <ClInclude Include="..\common\nvpr_init.h" />
     <ClInclude Include="..\common\request_vsync.h" />
     <ClInclude Include="..\common\showfps.h" />
     <ClInclude Include="..\common\sRGB_math.h" />

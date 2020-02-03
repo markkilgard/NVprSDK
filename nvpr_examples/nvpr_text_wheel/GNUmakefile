@@ -5,7 +5,7 @@ UNAME := $(shell uname)
 
 CSRCS = \
   ../common/sRGB_math.c \
-  ../common/nvpr_init.c \
+  ../common/nvpr_glew_init.c \
   ../common/showfps.c \
   ../common/request_vsync.c \
   ../glew/src/glew.c \

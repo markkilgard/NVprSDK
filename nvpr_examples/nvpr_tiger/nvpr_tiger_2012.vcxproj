@@ -169,13 +169,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\common\nvpr_init.c" />
+    <ClCompile Include="..\common\nvpr_glew_init.c" />
     <ClCompile Include="nvpr_tiger.c" />
     <ClCompile Include="..\common\tiger.c" />
     <ClCompile Include="..\common\xform.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\common\nvpr_init.h" />
+    <ClInclude Include="..\common\nvpr_glew_init.h" />
     <ClInclude Include="..\common\tiger.h" />
     <ClInclude Include="..\common\tiger_paths.h" />
     <ClInclude Include="..\common\tiger_style.h" />

@@ -166,8 +166,8 @@ void display(void)
   } glMatrixPopEXT(GL_MODELVIEW);
   glDisable(GL_STENCIL_TEST);
   if (show_bounding_box) {
-  glMatrixPushEXT(GL_MODELVIEW); {
-    MatrixLoadToGL(view);
+    glMatrixPushEXT(GL_MODELVIEW); {
+      MatrixLoadToGL(view);
       glDisable(GL_STENCIL_TEST);
       glColor3f(1,1,0);
       glBegin(GL_LINE_LOOP); {
@@ -266,14 +266,17 @@ keyboard(unsigned char c, int x, int y)
     return;
   case 'b':
     show_bounding_box = !show_bounding_box;
+    invalidateFPS();
     break;
   case 13:  /* Enter redisplays */
     break;
   case 's':
     stroking = !stroking;
+    invalidateFPS();
     break;
   case 'f':
     filling = !filling;
+    invalidateFPS();
     break;
   case 'r':
     initModelAndViewMatrices();

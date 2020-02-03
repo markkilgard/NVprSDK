@@ -16,6 +16,13 @@ typedef enum {
     FPS_USAGE_BITMAP
 } FPSusage;
 
+typedef enum {
+    FPS_LOWER_RIGHT,
+    FPS_LOWER_LEFT,
+    FPS_UPPER_RIGHT,
+    FPS_UPPER_LEFT
+} FPSorigin;
+
 typedef struct _FPScontext {
     FPSusage usage;
     int width, height;
@@ -35,6 +42,7 @@ extern double handleFPS(FPScontext *);
 extern void toggleFPSunits(void);
 extern void reportFPSinMS(void);
 extern void reportFPSinFPS(void);
+extern int showingFPSinMS(void);
 extern void toggleFPS();
 extern void enableFPS();
 extern void disableFPS();
@@ -42,6 +50,7 @@ extern void colorFPS(float r, float g, float b);
 extern void scaleFPS(float new_scale);
 extern double getElapsedTime();
 extern void invalidateFPS();
+extern void setFPSorigin(FPSorigin);
 
 #ifdef __cplusplus
 }

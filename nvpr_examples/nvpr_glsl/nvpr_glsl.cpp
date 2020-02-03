@@ -55,6 +55,7 @@ float slide_x = 0,
       slide_y = 0;  /* Prior (x,y) location for sliding. */
 int sliding = 0;  /* Are we sliding currently? */
 
+float time = 0.05;
 float last_time;
 bool show_text = true; // otherwise show rounded rectangle
 
@@ -522,14 +523,15 @@ void updateFractalProgram(GLuint program)
 
 static void updateFractal()
 {
-  offsetY += 0.4 * MYscale;
-  offsetX += 0.2 * MYscale;
-  updateFractalProgram(fractal_program);
+    offsetY += 0.4 * MYscale;
+    offsetX += 0.2 * MYscale;
+    updateFractalProgram(fractal_program);
 }
 
 static void idle()
 {
-  const float now = glutGet(GLUT_ELAPSED_TIME);
+  float now = glutGet(GLUT_ELAPSED_TIME);
+  time += (now - last_time) / 1000.0 * (3.1419/2);
   last_time = now;
 
   updateFractal();
@@ -685,8 +687,8 @@ static void glslInit()
   }
 
   const GLfloat coeffs[6] = {
-    1, 0, 0,
-    0, 1, 0
+    1, 0, 0,  // s = 1*x + 0*y + 0
+    0, 1, 0   // t = 0*x + 1*y + 0
   };
   GLint position_loc = glGetProgramResourceLocation(fractal_program, GL_PROGRAM_INPUT, "position");
   if (position_loc >= 0) {
