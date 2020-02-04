@@ -12,7 +12,7 @@ endif
 SKIA  := ../skia
 
 CG4CPP  := ../cg4cpp
-BOOST   := ../boost-1.38.0
+BOOST   := ../boost-1.50.0
 
 GS_SIMPLE_C = \
   ../common/showfps.c \
