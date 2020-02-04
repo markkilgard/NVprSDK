@@ -102,7 +102,7 @@ $(FREETYPE_LIB_FILE) : FORCE
 endif
 
 $(HARFBUZZ_DIR)/Makefile :
-	( cd $(HARFBUZZ_DIR) && ./configure --enable-shared=no --enable-static )
+	( cd $(HARFBUZZ_DIR) && ./autogen.sh )
 
 LIBRARIES_TO_BUILD += $(HARFBUZZ_LIB_FILE)
 $(HARFBUZZ_LIB_FILE) : FORCE $(HARFBUZZ_DIR)/Makefile

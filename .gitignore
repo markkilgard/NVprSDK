@@ -38,3 +38,10 @@ objs
 # gyp generated makefiles
 *.mk
 *.Makefile
+
+# temporary files
+*~
+
+# Skia build intermediates
+out/Debug/
+out/Makefile
