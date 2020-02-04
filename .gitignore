@@ -36,7 +36,7 @@ objs
 *.d
 
 # gyp generated makefiles
-*.mk
+nvpr_examples/skia/out/gyp/*.mk
 *.Makefile
 
 # temporary files
@@ -45,3 +45,7 @@ objs
 # Skia build intermediates
 out/Debug/
 out/Makefile
+
+# Harfbuzz intermediates
+.deps/
+*.cache
