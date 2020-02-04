@@ -117,6 +117,7 @@ ifeq ($(UNAME), Darwin)
   CLINKFLAGS += -framework OpenGL
   CXXFLAGS   += -I/usr/X11/include
   CXXFLAGS   += -I/usr/X11/include/freetype2
+  CXXFLAGS   += -I/usr/include/freetype2
   CLINKFLAGS += -Wl,-dylib_file,/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib
   CFLAGS     += $(DEPEND_OPTS)
   CXXFLAGS   += $(DEPEND_OPTS)
@@ -164,6 +165,7 @@ else
       CLINKFLAGS += -lpthread
       CFLAGS     += $(DEPEND_OPTS)
       CXXFLAGS   += $(DEPEND_OPTS)
+      CXXFLAGS   += -I/usr/include/freetype2
       CXXFLAGS   += -I/usr/include/cairo
       CXXFLAGS   += -I/usr/include/qt4
       CXXFLAGS   += -I/usr/include/qt4/QtCore
