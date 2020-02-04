@@ -16,7 +16,9 @@ SUBDIRS =\
   nvpr_morph \
   nvpr_pick \
   nvpr_shaders \
+  nvpr_stroke_edging \
   nvpr_svg \
+  nvpr_text_shape \
   nvpr_text_wheel \
   nvpr_tiger \
   nvpr_tiger_fms \
