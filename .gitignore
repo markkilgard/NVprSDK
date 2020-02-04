@@ -26,6 +26,9 @@ x64_2012
 *.sdf
 *.opensdf
 
+# FreeType build results
+objs
+
 # vi swap files
 *.swp
 

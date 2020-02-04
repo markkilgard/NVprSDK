@@ -76,7 +76,7 @@
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)$(Platform)_2012\$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)_2012\$(Configuration)\</IntDir>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</GenerateManifest>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)$(Platform)_2012\$(Configuration)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Platform)_2012\$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Platform)_2012\$(Configuration)\</IntDir>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</GenerateManifest>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)$(Platform)_2012\$(Configuration)\</OutDir>
@@ -106,7 +106,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>../cairo-1.9.6;../cairo-1.9.6/src;.;include;tinyxml;../boost-1.50.0;../cg4cpp/include;$(CG_INC_PATH);c:\Program Files\NVIDIA Corporation\Cg\include;C:\Program Files\GnuWin32\include;..\qt\include;..\glew\include;..\qt\include\QtGui;..\openvg-1_1-ri\ri_package\ri\include;..\skia\include\core;..\skia\include\config;..\skia\include\effects;..\common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../freetype-2.4.9/include;../cairo-1.9.6;../cairo-1.9.6/src;.;include;tinyxml;../boost-1.50.0;../cg4cpp/include;$(CG_INC_PATH);c:\Program Files\NVIDIA Corporation\Cg\include;C:\Program Files\GnuWin32\include;..\qt\include;..\glew\include;..\qt\include\QtGui;..\openvg-1_1-ri\ri_package\ri\include;..\skia\include\core;..\skia\include\config;..\skia\include\effects;..\common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>TIXML_USE_STL;_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;CAIRO_WIN32_STATIC_BUILD;GLEW_STATIC;GLUT_STATIC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -130,10 +130,10 @@
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
     </ProjectReference>
     <Link>
-      <AdditionalDependencies>freetype.lib;cg.lib;cgGL.lib;opengl32.lib;Msimg32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>cg.lib;cgGL.lib;opengl32.lib;Msimg32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>lib;$(CG_LIB_PATH);c:\Program Files\NVIDIA Corporation\Cg\lib;..\qt\lib;$(DXSDK_DIR)\Lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(CG_LIB_PATH);c:\Program Files\NVIDIA Corporation\Cg\lib;..\qt\lib;$(DXSDK_DIR)\Lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreEmbeddedIDL>true</IgnoreEmbeddedIDL>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(IntDir)nvpr_svg.pdb</ProgramDatabaseFile>
@@ -163,7 +163,7 @@ copy zlib1.dll $(OutDir)</Command>
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>../cairo-1.9.6;../cairo-1.9.6/src;.;include;tinyxml;../boost-1.50.0;../cg4cpp/include;$(CG_INC_PATH);c:\Program Files\NVIDIA Corporation\Cg\include;C:\Program Files\GnuWin32\include;..\qt\include;..\glew\include;..\qt\include\QtGui;..\openvg-1_1-ri\ri_package\ri\include;..\skia\include\core;..\skia\include\config;..\skia\include\effects;..\common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../freetype-2.4.9/include;../cairo-1.9.6;../cairo-1.9.6/src;.;include;tinyxml;../boost-1.50.0;../cg4cpp/include;$(CG_INC_PATH);c:\Program Files\NVIDIA Corporation\Cg\include;C:\Program Files\GnuWin32\include;..\qt\include;..\glew\include;..\qt\include\QtGui;..\openvg-1_1-ri\ri_package\ri\include;..\skia\include\core;..\skia\include\config;..\skia\include\effects;..\common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>TIXML_USE_STL;_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;CAIRO_WIN32_STATIC_BUILD;GLEW_STATIC;GLUT_STATIC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -186,7 +186,7 @@ copy zlib1.dll $(OutDir)</Command>
       <AdditionalDependencies>cg.lib;cgGL.lib;Msimg32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>lib.x64;$(CG_LIB64_PATH);c:\Program Files\NVIDIA Corporation\Cg\lib.x64;$(DXSDK_DIR)\Lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(CG_LIB64_PATH);c:\Program Files\NVIDIA Corporation\Cg\lib.x64;$(DXSDK_DIR)\Lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreEmbeddedIDL>true</IgnoreEmbeddedIDL>
       <ProgramDatabaseFile>$(IntDir)nvpr_svg.pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>
@@ -208,7 +208,7 @@ copy zlib1.dll $(OutDir)</Command>
     <ClCompile>
       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>../cairo-1.9.6;../cairo-1.9.6/src;.;include;tinyxml;../boost-1.50.0;../cg4cpp/include;$(CG_INC_PATH);c:\Program Files\NVIDIA Corporation\Cg\include;C:\Program Files\GnuWin32\include;..\qt\include;..\glew\include;..\qt\include\QtGui;..\openvg-1_1-ri\ri_package\ri\include;..\skia\include\core;..\skia\include\config;..\skia\include\effects;..\common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../freetype-2.4.9/include;../cairo-1.9.6;../cairo-1.9.6/src;.;include;tinyxml;../boost-1.50.0;../cg4cpp/include;$(CG_INC_PATH);c:\Program Files\NVIDIA Corporation\Cg\include;C:\Program Files\GnuWin32\include;..\qt\include;..\glew\include;..\qt\include\QtGui;..\openvg-1_1-ri\ri_package\ri\include;..\skia\include\core;..\skia\include\config;..\skia\include\effects;..\common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>TIXML_USE_STL;_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;CAIRO_WIN32_STATIC_BUILD;GLEW_STATIC;GLUT_STATIC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessToFile>false</PreprocessToFile>
       <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
@@ -230,11 +230,11 @@ copy zlib1.dll $(OutDir)</Command>
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>freetype.lib;cg.lib;cgGL.lib;opengl32.lib;Msimg32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>cg.lib;cgGL.lib;opengl32.lib;Msimg32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ShowProgress>NotSet</ShowProgress>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>lib;$(CG_LIB_PATH);c:\Program Files\NVIDIA Corporation\Cg\lib;..\qt\lib;$(DXSDK_DIR)\Lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(CG_LIB_PATH);c:\Program Files\NVIDIA Corporation\Cg\lib;..\qt\lib;$(DXSDK_DIR)\Lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <IgnoreEmbeddedIDL>true</IgnoreEmbeddedIDL>
@@ -263,7 +263,7 @@ copy zlib1.dll $(OutDir)</Command>
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>../cairo-1.9.6;../cairo-1.9.6/src;.;include;tinyxml;../boost-1.50.0;../cg4cpp/include;$(CG_INC_PATH);c:\Program Files\NVIDIA Corporation\Cg\include;C:\Program Files\GnuWin32\include;..\qt\include;..\glew\include;..\qt\include\QtGui;..\openvg-1_1-ri\ri_package\ri\include;..\skia\include\core;..\skia\include\config;..\skia\include\effects;..\common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../freetype-2.4.9/include;../cairo-1.9.6;../cairo-1.9.6/src;.;include;tinyxml;../boost-1.50.0;../cg4cpp/include;$(CG_INC_PATH);c:\Program Files\NVIDIA Corporation\Cg\include;C:\Program Files\GnuWin32\include;..\qt\include;..\glew\include;..\qt\include\QtGui;..\openvg-1_1-ri\ri_package\ri\include;..\skia\include\core;..\skia\include\config;..\skia\include\effects;..\common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>TIXML_USE_STL;_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;CAIRO_WIN32_STATIC_BUILD;GLEW_STATIC;GLUT_STATIC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -286,7 +286,7 @@ copy zlib1.dll $(OutDir)</Command>
       <AdditionalDependencies>cg.lib;cgGL.lib;Msimg32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>lib.x64;$(CG_LIB64_PATH);c:\Program Files\NVIDIA Corporation\Cg\lib.x64;$(DXSDK_DIR)\Lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(CG_LIB64_PATH);c:\Program Files\NVIDIA Corporation\Cg\lib.x64;$(DXSDK_DIR)\Lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreEmbeddedIDL>true</IgnoreEmbeddedIDL>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(IntDir)nvpr_svg.pdb</ProgramDatabaseFile>
@@ -478,6 +478,9 @@ copy zlib1.dll $(OutDir)</Command>
     <ProjectReference Include="..\cg4cpp\src\cg4cpp_2012.vcxproj">
       <Project>{dd69089e-81d7-4bb2-8a3d-cbe3c94a8684}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\freetype-2.4.9\builds\win32\vc2012\freetype.vcxproj">
+      <Project>{78b079bd-9fc7-4b9e-b4a6-96da0f00248b}</Project>
     </ProjectReference>
     <ProjectReference Include="..\glew\glewlib_2012.vcxproj">
       <Project>{05ffade4-2b93-c899-00ca-aa717ca7a077}</Project>

@@ -49,7 +49,7 @@
 				AdditionalOptions="/MP"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="&quot;../cairo-1.9.6&quot;;&quot;../cairo-1.9.6/src&quot;;.;include;tinyxml;&quot;../boost-1.50.0&quot;;../cg4cpp/include;&quot;$(CG_INC_PATH)&quot;;&quot;c:\Program Files\NVIDIA Corporation\Cg\include&quot;;&quot;C:\Program Files\GnuWin32\include&quot;;..\qt\include;..\glew\include;..\qt\include\QtGui;&quot;..\openvg-1_1-ri\ri_package\ri\include&quot;;..\skia\include\core;..\skia\include\config;..\skia\include\effects;&quot;$(DXSDK_DIR)\Include&quot;;..\common;..\skia\third_party\msinttypes"
+				AdditionalIncludeDirectories="&quot;../freetype-2.4.9/include&quot;;&quot;../cairo-1.9.6&quot;;&quot;../cairo-1.9.6/src&quot;;.;include;tinyxml;&quot;../boost-1.50.0&quot;;../cg4cpp/include;&quot;$(CG_INC_PATH)&quot;;&quot;c:\Program Files\NVIDIA Corporation\Cg\include&quot;;&quot;C:\Program Files\GnuWin32\include&quot;;..\qt\include;..\glew\include;..\qt\include\QtGui;&quot;..\openvg-1_1-ri\ri_package\ri\include&quot;;..\skia\include\core;..\skia\include\config;..\skia\include\effects;&quot;$(DXSDK_DIR)\Include&quot;;..\common;..\skia\third_party\msinttypes"
 				PreprocessorDefinitions="BOOST_ERROR_CODE_HEADER_ONLY;TIXML_USE_STL;_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;CAIRO_WIN32_STATIC_BUILD;GLEW_STATIC;GLUT_STATIC_LIB;BOOST_SP_DISABLE_THREADS;BOOST_ALL_NO_LIB"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -77,7 +77,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkLibraryDependencies="true"
-				AdditionalDependencies="freetype.lib cg.lib cgGL.lib opengl32.lib Msimg32.lib"
+				AdditionalDependencies="cg.lib cgGL.lib opengl32.lib Msimg32.lib"
 				OutputFile="$(OutDir)\nvpr_svg.exe"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="lib;&quot;$(CG_LIB_PATH)&quot;;&quot;c:\Program Files\NVIDIA Corporation\Cg\lib&quot;;..\qt\lib;&quot;$(DXSDK_DIR)\Lib\x86&quot;"
@@ -147,7 +147,7 @@
 				AdditionalOptions="/MP"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="&quot;../cairo-1.9.6&quot;;&quot;../cairo-1.9.6/src&quot;;.;include;tinyxml;&quot;../boost-1.50.0&quot;;../cg4cpp/include;&quot;$(CG_INC_PATH)&quot;;&quot;c:\Program Files\NVIDIA Corporation\Cg\include&quot;;&quot;C:\Program Files\GnuWin32\include&quot;;..\qt\include;..\glew\include;..\qt\include\QtGui;&quot;..\openvg-1_1-ri\ri_package\ri\include&quot;;..\skia\include\core;..\skia\include\config;..\skia\include\effects;&quot;$(DXSDK_DIR)\Include&quot;;..\common;..\skia\third_party\msinttypes"
+				AdditionalIncludeDirectories="&quot;../freetype-2.4.9/include&quot;;&quot;../cairo-1.9.6&quot;;&quot;../cairo-1.9.6/src&quot;;.;include;tinyxml;&quot;../boost-1.50.0&quot;;../cg4cpp/include;&quot;$(CG_INC_PATH)&quot;;&quot;c:\Program Files\NVIDIA Corporation\Cg\include&quot;;&quot;C:\Program Files\GnuWin32\include&quot;;..\qt\include;..\glew\include;..\qt\include\QtGui;&quot;..\openvg-1_1-ri\ri_package\ri\include&quot;;..\skia\include\core;..\skia\include\config;..\skia\include\effects;&quot;$(DXSDK_DIR)\Include&quot;;..\common;..\skia\third_party\msinttypes"
 				PreprocessorDefinitions="BOOST_ERROR_CODE_HEADER_ONLY;TIXML_USE_STL;_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;CAIRO_WIN32_STATIC_BUILD;GLEW_STATIC;GLUT_STATIC_LIB;BOOST_SP_DISABLE_THREADS;BOOST_ALL_NO_LIB"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -237,7 +237,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;../cairo-1.9.6&quot;;&quot;../cairo-1.9.6/src&quot;;.;include;tinyxml;&quot;../boost-1.50.0&quot;;../cg4cpp/include;&quot;$(CG_INC_PATH)&quot;;&quot;c:\Program Files\NVIDIA Corporation\Cg\include&quot;;&quot;C:\Program Files\GnuWin32\include&quot;;..\qt\include;..\glew\include;..\qt\include\QtGui;&quot;..\openvg-1_1-ri\ri_package\ri\include&quot;;..\skia\include\core;..\skia\include\config;..\skia\include\effects;&quot;$(DXSDK_DIR)\Include&quot;;..\common;..\skia\third_party\msinttypes"
+				AdditionalIncludeDirectories="&quot;../freetype-2.4.9/include&quot;;&quot;../cairo-1.9.6&quot;;&quot;../cairo-1.9.6/src&quot;;.;include;tinyxml;&quot;../boost-1.50.0&quot;;../cg4cpp/include;&quot;$(CG_INC_PATH)&quot;;&quot;c:\Program Files\NVIDIA Corporation\Cg\include&quot;;&quot;C:\Program Files\GnuWin32\include&quot;;..\qt\include;..\glew\include;..\qt\include\QtGui;&quot;..\openvg-1_1-ri\ri_package\ri\include&quot;;..\skia\include\core;..\skia\include\config;..\skia\include\effects;&quot;$(DXSDK_DIR)\Include&quot;;..\common;..\skia\third_party\msinttypes"
 				PreprocessorDefinitions="BOOST_ERROR_CODE_HEADER_ONLY;TIXML_USE_STL;_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;CAIRO_WIN32_STATIC_BUILD;GLEW_STATIC;GLUT_STATIC_LIB;BOOST_SP_DISABLE_THREADS;BOOST_ALL_NO_LIB"
 				GeneratePreprocessedFile="0"
 				BasicRuntimeChecks="3"
@@ -264,7 +264,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="freetype.lib cg.lib cgGL.lib opengl32.lib Msimg32.lib"
+				AdditionalDependencies="cg.lib cgGL.lib opengl32.lib Msimg32.lib"
 				ShowProgress="0"
 				OutputFile="$(OutDir)\nvpr_svg.exe"
 				SuppressStartupBanner="true"
@@ -333,7 +333,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;../cairo-1.9.6&quot;;&quot;../cairo-1.9.6/src&quot;;.;include;tinyxml;&quot;../boost-1.50.0&quot;;../cg4cpp/include;&quot;$(CG_INC_PATH)&quot;;&quot;c:\Program Files\NVIDIA Corporation\Cg\include&quot;;&quot;C:\Program Files\GnuWin32\include&quot;;..\qt\include;..\glew\include;..\qt\include\QtGui;&quot;..\openvg-1_1-ri\ri_package\ri\include&quot;;..\skia\include\core;..\skia\include\config;..\skia\include\effects;&quot;$(DXSDK_DIR)\Include&quot;;..\common;..\skia\third_party\msinttypes"
+				AdditionalIncludeDirectories="&quot;../freetype-2.4.9/include&quot;;&quot;../cairo-1.9.6&quot;;&quot;../cairo-1.9.6/src&quot;;.;include;tinyxml;&quot;../boost-1.50.0&quot;;../cg4cpp/include;&quot;$(CG_INC_PATH)&quot;;&quot;c:\Program Files\NVIDIA Corporation\Cg\include&quot;;&quot;C:\Program Files\GnuWin32\include&quot;;..\qt\include;..\glew\include;..\qt\include\QtGui;&quot;..\openvg-1_1-ri\ri_package\ri\include&quot;;..\skia\include\core;..\skia\include\config;..\skia\include\effects;&quot;$(DXSDK_DIR)\Include&quot;;..\common;..\skia\third_party\msinttypes"
 				PreprocessorDefinitions="BOOST_ERROR_CODE_HEADER_ONLY;TIXML_USE_STL;_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;CAIRO_WIN32_STATIC_BUILD;GLEW_STATIC;GLUT_STATIC_LIB;BOOST_SP_DISABLE_THREADS;BOOST_ALL_NO_LIB"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -403,6 +403,10 @@
 		<ProjectReference
 			ReferencedProjectIdentifier="{47C9817F-F497-45BF-90E6-5857F3128042}"
 			RelativePathToProject=".\glut\glut_2008.vcproj"
+		/>
+		<ProjectReference
+			ReferencedProjectIdentifier="{78B079BD-9FC7-4B9E-B4A6-96DA0F00248B}"
+			RelativePathToProject=".\freetype-2.4.9\builds\win32\vc2008\freetype.vcproj"
 		/>
 	</References>
 	<Files>
