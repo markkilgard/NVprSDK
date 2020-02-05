@@ -9,6 +9,7 @@ SUBDIRS =\
   nvpr_cmyk \
   nvpr_cursive \
   nvpr_font_file \
+  nvpr_gears \
   nvpr_glsl \
   nvpr_gradient \
   nvpr_hello_world \
